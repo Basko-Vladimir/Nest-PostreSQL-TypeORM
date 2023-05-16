@@ -21,7 +21,7 @@ export class ResendingRegistrationEmailGuard implements CanActivate {
     if (!user) {
       generateCustomBadRequestException(MISSING_USER_WITH_EMAIL_ERROR, 'email');
     }
-    if (user.isConfirmed) {
+    if (user.emailConfirmation.isConfirmed) {
       generateCustomBadRequestException(CONFIRMED_EMAIL_ERROR, 'email');
     }
 

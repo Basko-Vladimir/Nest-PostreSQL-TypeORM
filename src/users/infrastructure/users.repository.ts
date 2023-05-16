@@ -1,35 +1,43 @@
 import { v4 as uuidv4 } from 'uuid';
 import { add } from 'date-fns';
-import { DataSource } from 'typeorm';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../api/dto/create-user.dto';
 import { IUser } from '../entities/interfaces';
+import { DbUser } from '../entities/db-entities/user.entity';
+import { DbEmailConfirmation } from '../entities/db-entities/email-confirmation.entity';
+
+const selectingOptionsFields = [
+  'user',
+  'emailConfirmation.confirmationCode',
+  'emailConfirmation.isConfirmed',
+  'emailConfirmation.expirationDate',
+];
 
 @Injectable()
 export class UsersRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(DbUser)
+    private typeOrmUsersRepository: Repository<DbUser>,
+    @InjectRepository(DbEmailConfirmation)
+    private typeOrmEmailConfirmationRepository: Repository<DbEmailConfirmation>,
+    @InjectDataSource() private dataSource: DataSource,
+  ) {}
 
-  async findUserById(userId: string = null): Promise<IUser | null> {
-    const data = await this.dataSource.query(
-      ` SELECT
-          "user".*,
-          "emailConfirmation"."confirmationCode",
-          "emailConfirmation"."isConfirmed",
-          "emailConfirmation"."expirationDate"
-        FROM "user"
-          LEFT JOIN "emailConfirmation" ON "emailConfirmation"."userId" = "user"."id"
-          WHERE "user"."id" = $1
-      `,
-      [userId],
-    );
-
-    return data[0] || null;
+  async findUserById(userId: string = null): Promise<DbUser> {
+    return this.typeOrmUsersRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.emailConfirmation', 'emailConfirmation')
+      .select(selectingOptionsFields)
+      .where('user.id = :userId', { userId })
+      .getOne();
   }
 
   async findUserByLoginOrEmail(
     userFilter: Partial<Pick<IUser, 'email' | 'login'>>,
-  ): Promise<IUser | null> {
+  ): Promise<DbUser | null> {
+    // return this.typeOrmUsersRepository.
     const data = await this.dataSource.query(
       ` SELECT
           "user".*,
@@ -46,7 +54,7 @@ export class UsersRepository {
     return data[0] || null;
   }
 
-  async findUserByConfirmationCode(code: string): Promise<IUser | null> {
+  async findUserByConfirmationCode(code: string): Promise<DbUser | null> {
     const data = await this.dataSource.query(
       ` SELECT * FROM "emailConfirmation"
         WHERE "confirmationCode" = $1
@@ -57,7 +65,7 @@ export class UsersRepository {
     return data[0] || null;
   }
 
-  async findUserByPasswordRecoveryCode(code: string): Promise<IUser | null> {
+  async findUserByPasswordRecoveryCode(code: string): Promise<DbUser | null> {
     const data = await this.dataSource.query(
       ` SELECT * FROM "user"
         WHERE "passwordRecoveryCode" = $1
@@ -72,32 +80,52 @@ export class UsersRepository {
     createUserDto: CreateUserDto,
     passwordHash: string,
     isConfirmed: boolean,
-  ): Promise<IUser> {
+  ): Promise<any> {
     const { login, email } = createUserDto;
-    const data = await this.dataSource.query(
-      `INSERT INTO "user"
-        ("login", "email", "passwordHash")
-        VALUES ($1, $2, $3)
-        RETURNING "id"
-      `,
-      [login, email, passwordHash],
-    );
-    const user = data[0];
+    const createdUser = this.typeOrmUsersRepository.create({
+      login,
+      email,
+      passwordHash,
+    });
+    const savedUser = await this.typeOrmUsersRepository.save(createdUser);
 
-    await this.dataSource.query(
-      `INSERT INTO "emailConfirmation"
-        ("userId", "confirmationCode", "isConfirmed", "expirationDate")
-        VALUES ($1, $2, $3, $4)
-      `,
-      [
-        user.id,
-        uuidv4(),
+    const createdEmailConfirmation =
+      this.typeOrmEmailConfirmationRepository.create({
+        userId: savedUser.id,
+        confirmationCode: uuidv4(),
+        expirationDate: add(new Date(), { hours: 1 }),
         isConfirmed,
-        add(new Date(), { hours: 1 }).toISOString(),
-      ],
+      });
+
+    await this.typeOrmEmailConfirmationRepository.save(
+      createdEmailConfirmation,
     );
 
-    return this.findUserById(user.id);
+    // const { login, email } = createUserDto;
+    // const data = await this.dataSource.query(
+    //   `INSERT INTO "user"
+    //     ("login", "email", "passwordHash")
+    //     VALUES ($1, $2, $3)
+    //     RETURNING "id"
+    //   `,
+    //   [login, email, passwordHash],
+    // );
+    // const user = data[0];
+    //
+    // await this.dataSource.query(
+    //   `INSERT INTO "emailConfirmation"
+    //     ("userId", "confirmationCode", "isConfirmed", "expirationDate")
+    //     VALUES ($1, $2, $3, $4)
+    //   `,
+    //   [
+    //     user.id,
+    //     uuidv4(),
+    //     isConfirmed,
+    //     add(new Date(), { hours: 1 }).toISOString(),
+    //   ],
+    // );
+    //
+    return this.findUserById(savedUser.id);
   }
 
   async updateUserBanStatus(

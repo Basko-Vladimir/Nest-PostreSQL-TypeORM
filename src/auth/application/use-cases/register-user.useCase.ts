@@ -52,6 +52,7 @@ export class RegisterUserUseCase
       this.emailManager.formRegistrationEmail(user);
       return mapDbUserToUserOutputModel(user);
     } catch (error) {
+      console.log(error);
       await this.usersRepository.deleteUser(user.id);
       throw new Error(error);
     }

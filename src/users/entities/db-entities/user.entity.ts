@@ -7,25 +7,45 @@ import { DbBlockedUserForBlog } from './blocked-user-for-blog.entity';
 import { DbComment } from '../../../comments/entities/db-entities/comment.entity';
 import { DbLike } from '../../../likes/entities/db-entities/like.entity';
 import { DbPost } from '../../../posts/entities/db-entities/post.entity';
+import { usersConstants } from '../../../common/constants';
+
+const {
+  MAX_LOGIN_LENGTH,
+  LOGIN_REG_EXP,
+  MIN_PASSWORD_LENGTH,
+  MAX_PASSWORD_LENGTH,
+} = usersConstants;
 
 @Entity({ name: 'user' })
 export class DbUser extends BlockableEntity {
-  @Column()
+  @Column({
+    type: 'varchar',
+    length: MAX_LOGIN_LENGTH,
+  })
   login: string;
 
-  @Column()
+  @Column({
+    type: 'varchar',
+    length: 100,
+  })
   email: string;
 
-  @Column()
+  @Column({
+    type: 'varchar',
+    length: 100,
+  })
   passwordHash: string;
 
-  @Column({ nullable: true })
+  @Column({ default: null, nullable: true })
   passwordRecoveryCode: string;
 
   @Column({ default: null, nullable: true })
   banReason: string;
 
-  @OneToOne(() => DbEmailConfirmation)
+  @OneToOne(
+    () => DbEmailConfirmation,
+    (dbEmailConfirmation) => dbEmailConfirmation.user,
+  )
   emailConfirmation: DbEmailConfirmation;
 
   @OneToMany(() => DbDeviceSession, (deviceSession) => deviceSession.user)

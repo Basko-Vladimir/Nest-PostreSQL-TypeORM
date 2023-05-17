@@ -4,11 +4,10 @@ import { DataSource, Repository } from 'typeorm';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../api/dto/create-user.dto';
-import { IUser } from '../entities/interfaces';
 import { DbUser } from '../entities/db-entities/user.entity';
 import { DbEmailConfirmation } from '../entities/db-entities/email-confirmation.entity';
 
-const selectingOptionsFields = [
+const selectingUsersFields = [
   'user',
   'emailConfirmation.confirmationCode',
   'emailConfirmation.isConfirmed',
@@ -25,62 +24,52 @@ export class UsersRepository {
     @InjectDataSource() private dataSource: DataSource,
   ) {}
 
-  async findUserById(userId: string = null): Promise<DbUser> {
+  async findUserById(userId: string = null): Promise<DbUser | null> {
     return this.typeOrmUsersRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.emailConfirmation', 'emailConfirmation')
-      .select(selectingOptionsFields)
+      .select(selectingUsersFields)
       .where('user.id = :userId', { userId })
       .getOne();
   }
 
   async findUserByLoginOrEmail(
-    userFilter: Partial<Pick<IUser, 'email' | 'login'>>,
+    userFilter: Partial<Pick<DbUser, 'email' | 'login'>>,
   ): Promise<DbUser | null> {
-    // return this.typeOrmUsersRepository.
-    const data = await this.dataSource.query(
-      ` SELECT
-          "user".*,
-          "emailConfirmation"."confirmationCode",
-          "emailConfirmation"."isConfirmed",
-          "emailConfirmation"."expirationDate"
-        FROM "user"
-          LEFT JOIN "emailConfirmation" ON "emailConfirmation"."userId" = "user"."id"
-        WHERE "login" = $1 OR "email" = $2
-      `,
-      [userFilter.login, userFilter.email],
-    );
+    const { email, login } = userFilter;
 
-    return data[0] || null;
+    return this.typeOrmUsersRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.emailConfirmation', 'emailConfirmation')
+      .select(selectingUsersFields)
+      .where('user.email = :email', { email })
+      .orWhere('user.login = "login', { login })
+      .getOne();
   }
 
   async findUserByConfirmationCode(code: string): Promise<DbUser | null> {
-    const data = await this.dataSource.query(
-      ` SELECT * FROM "emailConfirmation"
-        WHERE "confirmationCode" = $1
-      `,
-      [code],
-    );
-
-    return data[0] || null;
+    return this.typeOrmUsersRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.emailConfirmation', 'emailConfirmation')
+      .select(selectingUsersFields)
+      .where('emailConfirmation.confirmationCode = :code', { code })
+      .getOne();
   }
 
   async findUserByPasswordRecoveryCode(code: string): Promise<DbUser | null> {
-    const data = await this.dataSource.query(
-      ` SELECT * FROM "user"
-        WHERE "passwordRecoveryCode" = $1
-      `,
-      [code],
-    );
-
-    return data[0] || null;
+    return this.typeOrmUsersRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.emailConfirmation', 'emailConfirmation')
+      .select(selectingUsersFields)
+      .where('user.passwordRecoveryCode = :code', { code })
+      .getOne();
   }
 
   async createUser(
     createUserDto: CreateUserDto,
     passwordHash: string,
     isConfirmed: boolean,
-  ): Promise<any> {
+  ): Promise<DbUser> {
     const { login, email } = createUserDto;
     const createdUser = this.typeOrmUsersRepository.create({
       login,
@@ -88,7 +77,6 @@ export class UsersRepository {
       passwordHash,
     });
     const savedUser = await this.typeOrmUsersRepository.save(createdUser);
-
     const createdEmailConfirmation =
       this.typeOrmEmailConfirmationRepository.create({
         userId: savedUser.id,
@@ -101,30 +89,6 @@ export class UsersRepository {
       createdEmailConfirmation,
     );
 
-    // const { login, email } = createUserDto;
-    // const data = await this.dataSource.query(
-    //   `INSERT INTO "user"
-    //     ("login", "email", "passwordHash")
-    //     VALUES ($1, $2, $3)
-    //     RETURNING "id"
-    //   `,
-    //   [login, email, passwordHash],
-    // );
-    // const user = data[0];
-    //
-    // await this.dataSource.query(
-    //   `INSERT INTO "emailConfirmation"
-    //     ("userId", "confirmationCode", "isConfirmed", "expirationDate")
-    //     VALUES ($1, $2, $3, $4)
-    //   `,
-    //   [
-    //     user.id,
-    //     uuidv4(),
-    //     isConfirmed,
-    //     add(new Date(), { hours: 1 }).toISOString(),
-    //   ],
-    // );
-    //
     return this.findUserById(savedUser.id);
   }
 
@@ -199,11 +163,8 @@ export class UsersRepository {
   }
 
   async deleteUser(userId: string): Promise<void> {
-    await this.dataSource.query(
-      `DELETE FROM "emailConfirmation" WHERE "userId" = $1`,
-      [userId],
-    );
-    await this.dataSource.query(`DELETE FROM "user" WHERE "id" = $1`, [userId]);
+    await this.typeOrmEmailConfirmationRepository.delete({ userId });
+    await this.typeOrmUsersRepository.delete(userId);
   }
 
   async deleteAllUsers(): Promise<void> {

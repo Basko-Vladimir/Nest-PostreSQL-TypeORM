@@ -1,18 +1,23 @@
-import { DataSource } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { UsersQueryParamsDto } from '../api/dto/users-query-params.dto';
 import { BanStatus, SortDirection, UserSortByField } from '../../common/enums';
 import {
   countSkipValue,
   getCommonInfoForQueryAllRequests,
+  getDbSortDirection,
 } from '../../common/utils';
 import { mapDbUserToUserOutputModel } from '../mappers/users-mappers';
 import { AllUsersOutputModel } from '../api/dto/users-output-models.dto';
+import { UserEntity } from '../entities/db-entities/user.entity';
 
 @Injectable()
 export class QueryAdminUsersRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(UserEntity)
+    private typeOrmUsersRepository: Repository<UserEntity>,
+  ) {}
 
   async findAllUsers(
     queryParams: UsersQueryParamsDto,
@@ -26,89 +31,38 @@ export class QueryAdminUsersRepository {
       sortDirection = SortDirection.desc,
       banStatus = BanStatus.ALL,
     } = queryParams;
-    const offset = countSkipValue(pageNumber, pageSize);
-    const getTermsConditions = (
-      searchLoginTerm: string,
-      searchEmailTerm: string,
-    ): string => {
-      const result = [];
-      if (searchLoginTerm) result.push(`"login" ILIKE '%${searchLoginTerm}%'`);
-      if (searchEmailTerm) result.push(`"email" ILIKE '%${searchEmailTerm}%'`);
+    const skip = countSkipValue(pageNumber, pageSize);
+    const dbSortDirection = getDbSortDirection(sortDirection);
+    const selectQueryBuilder = this.typeOrmUsersRepository
+      .createQueryBuilder('user')
+      .select('user');
 
-      switch (result.length) {
-        case 0: {
-          return '';
-        }
-        case 1: {
-          return `${result[0]} AND `;
-        }
-        default: {
-          return `${result.join(' OR ')} AND `;
-        }
-      }
-    };
-    const termsConditions = getTermsConditions(
-      searchLoginTerm,
-      searchEmailTerm,
-    );
+    if (searchLoginTerm) {
+      selectQueryBuilder.where('user.login ilike :searchLoginTerm', {
+        searchLoginTerm: `%${searchLoginTerm}%`,
+      });
+    }
+    if (searchEmailTerm) {
+      selectQueryBuilder.orWhere('user.email ilike :searchEmailTerm', {
+        searchEmailTerm: `%${searchEmailTerm}%`,
+      });
+    }
+    if (banStatus === BanStatus.BANNED || banStatus === BanStatus.NOT_BANNED) {
+      selectQueryBuilder.andWhere('user.isBanned = :isBanned', {
+        isBanned: banStatus === BanStatus.BANNED,
+      });
+    }
 
-    const countResult = await this.dataSource.query(
-      ` SELECT COUNT(*)
-        FROM "user"
-          LEFT JOIN "emailConfirmation" ON "emailConfirmation"."userId" = "user"."id"
-          WHERE ${termsConditions}
-            CASE
-              WHEN $1 = '${BanStatus.BANNED}' THEN "isBanned" = true
-              WHEN $1 = '${BanStatus.NOT_BANNED}' THEN "isBanned" = false
-              ELSE "isBanned" IN (true, false)
-            END
-      `,
-      [banStatus],
-    );
-    const totalCount = countResult[0].count;
-    const users = await this.dataSource.query(
-      ` SELECT
-          "user".*,
-          "emailConfirmation"."confirmationCode",
-          "emailConfirmation"."isConfirmed",
-          "emailConfirmation"."expirationDate"
-        FROM "user"
-          LEFT JOIN "emailConfirmation" ON "emailConfirmation"."userId" = "user"."id"
-          WHERE ${termsConditions}
-            CASE
-              WHEN $5 = '${BanStatus.BANNED}' THEN "isBanned" = true
-              WHEN $5 = '${BanStatus.NOT_BANNED}' THEN "isBanned" = false
-              ELSE "isBanned" IN (true, false)
-            END
-          ORDER BY
-            CASE
-              WHEN $1 = 'asc' THEN
-                CASE
-                  WHEN $2 = '${UserSortByField.email}' THEN "email"
-                  WHEN $2 = '${UserSortByField.login}' THEN "login"
-                  ELSE "createdAt"::varchar
-                END
-              END ASC,
-            CASE
-              WHEN $1 = 'desc' THEN
-                CASE
-                  WHEN $2 = '${UserSortByField.email}' THEN "email"
-                  WHEN $2 = '${UserSortByField.login}' THEN "login"
-                  ELSE "createdAt"::varchar
-                END
-              END DESC
-          OFFSET $3 LIMIT $4
-      `,
-      [sortDirection, sortBy, offset, pageSize, banStatus],
-    );
+    const totalCount = await selectQueryBuilder.getCount();
+    const users = await selectQueryBuilder
+      .orderBy(`"${sortBy}"`, dbSortDirection)
+      .take(pageSize)
+      .skip(skip)
+      .getMany();
 
     return {
       ...getCommonInfoForQueryAllRequests(totalCount, pageSize, pageNumber),
       items: users.map(mapDbUserToUserOutputModel),
     };
-  }
-
-  async findUserById(userId: string): Promise<any> {
-    return;
   }
 }

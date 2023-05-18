@@ -4,8 +4,8 @@ import { ConfigModule } from '@nestjs/config';
 import { CqrsModule } from '@nestjs/cqrs';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { DbEmailConfirmation } from './users/entities/db-entities/email-confirmation.entity';
-import { DbUser } from './users/entities/db-entities/user.entity';
+import { EmailConfirmationEntity } from './users/entities/db-entities/email-confirmation.entity';
+import { UserEntity } from './users/entities/db-entities/user.entity';
 import { AdminUsersController } from './users/api/admin-users.controller';
 import { UsersService } from './users/application/users.service';
 import { UsersRepository } from './users/infrastructure/users.repository';
@@ -144,8 +144,8 @@ const useCases = [
       },
     }),
     TypeOrmModule.forFeature([
-      DbUser,
-      DbEmailConfirmation,
+      UserEntity,
+      EmailConfirmationEntity,
       DbDeviceSession,
       DbClientRequest,
       DbBlog,

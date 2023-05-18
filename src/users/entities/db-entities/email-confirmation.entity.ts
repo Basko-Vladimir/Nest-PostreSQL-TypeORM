@@ -1,8 +1,8 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
-import { DbUser } from './user.entity';
+import { UserEntity } from './user.entity';
 
 @Entity({ name: 'emailConfirmation' })
-export class DbEmailConfirmation {
+export class EmailConfirmationEntity {
   @PrimaryColumn()
   userId: string;
 
@@ -15,7 +15,9 @@ export class DbEmailConfirmation {
   @Column({ type: 'timestamp' })
   expirationDate: Date;
 
-  @OneToOne(() => DbUser)
+  @OneToOne(() => UserEntity, (dbUser) => dbUser.emailConfirmation, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
-  user: DbUser;
+  user: UserEntity;
 }

@@ -4,7 +4,7 @@ import { postsConstants } from '../../../common/constants';
 import { DbBlog } from '../../../blogs/entities/db-entities/blog.entity';
 import { DbComment } from '../../../comments/entities/db-entities/comment.entity';
 import { DbLike } from '../../../likes/entities/db-entities/like.entity';
-import { DbUser } from '../../../users/entities/db-entities/user.entity';
+import { UserEntity } from '../../../users/entities/db-entities/user.entity';
 
 const { MAX_TITLE_LENGTH, MAX_SHORT_DESCRIPTION_LENGTH, MAX_CONTENT_LENGTH } =
   postsConstants;
@@ -45,7 +45,7 @@ export class DbPost extends BaseEntity {
   @JoinColumn({ name: 'blogId' })
   blog: DbBlog;
 
-  @ManyToOne(() => DbUser, (dbUser) => dbUser.posts)
+  @ManyToOne(() => UserEntity, (dbUser) => dbUser.posts)
   @JoinColumn({ name: 'userId' })
-  user: DbUser;
+  user: UserEntity;
 }

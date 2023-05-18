@@ -1,146 +1,137 @@
 import { v4 as uuidv4 } from 'uuid';
 import { add } from 'date-fns';
-import { DataSource } from 'typeorm';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../api/dto/create-user.dto';
-import { IUser } from '../entities/interfaces';
+import { UserEntity } from '../entities/db-entities/user.entity';
+import { EmailConfirmationEntity } from '../entities/db-entities/email-confirmation.entity';
+
+const selectingUsersFields = [
+  'user',
+  'emailConfirmation.confirmationCode',
+  'emailConfirmation.isConfirmed',
+  'emailConfirmation.expirationDate',
+];
 
 @Injectable()
 export class UsersRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(UserEntity)
+    private typeOrmUsersRepository: Repository<UserEntity>,
+    @InjectRepository(EmailConfirmationEntity)
+    private typeOrmEmailConfirmationRepository: Repository<EmailConfirmationEntity>,
+    @InjectDataSource() private dataSource: DataSource,
+  ) {}
 
-  async findUserById(userId: string = null): Promise<IUser | null> {
-    const data = await this.dataSource.query(
-      ` SELECT
-          "user".*,
-          "emailConfirmation"."confirmationCode",
-          "emailConfirmation"."isConfirmed",
-          "emailConfirmation"."expirationDate"
-        FROM "user"
-          LEFT JOIN "emailConfirmation" ON "emailConfirmation"."userId" = "user"."id"
-          WHERE "user"."id" = $1
-      `,
-      [userId],
-    );
-
-    return data[0] || null;
+  async findUserById(userId: string = null): Promise<UserEntity | null> {
+    return this.typeOrmUsersRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.emailConfirmation', 'emailConfirmation')
+      .select(selectingUsersFields)
+      .where('user.id = :userId', { userId })
+      .getOne();
   }
 
   async findUserByLoginOrEmail(
-    userFilter: Partial<Pick<IUser, 'email' | 'login'>>,
-  ): Promise<IUser | null> {
-    const data = await this.dataSource.query(
-      ` SELECT
-          "user".*,
-          "emailConfirmation"."confirmationCode",
-          "emailConfirmation"."isConfirmed",
-          "emailConfirmation"."expirationDate"
-        FROM "user"
-          LEFT JOIN "emailConfirmation" ON "emailConfirmation"."userId" = "user"."id"
-        WHERE "login" = $1 OR "email" = $2
-      `,
-      [userFilter.login, userFilter.email],
-    );
+    userFilter: Partial<Pick<UserEntity, 'email' | 'login'>>,
+  ): Promise<UserEntity | null> {
+    const { email, login } = userFilter;
 
-    return data[0] || null;
+    return this.typeOrmUsersRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.emailConfirmation', 'emailConfirmation')
+      .select(selectingUsersFields)
+      .where('user.email = :email', { email })
+      .orWhere('user.login = :login', { login })
+      .getOne();
   }
 
-  async findUserByConfirmationCode(code: string): Promise<IUser | null> {
-    const data = await this.dataSource.query(
-      ` SELECT * FROM "emailConfirmation"
-        WHERE "confirmationCode" = $1
-      `,
-      [code],
-    );
-
-    return data[0] || null;
+  async findUserByConfirmationCode(code: string): Promise<UserEntity | null> {
+    return this.typeOrmUsersRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.emailConfirmation', 'emailConfirmation')
+      .select(selectingUsersFields)
+      .where('emailConfirmation.confirmationCode = :code', { code })
+      .getOne();
   }
 
-  async findUserByPasswordRecoveryCode(code: string): Promise<IUser | null> {
-    const data = await this.dataSource.query(
-      ` SELECT * FROM "user"
-        WHERE "passwordRecoveryCode" = $1
-      `,
-      [code],
-    );
-
-    return data[0] || null;
+  async findUserByPasswordRecoveryCode(
+    code: string,
+  ): Promise<UserEntity | null> {
+    return this.typeOrmUsersRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.emailConfirmation', 'emailConfirmation')
+      .select(selectingUsersFields)
+      .where('user.passwordRecoveryCode = :code', { code })
+      .getOne();
   }
 
   async createUser(
     createUserDto: CreateUserDto,
     passwordHash: string,
     isConfirmed: boolean,
-  ): Promise<IUser> {
+  ): Promise<UserEntity> {
     const { login, email } = createUserDto;
-    const data = await this.dataSource.query(
-      `INSERT INTO "user"
-        ("login", "email", "passwordHash")
-        VALUES ($1, $2, $3)
-        RETURNING "id"
-      `,
-      [login, email, passwordHash],
-    );
-    const user = data[0];
+    const createdUser = await this.typeOrmUsersRepository
+      .createQueryBuilder()
+      .insert()
+      .into(UserEntity)
+      .values({ login, email, passwordHash })
+      .returning(['login', 'id', 'email', 'passwordHash'])
+      .execute();
 
-    await this.dataSource.query(
-      `INSERT INTO "emailConfirmation"
-        ("userId", "confirmationCode", "isConfirmed", "expirationDate")
-        VALUES ($1, $2, $3, $4)
-      `,
-      [
-        user.id,
-        uuidv4(),
+    await this.typeOrmEmailConfirmationRepository
+      .createQueryBuilder()
+      .insert()
+      .into(EmailConfirmationEntity)
+      .values({
+        userId: createdUser.identifiers[0].id,
+        confirmationCode: uuidv4(),
+        expirationDate: add(new Date(), { hours: 1 }),
         isConfirmed,
-        add(new Date(), { hours: 1 }).toISOString(),
-      ],
-    );
+      })
+      .execute();
 
-    return this.findUserById(user.id);
+    return this.findUserById(createdUser.identifiers[0].id);
   }
 
   async updateUserBanStatus(
     userId: string,
-    shouldBan: boolean,
+    isBanned: boolean,
     reason: string,
-  ): Promise<any> {
-    const banReason = shouldBan ? reason : null;
+  ): Promise<void> {
+    const banReason = isBanned ? reason : null;
 
-    await this.dataSource.query(
-      `UPDATE "user"
-        SET "isBanned" = $1, "banReason" = $2, "banDate" =
-          (CASE
-            WHEN $1 = true THEN NOW()
-            ELSE NULL
-          END)
-        WHERE "id" = $3
-      `,
-      [shouldBan, banReason, userId],
-    );
+    await this.typeOrmUsersRepository
+      .createQueryBuilder('user')
+      .update(UserEntity)
+      .set({ isBanned, banReason, banDate: isBanned ? new Date() : null })
+      .where('id = :userId', { userId })
+      .execute();
   }
 
   async confirmUserRegistration(userId: string): Promise<void> {
-    await this.dataSource.query(
-      `UPDATE "emailConfirmation"
-        SET "isConfirmed" = true
-        WHERE "userId" = $1
-      `,
-      [userId],
-    );
+    await this.typeOrmEmailConfirmationRepository
+      .createQueryBuilder()
+      .update(EmailConfirmationEntity)
+      .set({ isConfirmed: true })
+      .where('userId = :userId', { userId })
+      .execute();
   }
 
-  async updateConfirmationCode(userId: string, code: string): Promise<void> {
+  async updateConfirmationCode(
+    userId: string,
+    confirmationCode: string,
+  ): Promise<void> {
     const expirationDate = add(new Date(), { hours: 1 });
 
-    await this.dataSource.query(
-      `UPDATE "emailConfirmation"
-        SET "confirmationCode" = $1,
-            "expirationDate" = $2
-        WHERE "userId" = $3
-      `,
-      [code, expirationDate, userId],
-    );
+    await this.typeOrmEmailConfirmationRepository
+      .createQueryBuilder()
+      .update(EmailConfirmationEntity)
+      .set({ confirmationCode, expirationDate })
+      .where('userId = :userId', { userId })
+      .execute();
   }
 
   async updatePasswordRecoveryCode(
@@ -171,15 +162,19 @@ export class UsersRepository {
   }
 
   async deleteUser(userId: string): Promise<void> {
-    await this.dataSource.query(
-      `DELETE FROM "emailConfirmation" WHERE "userId" = $1`,
-      [userId],
-    );
-    await this.dataSource.query(`DELETE FROM "user" WHERE "id" = $1`, [userId]);
+    await this.typeOrmUsersRepository
+      .createQueryBuilder('user')
+      .delete()
+      .from(UserEntity)
+      .where('id = :userId', { userId })
+      .execute();
   }
 
   async deleteAllUsers(): Promise<void> {
-    await this.dataSource.query(`DELETE FROM "emailConfirmation"`);
-    return this.dataSource.query(`DELETE FROM "user"`);
+    await this.typeOrmUsersRepository
+      .createQueryBuilder('user')
+      .delete()
+      .from(UserEntity)
+      .execute();
   }
 }

@@ -1,20 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { EmailAdapter } from '../adapters/email.adapter';
 import { IEmailInfoModel } from '../types';
-import { IUser } from '../../users/entities/interfaces';
+import { UserEntity } from '../../users/entities/db-entities/user.entity';
 
 @Injectable()
 export class EmailManager {
   constructor(private readonly emailAdapter: EmailAdapter) {}
 
-  formRegistrationEmail(user: Partial<IUser>): void {
+  formRegistrationEmail(user: UserEntity): void {
     const messageInfo: IEmailInfoModel = {
       from: 'Test Backend Server <dev.test.vladimir@gmail.com>',
       to: user.email,
       subject: 'Test Backend Server Registration',
       html: `<h1>Thank for your registration</h1>
       <p>To finish registration please follow the link below:
-        <a href=https://somesite.com/confirm-email?code=${user.confirmationCode}>
+        <a href=https://somesite.com/confirm-email?code=${user.emailConfirmation.confirmationCode}>
          	Complete registration
         </a>
       </p>`,

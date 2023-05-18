@@ -5,37 +5,14 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { validateOrReject } from 'class-validator';
-import { BanStatus, DbSortDirection, SortDirection } from './enums';
-import { ICommonInfoForQueryAllRequests, SortSetting } from './types';
+import { SortDirection } from './enums';
+import { ICommonInfoForQueryAllRequests } from './types';
 
 export const countSkipValue = (
   pageNumber: number,
   pageSize: number,
 ): number => {
   return (pageNumber - 1) * pageSize;
-};
-
-export const setSortValue = (
-  sortBy: string,
-  sortDirection: SortDirection,
-): SortSetting => {
-  return {
-    [sortBy]:
-      sortDirection === SortDirection.asc
-        ? DbSortDirection.ASC
-        : DbSortDirection.DESC,
-  };
-};
-
-export const setBanFilter = (value: BanStatus) => {
-  switch (value) {
-    case BanStatus.BANNED:
-      return { ['banInfo.isBanned']: true };
-    case BanStatus.NOT_BANNED:
-      return { ['banInfo.isBanned']: false };
-    default:
-      return {};
-  }
 };
 
 export const validateOrRejectInputDto = async (
@@ -96,4 +73,8 @@ export const getCommonInfoForQueryAllRequests = (
     pageSize,
     totalCount,
   };
+};
+
+export const getDbSortDirection = (sortDirection: SortDirection) => {
+  return sortDirection === SortDirection.asc ? 'ASC' : 'DESC';
 };

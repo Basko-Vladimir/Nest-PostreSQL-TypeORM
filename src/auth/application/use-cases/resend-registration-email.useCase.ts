@@ -2,10 +2,10 @@ import { v4 as uuidv4 } from 'uuid';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UsersRepository } from '../../../users/infrastructure/users.repository';
 import { EmailManager } from '../../../common/managers/email.manager';
-import { IUser } from '../../../users/entities/interfaces';
+import { UserEntity } from '../../../users/entities/db-entities/user.entity';
 
 export class ResendRegistrationEmailCommand {
-  constructor(public user: IUser) {}
+  constructor(public user: UserEntity) {}
 }
 
 @CommandHandler(ResendRegistrationEmailCommand)
@@ -22,9 +22,6 @@ export class ResendRegistrationEmailUseCase
     const newCode = uuidv4();
 
     await this.usersRepository.updateConfirmationCode(user.id, newCode);
-    await this.emailManager.formRegistrationEmail({
-      email: user.email,
-      confirmationCode: newCode,
-    });
+    await this.emailManager.formRegistrationEmail(user);
   }
 }

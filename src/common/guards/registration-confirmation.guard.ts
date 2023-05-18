@@ -19,10 +19,10 @@ export class RegistrationConfirmationGuard implements CanActivate {
     if (!user) {
       generateCustomBadRequestException(INVALID_CONFIRMATION_CODE, 'code');
     }
-    if (user.confirmationCode !== code) {
+    if (user.emailConfirmation.confirmationCode !== code) {
       generateCustomBadRequestException(INVALID_CONFIRMATION_CODE, 'code');
     }
-    if (user.isConfirmed) {
+    if (user.emailConfirmation.isConfirmed) {
       generateCustomBadRequestException(EXISTED_CONFIRMATION_CODE, 'code');
     }
 

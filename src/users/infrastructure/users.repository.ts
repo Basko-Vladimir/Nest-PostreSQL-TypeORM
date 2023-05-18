@@ -4,7 +4,7 @@ import { DataSource, Repository } from 'typeorm';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../api/dto/create-user.dto';
-import { DbUser } from '../entities/db-entities/user.entity';
+import { User } from '../entities/db-entities/user.entity';
 import { DbEmailConfirmation } from '../entities/db-entities/email-confirmation.entity';
 
 const selectingUsersFields = [
@@ -17,14 +17,14 @@ const selectingUsersFields = [
 @Injectable()
 export class UsersRepository {
   constructor(
-    @InjectRepository(DbUser)
-    private typeOrmUsersRepository: Repository<DbUser>,
+    @InjectRepository(User)
+    private typeOrmUsersRepository: Repository<User>,
     @InjectRepository(DbEmailConfirmation)
     private typeOrmEmailConfirmationRepository: Repository<DbEmailConfirmation>,
     @InjectDataSource() private dataSource: DataSource,
   ) {}
 
-  async findUserById(userId: string = null): Promise<DbUser | null> {
+  async findUserById(userId: string = null): Promise<User | null> {
     return this.typeOrmUsersRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.emailConfirmation', 'emailConfirmation')
@@ -34,8 +34,8 @@ export class UsersRepository {
   }
 
   async findUserByLoginOrEmail(
-    userFilter: Partial<Pick<DbUser, 'email' | 'login'>>,
-  ): Promise<DbUser | null> {
+    userFilter: Partial<Pick<User, 'email' | 'login'>>,
+  ): Promise<User | null> {
     const { email, login } = userFilter;
 
     return this.typeOrmUsersRepository
@@ -47,7 +47,7 @@ export class UsersRepository {
       .getOne();
   }
 
-  async findUserByConfirmationCode(code: string): Promise<DbUser | null> {
+  async findUserByConfirmationCode(code: string): Promise<User | null> {
     return this.typeOrmUsersRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.emailConfirmation', 'emailConfirmation')
@@ -56,7 +56,7 @@ export class UsersRepository {
       .getOne();
   }
 
-  async findUserByPasswordRecoveryCode(code: string): Promise<DbUser | null> {
+  async findUserByPasswordRecoveryCode(code: string): Promise<User | null> {
     return this.typeOrmUsersRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.emailConfirmation', 'emailConfirmation')
@@ -69,12 +69,12 @@ export class UsersRepository {
     createUserDto: CreateUserDto,
     passwordHash: string,
     isConfirmed: boolean,
-  ): Promise<DbUser> {
+  ): Promise<User> {
     const { login, email } = createUserDto;
     const createdUser = await this.typeOrmUsersRepository
       .createQueryBuilder()
       .insert()
-      .into(DbUser)
+      .into(User)
       .values({ login, email, passwordHash })
       .returning(['login', 'id', 'email', 'passwordHash'])
       .execute();
@@ -101,21 +101,12 @@ export class UsersRepository {
   ): Promise<void> {
     const banReason = isBanned ? reason : null;
 
-    await this.typeOrmUsersRepository.update(
-      { id: userId },
-      { isBanned, banReason, banDate: isBanned ? new Date() : null },
-    );
-    // await this.dataSource.query(
-    //   `UPDATE "user"
-    //     SET "isBanned" = $1, "banReason" = $2, "banDate" =
-    //       (CASE
-    //         WHEN $1 = true THEN NOW()
-    //         ELSE NULL
-    //       END)
-    //     WHERE "id" = $3
-    //   `,
-    //   [shouldBan, banReason, userId],
-    // );
+    await this.typeOrmUsersRepository
+      .createQueryBuilder('user')
+      .update(User)
+      .set({ isBanned, banReason, banDate: isBanned ? new Date() : null })
+      .where('id = :userId', { userId })
+      .execute();
   }
 
   async confirmUserRegistration(userId: string): Promise<void> {
@@ -172,7 +163,7 @@ export class UsersRepository {
     await this.typeOrmUsersRepository
       .createQueryBuilder('user')
       .delete()
-      .from(DbUser)
+      .from(User)
       .where('id = :userId', { userId })
       .execute();
   }
@@ -181,7 +172,7 @@ export class UsersRepository {
     await this.typeOrmUsersRepository
       .createQueryBuilder('user')
       .delete()
-      .from(DbUser)
+      .from(User)
       .execute();
   }
 }

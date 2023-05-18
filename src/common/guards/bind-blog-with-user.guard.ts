@@ -11,7 +11,7 @@ import { UsersRepository } from '../../users/infrastructure/users.repository';
 import { BlogsRepository } from '../../blogs/infrastructure/blogs.repository';
 import { IdValidator } from '../validators/uuid.validator';
 import { IBlog } from '../../blogs/entities/interfaces';
-import { DbUser } from '../../users/entities/db-entities/user.entity';
+import { User } from '../../users/entities/db-entities/user.entity';
 
 @Injectable()
 export class BindBlogWithUserGuard implements CanActivate {
@@ -25,7 +25,7 @@ export class BindBlogWithUserGuard implements CanActivate {
     const { id: blogId, userId } = request.params;
     const blogIdValidationErrors = await validate(new IdValidator(blogId));
     const userIdValidationErrors = await validate(new IdValidator(userId));
-    let targetBlog: IBlog, targetUser: DbUser;
+    let targetBlog: IBlog, targetUser: User;
 
     if (blogIdValidationErrors.length || userIdValidationErrors.length) {
       generateCustomBadRequestException('Invalid paramsId', 'paramsId');

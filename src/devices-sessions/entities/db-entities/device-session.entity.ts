@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { User } from '../../../users/entities/db-entities/user.entity';
+import { UserEntity } from '../../../users/entities/db-entities/user.entity';
 import { BaseEntity } from '../../../common/common-db-entities';
 
 @Entity({ name: 'deviceSession' })
@@ -22,7 +22,7 @@ export class DbDeviceSession extends BaseEntity {
   @Column()
   userId: string;
 
-  @ManyToOne(() => User)
+  @ManyToOne(() => UserEntity)
   @JoinColumn()
-  user: User;
+  user: UserEntity;
 }

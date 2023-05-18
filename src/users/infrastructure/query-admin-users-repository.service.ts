@@ -10,13 +10,13 @@ import {
 } from '../../common/utils';
 import { mapDbUserToUserOutputModel } from '../mappers/users-mappers';
 import { AllUsersOutputModel } from '../api/dto/users-output-models.dto';
-import { User } from '../entities/db-entities/user.entity';
+import { UserEntity } from '../entities/db-entities/user.entity';
 
 @Injectable()
 export class QueryAdminUsersRepository {
   constructor(
-    @InjectRepository(User)
-    private typeOrmUsersRepository: Repository<User>,
+    @InjectRepository(UserEntity)
+    private typeOrmUsersRepository: Repository<UserEntity>,
   ) {}
 
   async findAllUsers(

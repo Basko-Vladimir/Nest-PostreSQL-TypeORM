@@ -4,7 +4,7 @@ import { DataSource, Repository } from 'typeorm';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../api/dto/create-user.dto';
-import { User } from '../entities/db-entities/user.entity';
+import { UserEntity } from '../entities/db-entities/user.entity';
 import { DbEmailConfirmation } from '../entities/db-entities/email-confirmation.entity';
 
 const selectingUsersFields = [
@@ -17,14 +17,14 @@ const selectingUsersFields = [
 @Injectable()
 export class UsersRepository {
   constructor(
-    @InjectRepository(User)
-    private typeOrmUsersRepository: Repository<User>,
+    @InjectRepository(UserEntity)
+    private typeOrmUsersRepository: Repository<UserEntity>,
     @InjectRepository(DbEmailConfirmation)
     private typeOrmEmailConfirmationRepository: Repository<DbEmailConfirmation>,
     @InjectDataSource() private dataSource: DataSource,
   ) {}
 
-  async findUserById(userId: string = null): Promise<User | null> {
+  async findUserById(userId: string = null): Promise<UserEntity | null> {
     return this.typeOrmUsersRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.emailConfirmation', 'emailConfirmation')
@@ -34,8 +34,8 @@ export class UsersRepository {
   }
 
   async findUserByLoginOrEmail(
-    userFilter: Partial<Pick<User, 'email' | 'login'>>,
-  ): Promise<User | null> {
+    userFilter: Partial<Pick<UserEntity, 'email' | 'login'>>,
+  ): Promise<UserEntity | null> {
     const { email, login } = userFilter;
 
     return this.typeOrmUsersRepository
@@ -47,7 +47,7 @@ export class UsersRepository {
       .getOne();
   }
 
-  async findUserByConfirmationCode(code: string): Promise<User | null> {
+  async findUserByConfirmationCode(code: string): Promise<UserEntity | null> {
     return this.typeOrmUsersRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.emailConfirmation', 'emailConfirmation')
@@ -56,7 +56,9 @@ export class UsersRepository {
       .getOne();
   }
 
-  async findUserByPasswordRecoveryCode(code: string): Promise<User | null> {
+  async findUserByPasswordRecoveryCode(
+    code: string,
+  ): Promise<UserEntity | null> {
     return this.typeOrmUsersRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.emailConfirmation', 'emailConfirmation')
@@ -69,12 +71,12 @@ export class UsersRepository {
     createUserDto: CreateUserDto,
     passwordHash: string,
     isConfirmed: boolean,
-  ): Promise<User> {
+  ): Promise<UserEntity> {
     const { login, email } = createUserDto;
     const createdUser = await this.typeOrmUsersRepository
       .createQueryBuilder()
       .insert()
-      .into(User)
+      .into(UserEntity)
       .values({ login, email, passwordHash })
       .returning(['login', 'id', 'email', 'passwordHash'])
       .execute();
@@ -103,7 +105,7 @@ export class UsersRepository {
 
     await this.typeOrmUsersRepository
       .createQueryBuilder('user')
-      .update(User)
+      .update(UserEntity)
       .set({ isBanned, banReason, banDate: isBanned ? new Date() : null })
       .where('id = :userId', { userId })
       .execute();
@@ -163,7 +165,7 @@ export class UsersRepository {
     await this.typeOrmUsersRepository
       .createQueryBuilder('user')
       .delete()
-      .from(User)
+      .from(UserEntity)
       .where('id = :userId', { userId })
       .execute();
   }
@@ -172,7 +174,7 @@ export class UsersRepository {
     await this.typeOrmUsersRepository
       .createQueryBuilder('user')
       .delete()
-      .from(User)
+      .from(UserEntity)
       .execute();
   }
 }

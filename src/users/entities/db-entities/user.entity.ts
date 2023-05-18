@@ -12,7 +12,7 @@ import { usersConstants } from '../../../common/constants';
 const { MAX_LOGIN_LENGTH } = usersConstants;
 
 @Entity({ name: 'user' })
-export class User extends BlockableEntity {
+export class UserEntity extends BlockableEntity {
   @Column({
     type: 'varchar',
     length: MAX_LOGIN_LENGTH,

@@ -33,8 +33,8 @@ import { RecoverPasswordCommand } from '../application/use-cases/recover-passwor
 import { ChangePasswordCommand } from '../application/use-cases/change-password.useCase';
 import { RefreshTokensCommand } from '../application/use-cases/refresh-tokens.useCase';
 import { LogoutCommand } from '../application/use-cases/logout.useCase';
-import { IUser } from '../../users/entities/interfaces';
 import { IDeviceSession } from '../../devices-sessions/entities/interfaces';
+import { UserEntity } from '../../users/entities/db-entities/user.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -42,7 +42,7 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(BearerAuthGuard)
-  async authMe(@User() user: IUser): Promise<AuthMeOutputModelDto> {
+  async authMe(@User() user: UserEntity): Promise<AuthMeOutputModelDto> {
     return {
       userId: String(user.id),
       email: user.email,
@@ -60,14 +60,14 @@ export class AuthController {
   @Post('registration-confirmation')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(RegistrationConfirmationGuard) //Temporary removing ClientsRequestsGuard
-  async confirmRegistration(@User() user: IUser): Promise<void> {
-    await this.commandBus.execute(new ConfirmRegistrationCommand(user.userId));
+  async confirmRegistration(@User() user: UserEntity): Promise<void> {
+    await this.commandBus.execute(new ConfirmRegistrationCommand(user.id));
   }
 
   @Post('registration-email-resending')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(ResendingRegistrationEmailGuard) //Temporary removing ClientsRequestsGuard
-  async resendRegistrationEmail(@User() user: IUser): Promise<void> {
+  async resendRegistrationEmail(@User() user: UserEntity): Promise<void> {
     await this.commandBus.execute(new ResendRegistrationEmailCommand(user));
   }
 
@@ -105,7 +105,7 @@ export class AuthController {
   @UseGuards(PasswordRecoveryCodeGuard) //Temporary removing ClientsRequestsGuard
   async changePassword(
     @Body() setNewPasswordDto: SetNewPasswordDto,
-    @User() user: IUser,
+    @User() user: UserEntity,
   ): Promise<void> {
     return this.commandBus.execute(
       new ChangePasswordCommand(setNewPasswordDto, user),
@@ -116,7 +116,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(RefreshTokenGuard)
   async refreshTokens(
-    @User() user: IUser,
+    @User() user: UserEntity,
     @Session() session: IDeviceSession,
     @Res({ passthrough: true }) response: Response,
   ): Promise<LoginOutputModel> {

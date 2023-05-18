@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { blogsConstants } from '../../../common/constants';
-import { User } from '../../../users/entities/db-entities/user.entity';
+import { UserEntity } from '../../../users/entities/db-entities/user.entity';
 import { BlockableEntity } from '../../../common/common-db-entities';
 import { DbPost } from '../../../posts/entities/db-entities/post.entity';
 import { DbBlockedUserForBlog } from '../../../users/entities/db-entities/blocked-user-for-blog.entity';
@@ -37,9 +37,9 @@ export class DbBlog extends BlockableEntity {
   @Column({ type: 'uuid' })
   ownerId: string;
 
-  @ManyToOne(() => User, (dbUser) => dbUser.blogs)
+  @ManyToOne(() => UserEntity, (dbUser) => dbUser.blogs)
   @JoinColumn({ name: 'ownerId' })
-  user: User;
+  user: UserEntity;
 
   @OneToMany(() => DbPost, (dbPost) => dbPost.blog)
   posts: DbPost[];

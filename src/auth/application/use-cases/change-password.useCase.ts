@@ -2,12 +2,12 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { AuthService } from '../auth.service';
 import { SetNewPasswordDto } from '../../api/dto/set-new-password.dto';
 import { UsersRepository } from '../../../users/infrastructure/users.repository';
-import { IUser } from '../../../users/entities/interfaces';
+import { UserEntity } from '../../../users/entities/db-entities/user.entity';
 
 export class ChangePasswordCommand {
   constructor(
     public setNewPasswordDto: SetNewPasswordDto,
-    public user: IUser,
+    public user: UserEntity,
   ) {}
 }
 

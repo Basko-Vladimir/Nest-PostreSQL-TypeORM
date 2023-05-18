@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/common-db-entities';
 import { commentsConstants } from '../../../common/constants';
-import { User } from '../../../users/entities/db-entities/user.entity';
+import { UserEntity } from '../../../users/entities/db-entities/user.entity';
 import { DbPost } from '../../../posts/entities/db-entities/post.entity';
 import { DbLike } from '../../../likes/entities/db-entities/like.entity';
 
@@ -28,9 +28,9 @@ export class DbComment extends BaseEntity {
   @OneToMany(() => DbLike, (dbLike) => dbLike.comment)
   likes: DbLike[];
 
-  @ManyToOne(() => User, (dbUser) => dbUser.comments)
+  @ManyToOne(() => UserEntity, (dbUser) => dbUser.comments)
   @JoinColumn({ name: 'authorId' })
-  user: User;
+  user: UserEntity;
 
   @ManyToOne(() => DbPost, (dbPost) => dbPost.comments)
   @JoinColumn({ name: 'postId' })

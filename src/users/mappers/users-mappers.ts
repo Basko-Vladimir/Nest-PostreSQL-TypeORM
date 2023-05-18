@@ -1,9 +1,11 @@
 import { IUserOutputModel } from '../api/dto/users-output-models.dto';
 import { IBannedUserForSpecificBlog } from '../api/dto/banned-users-for-specific-blog-output-model.dto';
 import { IUser } from '../entities/interfaces';
-import { User } from '../entities/db-entities/user.entity';
+import { UserEntity } from '../entities/db-entities/user.entity';
 
-export const mapDbUserToUserOutputModel = (user: User): IUserOutputModel => ({
+export const mapDbUserToUserOutputModel = (
+  user: UserEntity,
+): IUserOutputModel => ({
   id: String(user.id),
   login: user.login,
   email: user.email,

@@ -9,12 +9,7 @@ import { DbLike } from '../../../likes/entities/db-entities/like.entity';
 import { DbPost } from '../../../posts/entities/db-entities/post.entity';
 import { usersConstants } from '../../../common/constants';
 
-const {
-  MAX_LOGIN_LENGTH,
-  LOGIN_REG_EXP,
-  MIN_PASSWORD_LENGTH,
-  MAX_PASSWORD_LENGTH,
-} = usersConstants;
+const { MAX_LOGIN_LENGTH } = usersConstants;
 
 @Entity({ name: 'user' })
 export class DbUser extends BlockableEntity {

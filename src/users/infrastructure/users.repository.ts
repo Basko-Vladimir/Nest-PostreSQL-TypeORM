@@ -43,7 +43,7 @@ export class UsersRepository {
       .leftJoinAndSelect('user.emailConfirmation', 'emailConfirmation')
       .select(selectingUsersFields)
       .where('user.email = :email', { email })
-      .orWhere('user.login = "login', { login })
+      .orWhere('user.login = :login', { login })
       .getOne();
   }
 
@@ -71,45 +71,51 @@ export class UsersRepository {
     isConfirmed: boolean,
   ): Promise<DbUser> {
     const { login, email } = createUserDto;
-    const createdUser = this.typeOrmUsersRepository.create({
-      login,
-      email,
-      passwordHash,
-    });
-    const savedUser = await this.typeOrmUsersRepository.save(createdUser);
-    const createdEmailConfirmation =
-      this.typeOrmEmailConfirmationRepository.create({
-        userId: savedUser.id,
+    const createdUser = await this.typeOrmUsersRepository
+      .createQueryBuilder()
+      .insert()
+      .into(DbUser)
+      .values({ login, email, passwordHash })
+      .returning(['login', 'id', 'email', 'passwordHash'])
+      .execute();
+
+    await this.typeOrmEmailConfirmationRepository
+      .createQueryBuilder()
+      .insert()
+      .into(DbEmailConfirmation)
+      .values({
+        userId: createdUser.identifiers[0].id,
         confirmationCode: uuidv4(),
         expirationDate: add(new Date(), { hours: 1 }),
         isConfirmed,
-      });
+      })
+      .execute();
 
-    await this.typeOrmEmailConfirmationRepository.save(
-      createdEmailConfirmation,
-    );
-
-    return this.findUserById(savedUser.id);
+    return this.findUserById(createdUser.identifiers[0].id);
   }
 
   async updateUserBanStatus(
     userId: string,
-    shouldBan: boolean,
+    isBanned: boolean,
     reason: string,
-  ): Promise<any> {
-    const banReason = shouldBan ? reason : null;
+  ): Promise<void> {
+    const banReason = isBanned ? reason : null;
 
-    await this.dataSource.query(
-      `UPDATE "user"
-        SET "isBanned" = $1, "banReason" = $2, "banDate" =
-          (CASE
-            WHEN $1 = true THEN NOW()
-            ELSE NULL
-          END)
-        WHERE "id" = $3
-      `,
-      [shouldBan, banReason, userId],
+    await this.typeOrmUsersRepository.update(
+      { id: userId },
+      { isBanned, banReason, banDate: isBanned ? new Date() : null },
     );
+    // await this.dataSource.query(
+    //   `UPDATE "user"
+    //     SET "isBanned" = $1, "banReason" = $2, "banDate" =
+    //       (CASE
+    //         WHEN $1 = true THEN NOW()
+    //         ELSE NULL
+    //       END)
+    //     WHERE "id" = $3
+    //   `,
+    //   [shouldBan, banReason, userId],
+    // );
   }
 
   async confirmUserRegistration(userId: string): Promise<void> {
@@ -163,12 +169,19 @@ export class UsersRepository {
   }
 
   async deleteUser(userId: string): Promise<void> {
-    await this.typeOrmEmailConfirmationRepository.delete({ userId });
-    await this.typeOrmUsersRepository.delete(userId);
+    await this.typeOrmUsersRepository
+      .createQueryBuilder('user')
+      .delete()
+      .from(DbUser)
+      .where('id = :userId', { userId })
+      .execute();
   }
 
   async deleteAllUsers(): Promise<void> {
-    await this.dataSource.query(`DELETE FROM "emailConfirmation"`);
-    return this.dataSource.query(`DELETE FROM "user"`);
+    await this.typeOrmUsersRepository
+      .createQueryBuilder('user')
+      .delete()
+      .from(DbUser)
+      .execute();
   }
 }

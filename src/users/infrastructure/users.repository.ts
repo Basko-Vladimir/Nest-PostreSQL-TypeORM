@@ -5,7 +5,7 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../api/dto/create-user.dto';
 import { UserEntity } from '../entities/db-entities/user.entity';
-import { DbEmailConfirmation } from '../entities/db-entities/email-confirmation.entity';
+import { EmailConfirmationEntity } from '../entities/db-entities/email-confirmation.entity';
 
 const selectingUsersFields = [
   'user',
@@ -19,8 +19,8 @@ export class UsersRepository {
   constructor(
     @InjectRepository(UserEntity)
     private typeOrmUsersRepository: Repository<UserEntity>,
-    @InjectRepository(DbEmailConfirmation)
-    private typeOrmEmailConfirmationRepository: Repository<DbEmailConfirmation>,
+    @InjectRepository(EmailConfirmationEntity)
+    private typeOrmEmailConfirmationRepository: Repository<EmailConfirmationEntity>,
     @InjectDataSource() private dataSource: DataSource,
   ) {}
 
@@ -84,7 +84,7 @@ export class UsersRepository {
     await this.typeOrmEmailConfirmationRepository
       .createQueryBuilder()
       .insert()
-      .into(DbEmailConfirmation)
+      .into(EmailConfirmationEntity)
       .values({
         userId: createdUser.identifiers[0].id,
         confirmationCode: uuidv4(),
@@ -112,13 +112,12 @@ export class UsersRepository {
   }
 
   async confirmUserRegistration(userId: string): Promise<void> {
-    await this.dataSource.query(
-      `UPDATE "emailConfirmation"
-        SET "isConfirmed" = true
-        WHERE "userId" = $1
-      `,
-      [userId],
-    );
+    await this.typeOrmEmailConfirmationRepository
+      .createQueryBuilder()
+      .update(EmailConfirmationEntity)
+      .set({ isConfirmed: true })
+      .where('userId = :userId', { userId })
+      .execute();
   }
 
   async updateConfirmationCode(userId: string, code: string): Promise<void> {

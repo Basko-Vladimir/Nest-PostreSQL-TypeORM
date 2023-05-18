@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
 import { UserEntity } from './user.entity';
 
 @Entity({ name: 'emailConfirmation' })
-export class DbEmailConfirmation {
+export class EmailConfirmationEntity {
   @PrimaryColumn()
   userId: string;
 

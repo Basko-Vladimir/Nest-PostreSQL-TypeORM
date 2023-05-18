@@ -3,11 +3,6 @@ export enum SortDirection {
   asc = 'asc',
 }
 
-export const enum DbSortDirection {
-  ASC = 1,
-  DESC = -1,
-}
-
 export enum BlogSortByField {
   name = 'name',
   websiteUrl = 'websiteUrl',
@@ -30,7 +25,6 @@ export enum UserSortByField {
 
 export enum CommentSortByField {
   content = 'content',
-  // userLogin = 'userLogin', // This field doesn't exist in SQL comment table
   createdAt = 'createdAt',
 }
 

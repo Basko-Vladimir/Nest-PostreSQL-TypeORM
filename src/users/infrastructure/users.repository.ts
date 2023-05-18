@@ -120,17 +120,18 @@ export class UsersRepository {
       .execute();
   }
 
-  async updateConfirmationCode(userId: string, code: string): Promise<void> {
+  async updateConfirmationCode(
+    userId: string,
+    confirmationCode: string,
+  ): Promise<void> {
     const expirationDate = add(new Date(), { hours: 1 });
 
-    await this.dataSource.query(
-      `UPDATE "emailConfirmation"
-        SET "confirmationCode" = $1,
-            "expirationDate" = $2
-        WHERE "userId" = $3
-      `,
-      [code, expirationDate, userId],
-    );
+    await this.typeOrmEmailConfirmationRepository
+      .createQueryBuilder()
+      .update(EmailConfirmationEntity)
+      .set({ confirmationCode, expirationDate })
+      .where('userId = :userId', { userId })
+      .execute();
   }
 
   async updatePasswordRecoveryCode(

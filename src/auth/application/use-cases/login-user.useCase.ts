@@ -52,21 +52,21 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
       throw new Error(`Couldn't get payload from refresh token!`);
     }
 
-    const deviceSessionData: Omit<
-      IDeviceSession,
-      'id' | 'createdAt' | 'updatedAt'
-    > = {
-      issuedAt: refreshTokenPayload.iat,
-      expiredDate: refreshTokenPayload.exp,
-      deviceId: refreshTokenPayload.deviceId,
-      deviceName: userAgent,
-      ip,
-      userId: userId,
-    };
-
-    await this.commandBus.execute(
-      new CreateDeviceSessionCommand(deviceSessionData),
-    );
+    // const deviceSessionData: Omit<
+    //   IDeviceSession,
+    //   'id' | 'createdAt' | 'updatedAt'
+    // > = {
+    //   issuedAt: refreshTokenPayload.iat,
+    //   expiredDate: refreshTokenPayload.exp,
+    //   deviceId: refreshTokenPayload.deviceId,
+    //   deviceName: userAgent,
+    //   ip,
+    //   userId: userId,
+    // };
+    //
+    // await this.commandBus.execute(
+    //   new CreateDeviceSessionCommand(deviceSessionData),
+    // );
 
     return {
       accessToken,

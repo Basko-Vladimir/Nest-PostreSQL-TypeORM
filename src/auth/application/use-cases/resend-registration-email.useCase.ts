@@ -22,6 +22,6 @@ export class ResendRegistrationEmailUseCase
     const newCode = uuidv4();
 
     await this.usersRepository.updateConfirmationCode(user.id, newCode);
-    await this.emailManager.formRegistrationEmail(user);
+    await this.emailManager.formRegistrationEmail(user.email, newCode);
   }
 }

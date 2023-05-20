@@ -49,7 +49,10 @@ export class RegisterUserUseCase
     );
 
     try {
-      this.emailManager.formRegistrationEmail(user);
+      this.emailManager.formRegistrationEmail(
+        user.email,
+        user.emailConfirmation.confirmationCode,
+      );
       return mapDbUserToUserOutputModel(user);
     } catch (error) {
       console.log(error);

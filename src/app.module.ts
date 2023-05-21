@@ -22,7 +22,7 @@ import { AuthController } from './auth/api/auth.controller';
 import { ConfirmRegistrationUseCase } from './auth/application/use-cases/confirm-registration.useCase';
 import { ResendRegistrationEmailUseCase } from './auth/application/use-cases/resend-registration-email.useCase';
 import { LoginUserUseCase } from './auth/application/use-cases/login-user.useCase';
-import { DbDeviceSession } from './devices-sessions/entities/db-entities/device-session.entity';
+import { DeviceSessionEntity } from './devices-sessions/entities/db-entities/device-session.entity';
 import { DevicesSessionsController } from './devices-sessions/api/devices-sessions.controller';
 import { DevicesSessionsService } from './devices-sessions/application/devices-sessions.service';
 import { DevicesSessionsRepository } from './devices-sessions/infrastructure/devices-sessions.repository';
@@ -146,7 +146,7 @@ const useCases = [
     TypeOrmModule.forFeature([
       UserEntity,
       EmailConfirmationEntity,
-      DbDeviceSession,
+      DeviceSessionEntity,
       DbClientRequest,
       DbBlog,
       DbPost,

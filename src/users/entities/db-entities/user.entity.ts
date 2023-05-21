@@ -1,6 +1,6 @@
 import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 import { EmailConfirmationEntity } from './email-confirmation.entity';
-import { DbDeviceSession } from '../../../devices-sessions/entities/db-entities/device-session.entity';
+import { DeviceSessionEntity } from '../../../devices-sessions/entities/db-entities/device-session.entity';
 import { DbBlog } from '../../../blogs/entities/db-entities/blog.entity';
 import { BlockableEntity } from '../../../common/common-db-entities';
 import { DbBlockedUserForBlog } from './blocked-user-for-blog.entity';
@@ -43,8 +43,8 @@ export class UserEntity extends BlockableEntity {
   )
   emailConfirmation: EmailConfirmationEntity;
 
-  @OneToMany(() => DbDeviceSession, (deviceSession) => deviceSession.user)
-  deviceSession: DbDeviceSession[];
+  @OneToMany(() => DeviceSessionEntity, (deviceSession) => deviceSession.user)
+  deviceSession: DeviceSessionEntity[];
 
   @OneToMany(() => DbBlog, (dbBlog) => dbBlog.user)
   blogs: DbBlog[];

@@ -3,26 +3,28 @@ import { UserEntity } from '../../../users/entities/db-entities/user.entity';
 import { BaseEntity } from '../../../common/common-db-entities';
 
 @Entity({ name: 'deviceSession' })
-export class DbDeviceSession extends BaseEntity {
-  @Column()
+export class DeviceSessionEntity extends BaseEntity {
+  @Column({ type: 'integer' })
   issuedAt: number;
 
-  @Column()
+  @Column({ type: 'integer' })
   expiredDate: number;
 
-  @Column('uuid')
+  @Column({ type: 'uuid' })
   deviceId: string;
 
-  @Column()
+  @Column({ type: 'text' })
   deviceName: string;
 
-  @Column()
+  @Column({ type: 'varchar', length: 20 })
   ip: string;
 
-  @Column()
+  @Column({ type: 'uuid' })
   userId: string;
 
-  @ManyToOne(() => UserEntity)
+  @ManyToOne(() => UserEntity, (userEntity) => userEntity.deviceSession, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn()
   user: UserEntity;
 }

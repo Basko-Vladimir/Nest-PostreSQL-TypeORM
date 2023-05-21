@@ -6,13 +6,16 @@ export class EmailConfirmationEntity {
   @PrimaryColumn()
   userId: string;
 
-  @Column()
+  @Column({ type: 'uuid' })
   confirmationCode: string;
 
-  @Column()
+  @Column({
+    type: 'boolean',
+    default: false,
+  })
   isConfirmed: boolean;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'timestamp', nullable: true, default: null })
   expirationDate: Date;
 
   @OneToOne(() => UserEntity, (dbUser) => dbUser.emailConfirmation, {

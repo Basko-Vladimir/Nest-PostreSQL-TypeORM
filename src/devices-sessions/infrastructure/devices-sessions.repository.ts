@@ -1,11 +1,16 @@
-import { DataSource } from 'typeorm';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { IDeviceSession } from '../entities/interfaces';
+import { DeviceSessionEntity } from '../entities/db-entities/device-session.entity';
 
 @Injectable()
 export class DevicesSessionsRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource() private dataSource: DataSource,
+    @InjectRepository(DeviceSessionEntity)
+    private typeOrmDeviceSessionRepository: Repository<DeviceSessionEntity>,
+  ) {}
 
   async findDeviceSessionByDeviceId(
     deviceId: string,
@@ -35,18 +40,20 @@ export class DevicesSessionsRepository {
   }
 
   async createDeviceSession(
-    deviceSessionData: Omit<IDeviceSession, 'id' | 'createdAt' | 'updatedAt'>,
+    deviceSessionData: Omit<
+      DeviceSessionEntity,
+      'id' | 'createdAt' | 'updatedAt' | 'user'
+    >,
   ): Promise<void> {
     const { issuedAt, expiredDate, deviceId, deviceName, ip, userId } =
       deviceSessionData;
 
-    await this.dataSource.query(
-      `INSERT INTO "deviceSession"
-        ("issuedAt", "expiredDate", "deviceId", "deviceName", "ip", "userId")
-        VALUES($1, $2, $3, $4, $5, $6)
-      `,
-      [issuedAt, expiredDate, deviceId, deviceName, ip, userId],
-    );
+    await this.typeOrmDeviceSessionRepository
+      .createQueryBuilder()
+      .insert()
+      .into(DeviceSessionEntity)
+      .values({ issuedAt, expiredDate, deviceId, deviceName, ip, userId })
+      .execute();
   }
 
   async updateDeviceSessionIssuedAt(

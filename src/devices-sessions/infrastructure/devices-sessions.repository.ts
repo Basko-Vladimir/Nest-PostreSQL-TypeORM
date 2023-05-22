@@ -66,12 +66,11 @@ export class DevicesSessionsRepository {
   async deleteAllDevicesSessionsExceptCurrent(
     deviceSessionId: string,
   ): Promise<void> {
-    await this.dataSource.query(
-      `DELETE FROM "deviceSession"
-        WHERE "id" <> $1
-      `,
-      [deviceSessionId],
-    );
+    await this.typeOrmDeviceSessionRepository
+      .createQueryBuilder('deviceSession')
+      .delete()
+      .where('id != :deviceSessionId', { deviceSessionId })
+      .execute();
   }
 
   async deleteAllDevicesSessions(): Promise<void> {

@@ -148,16 +148,15 @@ export class UsersRepository {
 
   async updatePassword(
     userId: string,
-    hash: string,
-    recoveryCode,
+    passwordHash: string,
+    passwordRecoveryCode: string,
   ): Promise<void> {
-    await this.dataSource.query(
-      `UPDATE "user"
-        SET "passwordHash" = $1, "passwordRecoveryCode" = $2
-        WHERE "id" = $3
-      `,
-      [hash, recoveryCode, userId],
-    );
+    await this.typeOrmUsersRepository
+      .createQueryBuilder()
+      .update(UserEntity)
+      .set({ passwordHash, passwordRecoveryCode })
+      .where('id = :userId', { userId })
+      .execute();
   }
 
   async deleteUser(userId: string): Promise<void> {

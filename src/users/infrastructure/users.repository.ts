@@ -73,7 +73,7 @@ export class UsersRepository {
     isConfirmed: boolean,
   ): Promise<UserEntity> {
     const { login, email } = createUserDto;
-    const createdUser = await this.typeOrmUsersRepository
+    const createdUserData = await this.typeOrmUsersRepository
       .createQueryBuilder()
       .insert()
       .into(UserEntity)
@@ -86,14 +86,14 @@ export class UsersRepository {
       .insert()
       .into(EmailConfirmationEntity)
       .values({
-        userId: createdUser.identifiers[0].id,
+        userId: createdUserData.identifiers[0].id,
         confirmationCode: uuidv4(),
         expirationDate: add(new Date(), { hours: 1 }),
         isConfirmed,
       })
       .execute();
 
-    return this.findUserById(createdUser.identifiers[0].id);
+    return this.findUserById(createdUserData.identifiers[0].id);
   }
 
   async updateUserBanStatus(

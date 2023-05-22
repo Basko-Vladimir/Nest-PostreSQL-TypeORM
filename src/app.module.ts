@@ -34,7 +34,7 @@ import { RecoverPasswordUseCase } from './auth/application/use-cases/recover-pas
 import { ChangePasswordUseCase } from './auth/application/use-cases/change-password.useCase';
 import { LogoutUseCase } from './auth/application/use-cases/logout.useCase';
 import { RefreshTokensUseCase } from './auth/application/use-cases/refresh-tokens.useCase';
-import { DbClientRequest } from './clients-requests/entities/db-entities/client-request.entity';
+import { ClientRequestEntity } from './clients-requests/entities/db-entities/client-request.entity';
 import { UpdateClientRequestUseCase } from './clients-requests/application/use-cases/update-client-request.useCase';
 import { CreateClientRequestUseCase } from './clients-requests/application/use-cases/create-client-request.useCase';
 import { UpdateManyClientsRequestsUseCase } from './clients-requests/application/use-cases/update-many-clients-requests.useCase';
@@ -146,7 +146,7 @@ const useCases = [
       UserEntity,
       EmailConfirmationEntity,
       DeviceSessionEntity,
-      DbClientRequest,
+      ClientRequestEntity,
       DbBlog,
       DbPost,
       DbBlockedUserForBlog,

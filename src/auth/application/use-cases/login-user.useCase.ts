@@ -8,7 +8,6 @@ import {
   REFRESH_TOKEN_LIFE_TIME,
 } from '../../../common/constants';
 import { AuthService } from '../auth.service';
-import { DevicesSessionsService } from '../../../devices-sessions/application/devices-sessions.service';
 import { CreateDeviceSessionCommand } from '../../../devices-sessions/application/use-cases/create-device-session.useCase';
 import { DeviceSessionEntity } from '../../../devices-sessions/entities/db-entities/device-session.entity';
 
@@ -24,7 +23,6 @@ export class LoginUserCommand {
 export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
   constructor(
     private jwtService: JwtService,
-    private devicesSessionsService: DevicesSessionsService,
     private authService: AuthService,
     private commandBus: CommandBus,
   ) {}

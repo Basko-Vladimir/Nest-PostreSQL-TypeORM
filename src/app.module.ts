@@ -24,7 +24,6 @@ import { ResendRegistrationEmailUseCase } from './auth/application/use-cases/res
 import { LoginUserUseCase } from './auth/application/use-cases/login-user.useCase';
 import { DeviceSessionEntity } from './devices-sessions/entities/db-entities/device-session.entity';
 import { DevicesSessionsController } from './devices-sessions/api/devices-sessions.controller';
-import { DevicesSessionsService } from './devices-sessions/application/devices-sessions.service';
 import { DevicesSessionsRepository } from './devices-sessions/infrastructure/devices-sessions.repository';
 import { CreateDeviceSessionUseCase } from './devices-sessions/application/use-cases/create-device-session.useCase';
 import { UpdateDeviceSessionUseCase } from './devices-sessions/application/use-cases/update-device-session.useCase';
@@ -179,7 +178,6 @@ const useCases = [
     JwtService,
     EmailManager,
     EmailAdapter,
-    DevicesSessionsService,
     DevicesSessionsRepository,
     QueryDevicesSessionsRepository,
     ClientsRequestsRepository,

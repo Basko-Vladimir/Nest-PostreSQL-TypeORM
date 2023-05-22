@@ -1,14 +1,12 @@
 import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { AuthService } from '../auth.service';
 import { ITokensData } from '../../../common/types';
-import { UsersRepository } from '../../../users/infrastructure/users.repository';
 import { JwtService } from '../../infrastructure/jwt.service';
 import {
   ACCESS_TOKEN_LIFE_TIME,
   REFRESH_TOKEN_LIFE_TIME,
 } from '../../../common/constants';
 import { IDeviceSession } from '../../../devices-sessions/entities/interfaces';
-import { DevicesSessionsService } from '../../../devices-sessions/application/devices-sessions.service';
 import { UpdateDeviceSessionCommand } from '../../../devices-sessions/application/use-cases/update-device-session.useCase';
 
 export class RefreshTokensCommand {
@@ -20,9 +18,7 @@ export class RefreshTokensUseCase
   implements ICommandHandler<RefreshTokensCommand>
 {
   constructor(
-    private usersRepository: UsersRepository,
     private jwtService: JwtService,
-    private devicesSessionsService: DevicesSessionsService,
     private authService: AuthService,
     private commandBus: CommandBus,
   ) {}

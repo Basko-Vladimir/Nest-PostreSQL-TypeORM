@@ -22,9 +22,8 @@ import { AuthController } from './auth/api/auth.controller';
 import { ConfirmRegistrationUseCase } from './auth/application/use-cases/confirm-registration.useCase';
 import { ResendRegistrationEmailUseCase } from './auth/application/use-cases/resend-registration-email.useCase';
 import { LoginUserUseCase } from './auth/application/use-cases/login-user.useCase';
-import { DbDeviceSession } from './devices-sessions/entities/db-entities/device-session.entity';
+import { DeviceSessionEntity } from './devices-sessions/entities/db-entities/device-session.entity';
 import { DevicesSessionsController } from './devices-sessions/api/devices-sessions.controller';
-import { DevicesSessionsService } from './devices-sessions/application/devices-sessions.service';
 import { DevicesSessionsRepository } from './devices-sessions/infrastructure/devices-sessions.repository';
 import { CreateDeviceSessionUseCase } from './devices-sessions/application/use-cases/create-device-session.useCase';
 import { UpdateDeviceSessionUseCase } from './devices-sessions/application/use-cases/update-device-session.useCase';
@@ -35,7 +34,7 @@ import { RecoverPasswordUseCase } from './auth/application/use-cases/recover-pas
 import { ChangePasswordUseCase } from './auth/application/use-cases/change-password.useCase';
 import { LogoutUseCase } from './auth/application/use-cases/logout.useCase';
 import { RefreshTokensUseCase } from './auth/application/use-cases/refresh-tokens.useCase';
-import { DbClientRequest } from './clients-requests/entities/db-entities/client-request.entity';
+import { ClientRequestEntity } from './clients-requests/entities/db-entities/client-request.entity';
 import { UpdateClientRequestUseCase } from './clients-requests/application/use-cases/update-client-request.useCase';
 import { CreateClientRequestUseCase } from './clients-requests/application/use-cases/create-client-request.useCase';
 import { UpdateManyClientsRequestsUseCase } from './clients-requests/application/use-cases/update-many-clients-requests.useCase';
@@ -146,8 +145,8 @@ const useCases = [
     TypeOrmModule.forFeature([
       UserEntity,
       EmailConfirmationEntity,
-      DbDeviceSession,
-      DbClientRequest,
+      DeviceSessionEntity,
+      ClientRequestEntity,
       DbBlog,
       DbPost,
       DbBlockedUserForBlog,
@@ -179,7 +178,6 @@ const useCases = [
     JwtService,
     EmailManager,
     EmailAdapter,
-    DevicesSessionsService,
     DevicesSessionsRepository,
     QueryDevicesSessionsRepository,
     ClientsRequestsRepository,

@@ -8,9 +8,8 @@ import {
   REFRESH_TOKEN_LIFE_TIME,
 } from '../../../common/constants';
 import { AuthService } from '../auth.service';
-import { DevicesSessionsService } from '../../../devices-sessions/application/devices-sessions.service';
 import { CreateDeviceSessionCommand } from '../../../devices-sessions/application/use-cases/create-device-session.useCase';
-import { IDeviceSession } from '../../../devices-sessions/entities/interfaces';
+import { DeviceSessionEntity } from '../../../devices-sessions/entities/db-entities/device-session.entity';
 
 export class LoginUserCommand {
   constructor(
@@ -24,7 +23,6 @@ export class LoginUserCommand {
 export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
   constructor(
     private jwtService: JwtService,
-    private devicesSessionsService: DevicesSessionsService,
     private authService: AuthService,
     private commandBus: CommandBus,
   ) {}
@@ -52,21 +50,21 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
       throw new Error(`Couldn't get payload from refresh token!`);
     }
 
-    // const deviceSessionData: Omit<
-    //   IDeviceSession,
-    //   'id' | 'createdAt' | 'updatedAt'
-    // > = {
-    //   issuedAt: refreshTokenPayload.iat,
-    //   expiredDate: refreshTokenPayload.exp,
-    //   deviceId: refreshTokenPayload.deviceId,
-    //   deviceName: userAgent,
-    //   ip,
-    //   userId: userId,
-    // };
-    //
-    // await this.commandBus.execute(
-    //   new CreateDeviceSessionCommand(deviceSessionData),
-    // );
+    const deviceSessionData: Omit<
+      DeviceSessionEntity,
+      'id' | 'createdAt' | 'updatedAt' | 'user'
+    > = {
+      issuedAt: refreshTokenPayload.iat,
+      expiredDate: refreshTokenPayload.exp,
+      deviceId: refreshTokenPayload.deviceId,
+      deviceName: userAgent,
+      ip,
+      userId: userId,
+    };
+
+    await this.commandBus.execute(
+      new CreateDeviceSessionCommand(deviceSessionData),
+    );
 
     return {
       accessToken,

@@ -1,12 +1,12 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { DevicesSessionsRepository } from '../../infrastructure/devices-sessions.repository';
-import { IDeviceSession } from '../../entities/interfaces';
+import { DeviceSessionEntity } from '../../entities/db-entities/device-session.entity';
 
 export class CreateDeviceSessionCommand {
   constructor(
     public deviceSessionData: Omit<
-      IDeviceSession,
-      'id' | 'createdAt' | 'updatedAt'
+      DeviceSessionEntity,
+      'id' | 'createdAt' | 'updatedAt' | 'user'
     >,
   ) {}
 }

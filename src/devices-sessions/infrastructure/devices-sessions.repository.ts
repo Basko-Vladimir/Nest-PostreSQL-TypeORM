@@ -1,89 +1,82 @@
-import { DataSource } from 'typeorm';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
-import { IDeviceSession } from '../entities/interfaces';
+import { DeviceSessionEntity } from '../entities/db-entities/device-session.entity';
 
 @Injectable()
 export class DevicesSessionsRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(DeviceSessionEntity)
+    private typeOrmDeviceSessionRepository: Repository<DeviceSessionEntity>,
+  ) {}
 
   async findDeviceSessionByDeviceId(
     deviceId: string,
-  ): Promise<IDeviceSession | null> {
-    return this.dataSource.query(
-      `SELECT *
-       FROM "deviceSession"
-        WHERE "deviceId" = $1
-      `,
-      [deviceId],
-    );
+  ): Promise<DeviceSessionEntity | null> {
+    return this.typeOrmDeviceSessionRepository
+      .createQueryBuilder('deviceSession')
+      .select('deviceSession')
+      .where('deviceSession.deviceId = :deviceId', { deviceId })
+      .getOne();
   }
 
   async findDeviceSessionByDeviceIdAndIssuedAt(
     deviceId: number,
     issuedAt: number,
-  ): Promise<IDeviceSession | null> {
-    const data = await this.dataSource.query(
-      `SELECT *
-       FROM "deviceSession"
-        WHERE "deviceId" = $1 AND "issuedAt" = $2
-      `,
-      [deviceId, issuedAt],
-    );
-
-    return data[0] || null;
+  ): Promise<DeviceSessionEntity | null> {
+    return await this.typeOrmDeviceSessionRepository
+      .createQueryBuilder('deviceSession')
+      .select('deviceSession')
+      .where('deviceSession.deviceId = :deviceId', { deviceId })
+      .andWhere('deviceSession.issuedAt = :issuedAt', { issuedAt })
+      .getOne();
   }
 
   async createDeviceSession(
-    deviceSessionData: Omit<IDeviceSession, 'id' | 'createdAt' | 'updatedAt'>,
+    deviceSessionData: Omit<
+      DeviceSessionEntity,
+      'id' | 'createdAt' | 'updatedAt' | 'user'
+    >,
   ): Promise<void> {
     const { issuedAt, expiredDate, deviceId, deviceName, ip, userId } =
       deviceSessionData;
 
-    await this.dataSource.query(
-      `INSERT INTO "deviceSession"
-        ("issuedAt", "expiredDate", "deviceId", "deviceName", "ip", "userId")
-        VALUES($1, $2, $3, $4, $5, $6)
-      `,
-      [issuedAt, expiredDate, deviceId, deviceName, ip, userId],
-    );
+    await this.typeOrmDeviceSessionRepository
+      .createQueryBuilder()
+      .insert()
+      .into(DeviceSessionEntity)
+      .values({ issuedAt, expiredDate, deviceId, deviceName, ip, userId })
+      .execute();
   }
 
   async updateDeviceSessionIssuedAt(
     deviceSessionId: string,
     issuedAt: number,
   ): Promise<void> {
-    await this.dataSource.query(
-      `UPDATE "deviceSession"
-        SET "issuedAt" = $1
-        WHERE "id" = $2
-       `,
-      [issuedAt, deviceSessionId],
-    );
+    await this.typeOrmDeviceSessionRepository
+      .createQueryBuilder()
+      .update(DeviceSessionEntity)
+      .set({ issuedAt })
+      .where('id = :deviceSessionId', { deviceSessionId })
+      .execute();
   }
 
   async deleteAllDevicesSessionsExceptCurrent(
     deviceSessionId: string,
   ): Promise<void> {
-    await this.dataSource.query(
-      `DELETE FROM "deviceSession"
-        WHERE "id" <> $1
-      `,
-      [deviceSessionId],
-    );
+    await this.typeOrmDeviceSessionRepository
+      .createQueryBuilder('deviceSession')
+      .delete()
+      .where('id != :deviceSessionId', { deviceSessionId })
+      .execute();
   }
 
-  async deleteAllDevicesSessions(): Promise<void> {
-    await this.dataSource.query(`DELETE FROM "deviceSession"`);
-  }
-
-  async deleteDeviceSessionById(id: string): Promise<void> {
-    return this.dataSource.query(
-      `DELETE
-       FROM "deviceSession"
-        WHERE id = $1
-      `,
-      [id],
-    );
+  async deleteDeviceSessionById(deviceSessionId: string): Promise<void> {
+    await this.typeOrmDeviceSessionRepository
+      .createQueryBuilder()
+      .delete()
+      .from(DeviceSessionEntity)
+      .where('id = :deviceSessionId', { deviceSessionId })
+      .execute();
   }
 }

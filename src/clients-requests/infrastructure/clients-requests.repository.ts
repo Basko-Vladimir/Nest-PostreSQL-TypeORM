@@ -1,53 +1,55 @@
-import { DataSource } from 'typeorm';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { IClientRequest } from '../entities/interfaces';
+import { ClientRequestEntity } from '../entities/db-entities/client-request.entity';
 
 @Injectable()
 export class ClientsRequestsRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource() private dataSource: DataSource,
+    @InjectRepository(ClientRequestEntity)
+    private typeOrmClientRequestRepository: Repository<ClientRequestEntity>,
+  ) {}
 
   async getClientRequestsByFilter(
     ip: string,
     endpoint: string,
   ): Promise<IClientRequest[]> {
-    return await this.dataSource.query(
-      `SELECT *
-       FROM "clientRequest"
-       WHERE "ip" = $1 AND "endpoint" = $2
-      `,
-      [ip, endpoint],
-    );
+    return this.typeOrmClientRequestRepository
+      .createQueryBuilder('clientRequest')
+      .select('clientRequest')
+      .where('clientRequest.ip = :ip', { ip })
+      .andWhere('clientRequest.endpoint = :endpoint', { endpoint })
+      .getMany();
   }
 
   async createClientRequest(
     ip: string,
     endpoint: string,
     createTimeStamp: number,
-  ): Promise<IClientRequest> {
-    const data = await this.dataSource.query(
-      `INSERT INTO "clientRequest"
-        ("ip", "endpoint", "createTimeStamp")
-        VALUES ($1, $2, ${createTimeStamp})
-        RETURNING id
-      `,
-      [ip, endpoint],
-    );
+  ): Promise<ClientRequestEntity> {
+    const createdUserData = await this.typeOrmClientRequestRepository
+      .createQueryBuilder()
+      .insert()
+      .into(ClientRequestEntity)
+      .values({ ip, endpoint, createTimeStamp })
+      .returning('id')
+      .execute();
 
-    return data[0].id;
+    return createdUserData.identifiers[0].id;
   }
 
   async updateClientRequest(
     clientRequestId: string,
     createTimeStamp: number,
   ): Promise<void> {
-    await this.dataSource.query(
-      `UPDATE "clientRequest"
-        SET "createTimeStamp" = $1
-        WHERE "id" = $2
-      `,
-      [createTimeStamp, clientRequestId],
-    );
+    await this.typeOrmClientRequestRepository
+      .createQueryBuilder()
+      .update(ClientRequestEntity)
+      .set({ createTimeStamp })
+      .where('id = :clientRequestId', { clientRequestId })
+      .execute();
   }
 
   async updateManyClientsRequestsByFilter(
@@ -55,16 +57,20 @@ export class ClientsRequestsRepository {
     endpoint: string,
     createTimeStamp: number,
   ): Promise<void> {
-    await this.dataSource.query(
-      `UPDATE "clientRequest"
-        SET "createTimeStamp" = $1
-        WHERE "ip" = $2 AND "endpoint" = $3
-      `,
-      [createTimeStamp, ip, endpoint],
-    );
+    await this.typeOrmClientRequestRepository
+      .createQueryBuilder()
+      .update(ClientRequestEntity)
+      .set({ createTimeStamp })
+      .where('ip = :ip', { ip })
+      .andWhere('endpoint = :endpoint', { endpoint })
+      .execute();
   }
 
   async deleteAllClientRequests(): Promise<void> {
-    return this.dataSource.query(`DELETE FROM "clientRequest"`);
+    await this.typeOrmClientRequestRepository
+      .createQueryBuilder()
+      .delete()
+      .from(ClientRequestEntity)
+      .execute();
   }
 }

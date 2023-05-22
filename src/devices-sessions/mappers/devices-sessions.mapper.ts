@@ -1,8 +1,8 @@
 import { DeviceSessionOutputModel } from '../api/dto/devices-sessions-output-models.dto';
-import { IDeviceSession } from '../entities/interfaces';
+import { DeviceSessionEntity } from '../entities/db-entities/device-session.entity';
 
 export const mapDbDeviceSessionToDeviceSessionOutputModel = (
-  deviceSession: IDeviceSession,
+  deviceSession: DeviceSessionEntity,
 ): DeviceSessionOutputModel => {
   return {
     ip: deviceSession.ip,

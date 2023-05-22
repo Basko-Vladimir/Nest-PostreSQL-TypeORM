@@ -73,7 +73,7 @@ export class UsersRepository {
     isConfirmed: boolean,
   ): Promise<UserEntity> {
     const { login, email } = createUserDto;
-    const createdUser = await this.typeOrmUsersRepository
+    const createdUserData = await this.typeOrmUsersRepository
       .createQueryBuilder()
       .insert()
       .into(UserEntity)
@@ -86,14 +86,14 @@ export class UsersRepository {
       .insert()
       .into(EmailConfirmationEntity)
       .values({
-        userId: createdUser.identifiers[0].id,
+        userId: createdUserData.identifiers[0].id,
         confirmationCode: uuidv4(),
         expirationDate: add(new Date(), { hours: 1 }),
         isConfirmed,
       })
       .execute();
 
-    return this.findUserById(createdUser.identifiers[0].id);
+    return this.findUserById(createdUserData.identifiers[0].id);
   }
 
   async updateUserBanStatus(
@@ -136,29 +136,27 @@ export class UsersRepository {
 
   async updatePasswordRecoveryCode(
     userId: string,
-    newCode: string,
+    passwordRecoveryCode: string,
   ): Promise<void> {
-    await this.dataSource.query(
-      `UPDATE "user"
-        SET "passwordRecoveryCode" = '${newCode}'
-        WHERE "id" = $1
-      `,
-      [userId],
-    );
+    await this.typeOrmUsersRepository
+      .createQueryBuilder()
+      .update(UserEntity)
+      .set({ passwordRecoveryCode })
+      .where('id = :userId', { userId })
+      .execute();
   }
 
   async updatePassword(
     userId: string,
-    hash: string,
-    recoveryCode,
+    passwordHash: string,
+    passwordRecoveryCode: string,
   ): Promise<void> {
-    await this.dataSource.query(
-      `UPDATE "user"
-        SET "passwordHash" = $1, "passwordRecoveryCode" = $2
-        WHERE "id" = $3
-      `,
-      [hash, recoveryCode, userId],
-    );
+    await this.typeOrmUsersRepository
+      .createQueryBuilder()
+      .update(UserEntity)
+      .set({ passwordHash, passwordRecoveryCode })
+      .where('id = :userId', { userId })
+      .execute();
   }
 
   async deleteUser(userId: string): Promise<void> {

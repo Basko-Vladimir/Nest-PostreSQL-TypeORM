@@ -54,13 +54,12 @@ export class DevicesSessionsRepository {
     deviceSessionId: string,
     issuedAt: number,
   ): Promise<void> {
-    await this.dataSource.query(
-      `UPDATE "deviceSession"
-        SET "issuedAt" = $1
-        WHERE "id" = $2
-       `,
-      [issuedAt, deviceSessionId],
-    );
+    await this.typeOrmDeviceSessionRepository
+      .createQueryBuilder()
+      .update(DeviceSessionEntity)
+      .set({ issuedAt })
+      .where('id = :deviceSessionId', { deviceSessionId })
+      .execute();
   }
 
   async deleteAllDevicesSessionsExceptCurrent(

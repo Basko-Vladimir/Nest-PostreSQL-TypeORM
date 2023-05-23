@@ -24,7 +24,7 @@ export class DevicesSessionsRepository {
     deviceId: number,
     issuedAt: number,
   ): Promise<DeviceSessionEntity | null> {
-    return await this.typeOrmDeviceSessionRepository
+    return this.typeOrmDeviceSessionRepository
       .createQueryBuilder('deviceSession')
       .select('deviceSession')
       .where('deviceSession.deviceId = :deviceId', { deviceId })

@@ -1,3 +1,4 @@
+import fs from 'fs';
 import { Request } from 'express';
 import {
   BadRequestException,
@@ -77,4 +78,10 @@ export const getCommonInfoForQueryAllRequests = (
 
 export const getDbSortDirection = (sortDirection: SortDirection) => {
   return sortDirection === SortDirection.asc ? 'ASC' : 'DESC';
+};
+
+export const writeLogToFile = async (content: string): Promise<void> => {
+  return fs.writeFile('logs.txt', content, {}, (err) => {
+    console.log(err);
+  });
 };

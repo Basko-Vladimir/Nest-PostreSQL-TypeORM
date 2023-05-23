@@ -3,6 +3,8 @@ import { UsersRepository } from '../../users/infrastructure/users.repository';
 import { Request } from 'express';
 import { confirmationCodeErrorMessages } from '../error-messages';
 import { generateCustomBadRequestException } from '../utils';
+import { validate } from 'class-validator';
+import { IdValidator } from '../validators/uuid.validator';
 
 @Injectable()
 export class RegistrationConfirmationGuard implements CanActivate {
@@ -11,18 +13,20 @@ export class RegistrationConfirmationGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
     const code = request.body.code;
+    const codeValidationErrors = await validate(new IdValidator(code));
     const {
       INVALID_CONFIRMATION_CODE,
       EXISTED_CONFIRMATION_CODE,
       CONFIRMATION_CODE_IS_EXPIRED,
     } = confirmationCodeErrorMessages;
 
+    if (codeValidationErrors.length) {
+      generateCustomBadRequestException('Invalid code', 'code');
+    }
+
     const user = await this.userRepository.findUserByConfirmationCode(code);
 
-    if (!user) {
-      generateCustomBadRequestException(INVALID_CONFIRMATION_CODE, 'code');
-    }
-    if (user.emailConfirmation.confirmationCode !== code) {
+    if (!user || user.emailConfirmation.confirmationCode !== code) {
       generateCustomBadRequestException(INVALID_CONFIRMATION_CODE, 'code');
     }
     if (user.emailConfirmation.isConfirmed) {

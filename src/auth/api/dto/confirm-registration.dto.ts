@@ -1,7 +1,6 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsUUID } from 'class-validator';
 
 export class ConfirmRegistrationDto {
-  @IsNotEmpty()
-  @IsString()
+  @IsUUID()
   readonly code: string;
 }

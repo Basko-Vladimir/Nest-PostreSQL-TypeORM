@@ -4,7 +4,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Param,
   UseGuards,
 } from '@nestjs/common';
 import { User } from '../../common/decorators/user.decorator';
@@ -51,8 +50,10 @@ export class DevicesSessionsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(RefreshTokenGuard, DeleteDeviceSessionGuard)
   async deleteDeviceSessionByDeviceId(
-    @Param('deviceId') deviceId: string,
+    @Session('id') deviceSessionId: string,
   ): Promise<void> {
-    await this.commandBus.execute(new DeleteDeviceSessionCommand(deviceId));
+    await this.commandBus.execute(
+      new DeleteDeviceSessionCommand(deviceSessionId),
+    );
   }
 }

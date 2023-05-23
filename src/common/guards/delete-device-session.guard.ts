@@ -34,6 +34,8 @@ export class DeleteDeviceSessionGuard implements CanActivate {
       throw new ForbiddenException();
     }
 
+    request.context = { ...request.context, session: targetDeviceSession };
+
     return true;
   }
 }

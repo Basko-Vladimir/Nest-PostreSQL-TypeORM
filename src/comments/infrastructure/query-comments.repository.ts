@@ -18,6 +18,7 @@ import { CommentsQueryParamsDto } from '../api/dto/comments-query-params.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { QueryLikesRepository } from '../../likes/infrastructure/query-likes.repository';
+import { DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE } from '../../common/constants';
 
 @Injectable()
 export class QueryCommentsRepository {
@@ -154,8 +155,8 @@ export class QueryCommentsRepository {
     const {
       sortBy = CommentSortByField.createdAt,
       sortDirection = SortDirection.desc,
-      pageNumber = 1,
-      pageSize = 10,
+      pageNumber = DEFAULT_PAGE_NUMBER,
+      pageSize = DEFAULT_PAGE_SIZE,
     } = queryParams;
     const offset = countSkipValue(pageNumber, pageSize);
     const postIdCondition = postId

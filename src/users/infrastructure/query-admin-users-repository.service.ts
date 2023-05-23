@@ -11,6 +11,7 @@ import {
 import { mapDbUserToUserOutputModel } from '../mappers/users-mappers';
 import { AllUsersOutputModel } from '../api/dto/users-output-models.dto';
 import { UserEntity } from '../entities/db-entities/user.entity';
+import { DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE } from '../../common/constants';
 
 @Injectable()
 export class QueryAdminUsersRepository {
@@ -25,8 +26,8 @@ export class QueryAdminUsersRepository {
     const {
       searchLoginTerm = '',
       searchEmailTerm = '',
-      pageNumber = 1,
-      pageSize = 10,
+      pageNumber = DEFAULT_PAGE_NUMBER,
+      pageSize = DEFAULT_PAGE_SIZE,
       sortBy = UserSortByField.createdAt,
       sortDirection = SortDirection.desc,
       banStatus = BanStatus.ALL,

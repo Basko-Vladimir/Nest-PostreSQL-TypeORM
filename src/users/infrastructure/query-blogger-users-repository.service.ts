@@ -9,6 +9,7 @@ import {
   countSkipValue,
   getCommonInfoForQueryAllRequests,
 } from '../../common/utils';
+import { DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE } from '../../common/constants';
 
 @Injectable()
 export class QueryBloggerUsersRepository {
@@ -21,8 +22,8 @@ export class QueryBloggerUsersRepository {
     const {
       sortBy = UserSortByField.createdAt,
       sortDirection = SortDirection.desc,
-      pageNumber = 1,
-      pageSize = 10,
+      pageNumber = DEFAULT_PAGE_NUMBER,
+      pageSize = DEFAULT_PAGE_SIZE,
       searchLoginTerm = '',
     } = queryParams;
     const offset = countSkipValue(pageNumber, pageSize);

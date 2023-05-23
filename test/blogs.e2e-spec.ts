@@ -27,6 +27,10 @@ import {
   AllPostsOutputModel,
   IFullPostOutputModel,
 } from '../src/posts/api/dto/posts-output-models.dto';
+import {
+  DEFAULT_PAGE_NUMBER,
+  DEFAULT_PAGE_SIZE,
+} from '../src/common/constants';
 
 describe('BLOGS', () => {
   jest.setTimeout(20 * 1000);
@@ -702,8 +706,8 @@ describe('BLOGS', () => {
         expect(response.status).toBe(200);
         expect(response.body).toEqual({
           page: 1,
-          pageSize: 10,
-          pagesCount: 1,
+          pageSize: DEFAULT_PAGE_SIZE,
+          pagesCount: DEFAULT_PAGE_NUMBER,
           totalCount: 2,
           items: [post2, post1],
         });

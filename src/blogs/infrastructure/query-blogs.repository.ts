@@ -13,6 +13,7 @@ import { mapDbBlogToBlogOutputModel } from '../mappers/blogs-mappers';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { IBlog } from '../entities/interfaces';
+import { DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE } from '../../common/constants';
 
 interface IBlogsDataByQueryParams {
   blogs: IBlog[];
@@ -59,8 +60,8 @@ export class QueryBlogsRepository {
     const {
       sortBy = BlogSortByField.createdAt,
       sortDirection = SortDirection.desc,
-      pageNumber = 1,
-      pageSize = 10,
+      pageNumber = DEFAULT_PAGE_NUMBER,
+      pageSize = DEFAULT_PAGE_SIZE,
       searchNameTerm = '',
     } = queryParams;
     const offset = countSkipValue(pageNumber, pageSize);

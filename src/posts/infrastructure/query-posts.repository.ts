@@ -12,6 +12,7 @@ import {
 } from '../../common/utils';
 import { PostSortByField, SortDirection } from '../../common/enums';
 import { mapDbPostToPostOutputModel } from '../mappers/posts-mapper';
+import { DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE } from '../../common/constants';
 
 @Injectable()
 export class QueryPostsRepository {
@@ -22,8 +23,8 @@ export class QueryPostsRepository {
     blogId?: string,
   ): Promise<AllPostsOutputModel> {
     const {
-      pageSize = 10,
-      pageNumber = 1,
+      pageSize = DEFAULT_PAGE_SIZE,
+      pageNumber = DEFAULT_PAGE_NUMBER,
       sortBy = PostSortByField.createdAt,
       sortDirection = SortDirection.desc,
     } = queryParams;

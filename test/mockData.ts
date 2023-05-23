@@ -27,6 +27,10 @@ import {
 } from '../src/blogs/api/dto/blogs-output-models.dto';
 import { CreatePostDto } from '../src/posts/api/dto/create-post.dto';
 import { IFullPostOutputModel } from '../src/posts/api/dto/posts-output-models.dto';
+import {
+  DEFAULT_PAGE_SIZE,
+  DEFAULT_PAGE_NUMBER,
+} from '../src/common/constants';
 // import { UpdateBlogDto } from '../src/blogs/api/dto/update-blog.dto';
 
 interface Exception {
@@ -397,8 +401,8 @@ export const errors: { [key: string]: Exception } = {
 
 export const defaultResponses = {
   defaultGetAllResponse: {
-    page: 1,
-    pageSize: 10,
+    page: DEFAULT_PAGE_NUMBER,
+    pageSize: DEFAULT_PAGE_SIZE,
     pagesCount: 0,
     totalCount: 0,
     items: [],

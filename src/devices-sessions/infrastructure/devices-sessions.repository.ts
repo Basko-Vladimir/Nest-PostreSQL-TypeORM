@@ -21,7 +21,7 @@ export class DevicesSessionsRepository {
   }
 
   async findDeviceSessionByDeviceIdAndIssuedAt(
-    deviceId: number,
+    deviceId: string,
     issuedAt: number,
   ): Promise<DeviceSessionEntity | null> {
     return this.typeOrmDeviceSessionRepository

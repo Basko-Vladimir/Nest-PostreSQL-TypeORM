@@ -14,6 +14,7 @@ export const emailErrorMessages = {
 export const confirmationCodeErrorMessages = {
   INVALID_CONFIRMATION_CODE: 'Confirmation code is not valid!',
   EXISTED_CONFIRMATION_CODE: 'Confirmation code is confirmed already!',
+  CONFIRMATION_CODE_IS_EXPIRED: 'Confirmation code is expired!',
 };
 
 export const authErrorsMessages = {

@@ -11,8 +11,11 @@ export class RegistrationConfirmationGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
     const code = request.body.code;
-    const { INVALID_CONFIRMATION_CODE, EXISTED_CONFIRMATION_CODE } =
-      confirmationCodeErrorMessages;
+    const {
+      INVALID_CONFIRMATION_CODE,
+      EXISTED_CONFIRMATION_CODE,
+      CONFIRMATION_CODE_IS_EXPIRED,
+    } = confirmationCodeErrorMessages;
 
     const user = await this.userRepository.findUserByConfirmationCode(code);
 
@@ -24,6 +27,9 @@ export class RegistrationConfirmationGuard implements CanActivate {
     }
     if (user.emailConfirmation.isConfirmed) {
       generateCustomBadRequestException(EXISTED_CONFIRMATION_CODE, 'code');
+    }
+    if (user.emailConfirmation.expirationDate > new Date()) {
+      generateCustomBadRequestException(CONFIRMATION_CODE_IS_EXPIRED, 'code');
     }
 
     request.context = { user };

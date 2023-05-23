@@ -8,7 +8,6 @@ import { Request } from 'express';
 import { JwtService } from '../../auth/infrastructure/jwt.service';
 import { UsersRepository } from '../../users/infrastructure/users.repository';
 import { DevicesSessionsRepository } from '../../devices-sessions/infrastructure/devices-sessions.repository';
-import { writeLogToFile } from '../utils';
 
 @Injectable()
 export class RefreshTokenGuard implements CanActivate {
@@ -23,14 +22,12 @@ export class RefreshTokenGuard implements CanActivate {
     const refreshToken = request.cookies.refreshToken;
 
     if (!refreshToken) {
-      await writeLogToFile(`Log 1, ${new Date()}`);
       throw new UnauthorizedException();
     }
 
     const tokenPayload = await this.jwtService.getTokenPayload(refreshToken);
 
     if (!tokenPayload) {
-      await writeLogToFile(`Log 2, ${new Date()}`);
       throw new UnauthorizedException();
     }
 
@@ -41,7 +38,6 @@ export class RefreshTokenGuard implements CanActivate {
       );
 
     if (!currentDeviceSession) {
-      await writeLogToFile(`Log 3, ${new Date()}`);
       throw new UnauthorizedException();
     }
 

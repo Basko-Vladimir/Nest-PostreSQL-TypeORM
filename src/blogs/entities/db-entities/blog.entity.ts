@@ -37,7 +37,9 @@ export class DbBlog extends BlockableEntity {
   @Column({ type: 'uuid' })
   ownerId: string;
 
-  @ManyToOne(() => UserEntity, (dbUser) => dbUser.blogs)
+  @ManyToOne(() => UserEntity, (dbUser) => dbUser.blogs, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'ownerId' })
   user: UserEntity;
 

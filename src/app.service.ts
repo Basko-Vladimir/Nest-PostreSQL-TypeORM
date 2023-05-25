@@ -31,7 +31,6 @@ export class AppService {
       await this.likesRepository.deleteAllLikes(),
       await this.commentsRepository.deleteAllComments(),
       await this.postsRepository.deleteAllPosts(),
-      await this.blogsRepository.deleteAllBlogs(),
       await this.usersRepository.deleteAllUsers(),
       await this.clientsRequestsRepository.deleteAllClientRequests(),
     ]);

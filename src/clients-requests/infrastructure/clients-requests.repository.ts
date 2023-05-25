@@ -1,5 +1,5 @@
-import { DataSource, Repository } from 'typeorm';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { IClientRequest } from '../entities/interfaces';
 import { ClientRequestEntity } from '../entities/db-entities/client-request.entity';
@@ -7,7 +7,6 @@ import { ClientRequestEntity } from '../entities/db-entities/client-request.enti
 @Injectable()
 export class ClientsRequestsRepository {
   constructor(
-    @InjectDataSource() private dataSource: DataSource,
     @InjectRepository(ClientRequestEntity)
     private typeOrmClientRequestRepository: Repository<ClientRequestEntity>,
   ) {}

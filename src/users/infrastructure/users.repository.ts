@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { add } from 'date-fns';
-import { DataSource, Repository } from 'typeorm';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../api/dto/create-user.dto';
 import { UserEntity } from '../entities/db-entities/user.entity';
@@ -21,7 +21,6 @@ export class UsersRepository {
     private typeOrmUsersRepository: Repository<UserEntity>,
     @InjectRepository(EmailConfirmationEntity)
     private typeOrmEmailConfirmationRepository: Repository<EmailConfirmationEntity>,
-    @InjectDataSource() private dataSource: DataSource,
   ) {}
 
   async findUserById(userId: string = null): Promise<UserEntity | null> {

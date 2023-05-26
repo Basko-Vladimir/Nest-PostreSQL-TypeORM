@@ -1,24 +1,25 @@
-import { DataSource } from 'typeorm';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { IBlog } from '../entities/interfaces';
 import { CreateBlogDto } from '../api/dto/create-blog.dto';
 import { UpdateBlogDto } from '../api/dto/update-blog.dto';
+import { BlogEntity } from '../entities/db-entities/blog.entity';
 
 @Injectable()
 export class BlogsRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource() private dataSource: DataSource,
+    @InjectRepository(BlogEntity)
+    private typeOrmBlogRepository: Repository<BlogEntity>,
+  ) {}
 
   async findBlogById(blogId): Promise<IBlog | null> {
-    const data = await this.dataSource.query(
-      `SELECT *
-        FROM "blog"
-        WHERE id = $1
-      `,
-      [blogId],
-    );
-
-    return data[0] || null;
+    return this.typeOrmBlogRepository
+      .createQueryBuilder('blog')
+      .select('blog')
+      .where('blog.id = :blogId', { blogId })
+      .getOne();
   }
 
   async createBlog(
@@ -65,14 +66,13 @@ export class BlogsRepository {
     );
   }
 
-  async bindBlogWithUser(blogId: string, userId: string): Promise<void> {
-    await this.dataSource.query(
-      ` UPDATE "blog"
-          SET "ownerId" = $1
-          WHERE "id" = $2
-      `,
-      [userId, blogId],
-    );
+  async bindBlogWithUser(blogId: string, ownerId: string): Promise<void> {
+    await this.typeOrmBlogRepository
+      .createQueryBuilder('blog')
+      .update(BlogEntity)
+      .set({ ownerId })
+      .where('blog.id = :blogId', { blogId })
+      .execute();
   }
 
   async deleteBlog(blogId: string): Promise<void> {

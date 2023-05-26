@@ -55,8 +55,7 @@ export class AdminBlogsController {
   @UseGuards(CheckExistingEntityGuard, BasicAuthGuard)
   async updateBlogBanStatus(
     @Body() updateBlogBanStatusDto: UpdateBlogBanStatusDto,
-    @Param('id')
-    blogId: string,
+    @Param('id') blogId: string,
   ): Promise<void> {
     const { isBanned } = updateBlogBanStatusDto;
 

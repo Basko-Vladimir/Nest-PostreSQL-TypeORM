@@ -57,13 +57,12 @@ export class BlogsRepository {
     isBanned: boolean,
     banDate: string,
   ): Promise<void> {
-    await this.dataSource.query(
-      `UPDATE "blog"
-        SET "isBanned" = ${isBanned}, "banDate" = $1
-        WHERE "id" = $2
-      `,
-      [banDate, blogId],
-    );
+    await this.typeOrmBlogRepository
+      .createQueryBuilder('blog')
+      .update(BlogEntity)
+      .set({ isBanned, banDate })
+      .where('blog.id = :blogId', { blogId })
+      .execute();
   }
 
   async bindBlogWithUser(blogId: string, ownerId: string): Promise<void> {

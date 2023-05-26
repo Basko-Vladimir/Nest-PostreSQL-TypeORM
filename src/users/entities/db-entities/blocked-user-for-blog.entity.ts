@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { UserEntity } from './user.entity';
-import { DbBlog } from '../../../blogs/entities/db-entities/blog.entity';
+import { BlogEntity } from '../../../blogs/entities/db-entities/blog.entity';
 
 @Entity({ name: 'blockedUserForBlog' })
 export class DbBlockedUserForBlog {
@@ -30,7 +30,7 @@ export class DbBlockedUserForBlog {
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
 
-  @ManyToOne(() => DbBlog, (dbBlog) => dbBlog.blockedUsersForBlog)
+  @ManyToOne(() => BlogEntity, (dbBlog) => dbBlog.blockedUsersForBlog)
   @JoinColumn({ name: 'blogId' })
-  blog: DbBlog;
+  blog: BlogEntity;
 }

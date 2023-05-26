@@ -18,13 +18,13 @@ const selectingUsersFields = [
 export class UsersRepository {
   constructor(
     @InjectRepository(UserEntity)
-    private typeOrmUsersRepository: Repository<UserEntity>,
+    private typeOrmUserRepository: Repository<UserEntity>,
     @InjectRepository(EmailConfirmationEntity)
     private typeOrmEmailConfirmationRepository: Repository<EmailConfirmationEntity>,
   ) {}
 
   async findUserById(userId: string = null): Promise<UserEntity | null> {
-    return this.typeOrmUsersRepository
+    return this.typeOrmUserRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.emailConfirmation', 'emailConfirmation')
       .select(selectingUsersFields)
@@ -37,7 +37,7 @@ export class UsersRepository {
   ): Promise<UserEntity | null> {
     const { email, login } = userFilter;
 
-    return this.typeOrmUsersRepository
+    return this.typeOrmUserRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.emailConfirmation', 'emailConfirmation')
       .select(selectingUsersFields)
@@ -47,7 +47,7 @@ export class UsersRepository {
   }
 
   async findUserByConfirmationCode(code: string): Promise<UserEntity | null> {
-    return this.typeOrmUsersRepository
+    return this.typeOrmUserRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.emailConfirmation', 'emailConfirmation')
       .select(selectingUsersFields)
@@ -58,7 +58,7 @@ export class UsersRepository {
   async findUserByPasswordRecoveryCode(
     code: string,
   ): Promise<UserEntity | null> {
-    return this.typeOrmUsersRepository
+    return this.typeOrmUserRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.emailConfirmation', 'emailConfirmation')
       .select(selectingUsersFields)
@@ -72,7 +72,7 @@ export class UsersRepository {
     isConfirmed: boolean,
   ): Promise<UserEntity> {
     const { login, email } = createUserDto;
-    const createdUserData = await this.typeOrmUsersRepository
+    const createdUserData = await this.typeOrmUserRepository
       .createQueryBuilder()
       .insert()
       .into(UserEntity)
@@ -102,7 +102,7 @@ export class UsersRepository {
   ): Promise<void> {
     const banReason = isBanned ? reason : null;
 
-    await this.typeOrmUsersRepository
+    await this.typeOrmUserRepository
       .createQueryBuilder('user')
       .update(UserEntity)
       .set({ isBanned, banReason, banDate: isBanned ? new Date() : null })
@@ -137,7 +137,7 @@ export class UsersRepository {
     userId: string,
     passwordRecoveryCode: string,
   ): Promise<void> {
-    await this.typeOrmUsersRepository
+    await this.typeOrmUserRepository
       .createQueryBuilder()
       .update(UserEntity)
       .set({ passwordRecoveryCode })
@@ -150,7 +150,7 @@ export class UsersRepository {
     passwordHash: string,
     passwordRecoveryCode: string,
   ): Promise<void> {
-    await this.typeOrmUsersRepository
+    await this.typeOrmUserRepository
       .createQueryBuilder()
       .update(UserEntity)
       .set({ passwordHash, passwordRecoveryCode })
@@ -159,7 +159,7 @@ export class UsersRepository {
   }
 
   async deleteUser(userId: string): Promise<void> {
-    await this.typeOrmUsersRepository
+    await this.typeOrmUserRepository
       .createQueryBuilder('user')
       .delete()
       .from(UserEntity)
@@ -168,7 +168,7 @@ export class UsersRepository {
   }
 
   async deleteAllUsers(): Promise<void> {
-    await this.typeOrmUsersRepository
+    await this.typeOrmUserRepository
       .createQueryBuilder('user')
       .delete()
       .from(UserEntity)

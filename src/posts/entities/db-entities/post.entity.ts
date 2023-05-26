@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/common-db-entities';
 import { postsConstants } from '../../../common/constants';
-import { DbBlog } from '../../../blogs/entities/db-entities/blog.entity';
+import { BlogEntity } from '../../../blogs/entities/db-entities/blog.entity';
 import { DbComment } from '../../../comments/entities/db-entities/comment.entity';
 import { DbLike } from '../../../likes/entities/db-entities/like.entity';
 import { UserEntity } from '../../../users/entities/db-entities/user.entity';
@@ -41,11 +41,11 @@ export class DbPost extends BaseEntity {
   @OneToMany(() => DbLike, (dbLike) => dbLike.post)
   likes: DbLike[];
 
-  @ManyToOne(() => DbBlog, (dbBlog) => dbBlog.posts)
+  @ManyToOne(() => BlogEntity, (blogEntity) => blogEntity.posts)
   @JoinColumn({ name: 'blogId' })
-  blog: DbBlog;
+  blog: BlogEntity;
 
-  @ManyToOne(() => UserEntity, (dbUser) => dbUser.posts)
+  @ManyToOne(() => UserEntity, (userEntity) => userEntity.posts)
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
 }

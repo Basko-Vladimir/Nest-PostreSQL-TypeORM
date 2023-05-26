@@ -17,7 +17,7 @@ import { DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE } from '../../common/constants';
 export class QueryAdminUsersRepository {
   constructor(
     @InjectRepository(UserEntity)
-    private typeOrmUsersRepository: Repository<UserEntity>,
+    private typeOrmUserRepository: Repository<UserEntity>,
   ) {}
 
   async findAllUsers(
@@ -34,7 +34,7 @@ export class QueryAdminUsersRepository {
     } = queryParams;
     const skip = countSkipValue(pageNumber, pageSize);
     const dbSortDirection = getDbSortDirection(sortDirection);
-    const selectQueryBuilder = this.typeOrmUsersRepository
+    const selectQueryBuilder = this.typeOrmUserRepository
       .createQueryBuilder('user')
       .select('user');
 

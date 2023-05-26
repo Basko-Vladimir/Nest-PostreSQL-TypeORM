@@ -39,7 +39,7 @@ import { UpdateClientRequestUseCase } from './clients-requests/application/use-c
 import { CreateClientRequestUseCase } from './clients-requests/application/use-cases/create-client-request.useCase';
 import { UpdateManyClientsRequestsUseCase } from './clients-requests/application/use-cases/update-many-clients-requests.useCase';
 import { ClientsRequestsRepository } from './clients-requests/infrastructure/clients-requests.repository';
-import { DbBlog } from './blogs/entities/db-entities/blog.entity';
+import { BlogEntity } from './blogs/entities/db-entities/blog.entity';
 import { BloggerBlogsController } from './blogs/api/blogger-blogs.controller';
 import { BlogsRepository } from './blogs/infrastructure/blogs.repository';
 import { CreateBlogUseCase } from './blogs/application/use-cases/create-blog.useCase';
@@ -147,7 +147,7 @@ const useCases = [
       EmailConfirmationEntity,
       DeviceSessionEntity,
       ClientRequestEntity,
-      DbBlog,
+      BlogEntity,
       DbPost,
       DbBlockedUserForBlog,
       DbComment,

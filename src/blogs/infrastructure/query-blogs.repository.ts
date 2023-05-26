@@ -45,17 +45,14 @@ export class QueryBlogsRepository {
   }
 
   async findBlogById(blogId: string): Promise<IBlogOutputModel | null> {
-    const data = await this.dataSource.query(
-      ` SELECT *
-        FROM "blog"
-          WHERE "id" = $1 AND "isBanned" = false
-      `,
-      [blogId],
-    );
+    const targetBlog = await this.typeOrmBlogRepository
+      .createQueryBuilder('blog')
+      .select()
+      .where('blog.id = :blogId', { blogId })
+      .andWhere('blog.isBanned = :isBanned', { isBanned: false })
+      .getOne();
 
-    if (!data.length) return null;
-
-    return mapDbBlogToBlogOutputModel(data[0]);
+    return mapDbBlogToBlogOutputModel(targetBlog);
   }
 
   protected async getBlogsDataByQueryParams(

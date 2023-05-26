@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { blogsConstants } from '../../../common/constants';
 import { UserEntity } from '../../../users/entities/db-entities/user.entity';
 import { BlockableEntity } from '../../../common/common-db-entities';
-import { DbPost } from '../../../posts/entities/db-entities/post.entity';
+import { PostEntity } from '../../../posts/entities/db-entities/post.entity';
 import { DbBlockedUserForBlog } from '../../../users/entities/db-entities/blocked-user-for-blog.entity';
 
 const { MAX_NAME_LENGTH, MAX_WEBSITE_URL_LENGTH, MAX_DESCRIPTION_LENGTH } =
@@ -43,8 +43,8 @@ export class BlogEntity extends BlockableEntity {
   @JoinColumn({ name: 'ownerId' })
   user: UserEntity;
 
-  @OneToMany(() => DbPost, (dbPost) => dbPost.blog)
-  posts: DbPost[];
+  @OneToMany(() => PostEntity, (dbPost) => dbPost.blog)
+  posts: PostEntity[];
 
   @OneToMany(
     () => DbBlockedUserForBlog,

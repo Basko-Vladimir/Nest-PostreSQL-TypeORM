@@ -1,14 +1,16 @@
 import { IPostOutputModel } from '../api/dto/posts-output-models.dto';
-import { IPost } from '../entities/interfaces';
+import { PostEntity } from '../entities/db-entities/post.entity';
 
-export const mapDbPostToPostOutputModel = (post: IPost): IPostOutputModel => {
+export const mapDbPostToPostOutputModel = (
+  post: PostEntity,
+): IPostOutputModel => {
   return {
     id: post.id,
     title: post.title,
     shortDescription: post.shortDescription,
     content: post.content,
     blogId: post.blogId,
-    blogName: post.blogName,
+    blogName: post.blog.name,
     createdAt: post.createdAt.toISOString(),
   };
 };

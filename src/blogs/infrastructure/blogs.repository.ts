@@ -1,7 +1,6 @@
 import { DataSource, Repository } from 'typeorm';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
-import { IBlog } from '../entities/interfaces';
 import { CreateBlogDto } from '../api/dto/create-blog.dto';
 import { UpdateBlogDto } from '../api/dto/update-blog.dto';
 import { BlogEntity } from '../entities/db-entities/blog.entity';
@@ -14,7 +13,7 @@ export class BlogsRepository {
     private typeOrmBlogRepository: Repository<BlogEntity>,
   ) {}
 
-  async findBlogById(blogId): Promise<IBlog | null> {
+  async findBlogById(blogId): Promise<BlogEntity | null> {
     return this.typeOrmBlogRepository
       .createQueryBuilder('blog')
       .select('blog')
@@ -25,17 +24,18 @@ export class BlogsRepository {
   async createBlog(
     ownerId: string,
     createBlogDto: CreateBlogDto,
-  ): Promise<IBlog> {
+  ): Promise<string> {
     const { name, websiteUrl, description } = createBlogDto;
-    const data = await this.dataSource.query(
-      `INSERT INTO "blog"
-        ("name", "websiteUrl", "description", "ownerId")
-        VALUES ($1, $2, $3, $4)
-        RETURNING *
-      `,
-      [name, websiteUrl, description, ownerId],
-    );
-    return data[0];
+
+    const createdBlogData = await this.typeOrmBlogRepository
+      .createQueryBuilder()
+      .insert()
+      .into(BlogEntity)
+      .values({ name, websiteUrl, description, ownerId })
+      .returning('id')
+      .execute();
+
+    return createdBlogData.identifiers[0].id;
   }
 
   async updateBlog(

@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/common-db-entities';
 import { LikeStatus } from '../../../common/enums';
 import { UserEntity } from '../../../users/entities/db-entities/user.entity';
-import { DbPost } from '../../../posts/entities/db-entities/post.entity';
+import { PostEntity } from '../../../posts/entities/db-entities/post.entity';
 import { DbComment } from '../../../comments/entities/db-entities/comment.entity';
 
 @Entity({ name: 'like' })
@@ -30,9 +30,9 @@ export class DbLike extends BaseEntity {
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
 
-  @ManyToOne(() => DbPost, (dbPost) => dbPost.likes)
+  @ManyToOne(() => PostEntity, (dbPost) => dbPost.likes)
   @JoinColumn({ name: 'postId' })
-  post: DbPost;
+  post: PostEntity;
 
   @ManyToOne(() => DbComment, (dbComment) => dbComment.likes)
   @JoinColumn({ name: 'commentId' })

@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/common-db-entities';
 import { commentsConstants } from '../../../common/constants';
 import { UserEntity } from '../../../users/entities/db-entities/user.entity';
-import { DbPost } from '../../../posts/entities/db-entities/post.entity';
+import { PostEntity } from '../../../posts/entities/db-entities/post.entity';
 import { DbLike } from '../../../likes/entities/db-entities/like.entity';
 
 const { MAX_CONTENT_LENGTH } = commentsConstants;
@@ -32,7 +32,7 @@ export class DbComment extends BaseEntity {
   @JoinColumn({ name: 'authorId' })
   user: UserEntity;
 
-  @ManyToOne(() => DbPost, (dbPost) => dbPost.comments)
+  @ManyToOne(() => PostEntity, (dbPost) => dbPost.comments)
   @JoinColumn({ name: 'postId' })
-  post: DbPost;
+  post: PostEntity;
 }

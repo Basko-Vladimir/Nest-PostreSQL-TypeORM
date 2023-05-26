@@ -10,7 +10,7 @@ const { MAX_TITLE_LENGTH, MAX_SHORT_DESCRIPTION_LENGTH, MAX_CONTENT_LENGTH } =
   postsConstants;
 
 @Entity({ name: 'post' })
-export class DbPost extends BaseEntity {
+export class PostEntity extends BaseEntity {
   @Column({
     type: 'varchar',
     length: MAX_TITLE_LENGTH,
@@ -41,7 +41,9 @@ export class DbPost extends BaseEntity {
   @OneToMany(() => DbLike, (dbLike) => dbLike.post)
   likes: DbLike[];
 
-  @ManyToOne(() => BlogEntity, (blogEntity) => blogEntity.posts)
+  @ManyToOne(() => BlogEntity, (blogEntity) => blogEntity.posts, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'blogId' })
   blog: BlogEntity;
 

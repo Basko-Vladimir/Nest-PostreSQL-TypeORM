@@ -49,7 +49,7 @@ import { QueryBlogsRepository } from './blogs/infrastructure/query-blogs.reposit
 import { QueryPostsRepository } from './posts/infrastructure/query-posts.repository';
 import { DeleteBlogUseCase } from './blogs/application/use-cases/delete-blog.useCase';
 import { UpdateBlogUseCase } from './blogs/application/use-cases/update-blog.useCase';
-import { DbPost } from './posts/entities/db-entities/post.entity';
+import { PostEntity } from './posts/entities/db-entities/post.entity';
 import { CreatePostUseCase } from './posts/application/use-cases/create-post.useCase';
 import { GetFullPostUseCase } from './posts/application/use-cases/get-full-post.useCase';
 import { DeletePostUseCase } from './posts/application/use-cases/delete-post.useCase';
@@ -148,7 +148,7 @@ const useCases = [
       DeviceSessionEntity,
       ClientRequestEntity,
       BlogEntity,
-      DbPost,
+      PostEntity,
       DbBlockedUserForBlog,
       DbComment,
       DbLike,

@@ -1,5 +1,5 @@
-import { DataSource } from 'typeorm';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { PostsQueryParamsDto } from '../api/dto/posts-query-params.dto';
 import {
@@ -9,14 +9,20 @@ import {
 import {
   countSkipValue,
   getCommonInfoForQueryAllRequests,
+  getDbSortDirection,
 } from '../../common/utils';
 import { PostSortByField, SortDirection } from '../../common/enums';
-import { mapDbPostToPostOutputModel } from '../mappers/posts-mapper';
 import { DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE } from '../../common/constants';
+import { mapDbPostToPostOutputModel } from '../mappers/posts-mapper';
+import { PostEntity } from '../entities/db-entities/post.entity';
 
 @Injectable()
 export class QueryPostsRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource() private dataSource: DataSource,
+    @InjectRepository(PostEntity)
+    private typeOrmPostRepository: Repository<PostEntity>,
+  ) {}
 
   async findAllPosts(
     queryParams: PostsQueryParamsDto,
@@ -28,48 +34,23 @@ export class QueryPostsRepository {
       sortBy = PostSortByField.createdAt,
       sortDirection = SortDirection.desc,
     } = queryParams;
-    const blogIdCondition = blogId ? `WHERE "post"."blogId" = '${blogId}'` : '';
-    const offset = countSkipValue(pageNumber, pageSize);
+    const skip = countSkipValue(pageNumber, pageSize);
 
-    const countResult = await this.dataSource.query(
-      ` SELECT COUNT(*)
-        FROM "post"
-          ${blogIdCondition}
-      `,
-    );
-    const totalCount = countResult[0].count;
-    const posts = await this.dataSource.query(
-      ` SELECT
-          "post".*,
-          "blog"."name" as "blogName"
-        FROM "post"
-          LEFT JOIN "blog" ON "blog"."id" = "post"."blogId"
-          ${blogIdCondition}
-          ORDER BY
-            CASE
-              WHEN $1 = 'asc' THEN
-                CASE
-                  WHEN $2 = '${PostSortByField.blogName}' THEN "blog"."name"
-                  WHEN $2 = '${PostSortByField.content}' THEN "post"."content"
-                  WHEN $2 = '${PostSortByField.title}' THEN "post"."title"
-                  WHEN $2 = '${PostSortByField.shortDescription}' THEN "post"."shortDescription"
-                  ELSE "post"."createdAt"::varchar
-                END
-              END ASC,
-            CASE
-              WHEN $1 = 'desc' THEN
-                CASE
-                  WHEN $2 = '${PostSortByField.blogName}' THEN "blog"."name"
-                  WHEN $2 = '${PostSortByField.content}' THEN "post"."content"
-                  WHEN $2 = '${PostSortByField.title}' THEN "post"."title"
-                  WHEN $2 = '${PostSortByField.shortDescription}' THEN "post"."shortDescription"
-                  ELSE "post"."createdAt"::varchar
-                END
-              END DESC
-           OFFSET $3 LIMIT $4
-      `,
-      [sortDirection, sortBy, offset, pageSize],
-    );
+    const selectQueryBuilder = this.typeOrmPostRepository
+      .createQueryBuilder('post')
+      .innerJoinAndSelect('post.blog', 'blog');
+    const dbSortDirection = getDbSortDirection(sortDirection);
+
+    if (blogId) {
+      selectQueryBuilder.where('post.blogId = :blogId', { blogId });
+    }
+
+    const totalCount = await selectQueryBuilder.getCount();
+    const posts = await selectQueryBuilder
+      .orderBy(`blog.${sortBy}`, dbSortDirection)
+      .skip(skip)
+      .take(pageSize)
+      .getMany();
 
     return {
       ...getCommonInfoForQueryAllRequests(totalCount, pageSize, pageNumber),
@@ -77,21 +58,14 @@ export class QueryPostsRepository {
     };
   }
 
-  async findPostById(postId: string): Promise<IPostOutputModel | null> {
-    const data = await this.dataSource.query(
-      ` SELECT
-          "post".*,
-          "blog"."name" as "blogName",
-          "blog"."isBanned"
-        FROM "post"
-          LEFT JOIN "blog" ON "blog"."id" = "post"."blogId"
-          WHERE "post"."id" = $1 AND "blog"."isBanned" = false
-      `,
-      [postId],
-    );
+  async findPostById(postId: string): Promise<IPostOutputModel> {
+    const targetPost = await this.typeOrmPostRepository
+      .createQueryBuilder('post')
+      .innerJoinAndSelect('post.blog', 'blog')
+      .where('post.id = :postId', { postId })
+      .andWhere('blog.isBanned = :isBanned', { isBanned: false })
+      .getOne();
 
-    if (!data.length) return null;
-
-    return mapDbPostToPostOutputModel(data[0]);
+    return mapDbPostToPostOutputModel(targetPost);
   }
 }

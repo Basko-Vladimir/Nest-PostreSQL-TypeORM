@@ -6,7 +6,7 @@ import { BlockableEntity } from '../../../common/common-db-entities';
 import { DbBlockedUserForBlog } from './blocked-user-for-blog.entity';
 import { DbComment } from '../../../comments/entities/db-entities/comment.entity';
 import { DbLike } from '../../../likes/entities/db-entities/like.entity';
-import { DbPost } from '../../../posts/entities/db-entities/post.entity';
+import { PostEntity } from '../../../posts/entities/db-entities/post.entity';
 import { usersConstants } from '../../../common/constants';
 
 const { MAX_LOGIN_LENGTH } = usersConstants;
@@ -52,8 +52,8 @@ export class UserEntity extends BlockableEntity {
   @OneToMany(() => BlogEntity, (blogEntity) => blogEntity.user)
   blogs: BlogEntity[];
 
-  @OneToMany(() => DbPost, (dbPost) => dbPost.user)
-  posts: DbPost[];
+  @OneToMany(() => PostEntity, (dbPost) => dbPost.user)
+  posts: PostEntity[];
 
   @OneToMany(
     () => DbBlockedUserForBlog,

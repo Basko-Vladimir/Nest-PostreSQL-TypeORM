@@ -1,13 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { CreatePostForBlogDto } from '../../blogs/api/dto/create-post-for-blog.dto';
 import { IPost } from '../entities/interfaces';
 import { UpdatePostDto } from '../api/dto/update-post.dto';
+import { PostEntity } from '../entities/db-entities/post.entity';
 
 @Injectable()
 export class PostsRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource() private dataSource: DataSource,
+    @InjectRepository(PostEntity)
+    private typeOrmPostRepository: Repository<PostEntity>,
+  ) {}
 
   async findPostById(postId: string): Promise<IPost | null> {
     const data = await this.dataSource.query(
@@ -28,18 +33,18 @@ export class PostsRepository {
     createPostForBlogDto: CreatePostForBlogDto,
     blogId: string,
     userId: string,
-  ): Promise<IPost> {
+  ): Promise<string> {
     const { title, shortDescription, content } = createPostForBlogDto;
-    const data = await this.dataSource.query(
-      `INSERT INTO "post"
-        ("title", "shortDescription", "content", "blogId", "userId")
-        VALUES ($1, $2, $3, $4, $5)
-        RETURNING *
-      `,
-      [title, shortDescription, content, blogId, userId],
-    );
 
-    return data[0];
+    const createdPostData = await this.typeOrmPostRepository
+      .createQueryBuilder()
+      .insert()
+      .into(PostEntity)
+      .values({ title, shortDescription, content, blogId, userId })
+      .returning('id')
+      .execute();
+
+    return createdPostData.identifiers[0].id;
   }
 
   async updatePost(

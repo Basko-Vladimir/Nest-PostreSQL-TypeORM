@@ -69,25 +69,25 @@ export class QueryBlogsRepository {
     } = queryParams;
     const skip = countSkipValue(pageNumber, pageSize);
     const dbSortDirection = getDbSortDirection(sortDirection);
-    const queryBuilder = this.typeOrmBlogRepository
+    const selectQueryBuilder = this.typeOrmBlogRepository
       .createQueryBuilder('blog')
       .innerJoinAndSelect('blog.user', 'user')
       .select(['blog.*', 'user.login as "ownerLogin"']);
 
     if (typeof isBanned === 'boolean') {
-      queryBuilder.where('blog.isBanned = :isBanned', { isBanned });
+      selectQueryBuilder.where('blog.isBanned = :isBanned', { isBanned });
     }
     if (searchNameTerm) {
-      queryBuilder.andWhere('blog.name ilike :searchNameTerm', {
+      selectQueryBuilder.andWhere('blog.name ilike :searchNameTerm', {
         searchNameTerm: `%${searchNameTerm}%`,
       });
     }
     if (userId) {
-      queryBuilder.andWhere('blog.ownerId = :userId', { userId });
+      selectQueryBuilder.andWhere('blog.ownerId = :userId', { userId });
     }
 
-    const totalCount = await queryBuilder.getCount();
-    const blogs = await queryBuilder
+    const totalCount = await selectQueryBuilder.getCount();
+    const blogs = await selectQueryBuilder
       .orderBy(`blog."${sortBy}"`, dbSortDirection)
       .skip(skip)
       .take(pageSize)

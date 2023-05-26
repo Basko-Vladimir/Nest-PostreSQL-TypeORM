@@ -39,11 +39,14 @@ export class UserEntity extends BlockableEntity {
 
   @OneToOne(
     () => EmailConfirmationEntity,
-    (dbEmailConfirmation) => dbEmailConfirmation.user,
+    (emailConfirmationEntity) => emailConfirmationEntity.user,
   )
   emailConfirmation: EmailConfirmationEntity;
 
-  @OneToMany(() => DeviceSessionEntity, (deviceSession) => deviceSession.user)
+  @OneToMany(
+    () => DeviceSessionEntity,
+    (deviceSessionEntity) => deviceSessionEntity.user,
+  )
   deviceSession: DeviceSessionEntity[];
 
   @OneToMany(() => BlogEntity, (blogEntity) => blogEntity.user)

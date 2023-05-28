@@ -71,7 +71,7 @@ export class QueryLikesRepository {
       .andWhere('like.status = :status', { status: LikeStatus.LIKE })
       .andWhere('like.postId = :postId', { postId })
       .orderBy('like.createdAt', 'DESC')
-      .take(3)
+      .limit(3)
       .getMany();
 
     if (userId) {

@@ -32,7 +32,7 @@ export class QueryAdminUsersRepository {
       sortDirection = SortDirection.desc,
       banStatus = BanStatus.ALL,
     } = queryParams;
-    const skip = countSkipValue(pageNumber, pageSize);
+    const offset = countSkipValue(pageNumber, pageSize);
     const dbSortDirection = getDbSortDirection(sortDirection);
     const selectQueryBuilder = this.typeOrmUserRepository
       .createQueryBuilder('user')
@@ -57,8 +57,8 @@ export class QueryAdminUsersRepository {
     const totalCount = await selectQueryBuilder.getCount();
     const users = await selectQueryBuilder
       .orderBy(`"${sortBy}"`, dbSortDirection)
-      .take(pageSize)
-      .skip(skip)
+      .limit(pageSize)
+      .offset(offset)
       .getMany();
 
     return {

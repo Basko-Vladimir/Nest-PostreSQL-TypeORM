@@ -149,7 +149,7 @@ export class QueryCommentsRepository {
       pageNumber = DEFAULT_PAGE_NUMBER,
       pageSize = DEFAULT_PAGE_SIZE,
     } = queryParams;
-    const skip = countSkipValue(pageNumber, pageSize);
+    const offset = countSkipValue(pageNumber, pageSize);
     const dbSortDirection = getDbSortDirection(sortDirection);
     const selectQueryBuilder = this.typeOrmCommentRepository
       .createQueryBuilder('comment')
@@ -165,8 +165,8 @@ export class QueryCommentsRepository {
     const totalCount = await selectQueryBuilder.getCount();
     const comments = await selectQueryBuilder
       .orderBy(`comment.${sortBy}`, dbSortDirection)
-      .skip(skip)
-      .take(pageSize)
+      .offset(offset)
+      .limit(pageSize)
       .getMany();
 
     return {

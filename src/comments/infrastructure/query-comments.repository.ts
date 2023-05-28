@@ -1,3 +1,5 @@
+import { DataSource, Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import {
   AllBloggerCommentsOutputModel,
@@ -15,16 +17,17 @@ import {
 } from '../mappers/comments-mapper';
 import { CommentSortByField, SortDirection } from '../../common/enums';
 import { CommentsQueryParamsDto } from '../api/dto/comments-query-params.dto';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
 import { QueryLikesRepository } from '../../likes/infrastructure/query-likes.repository';
 import { DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE } from '../../common/constants';
+import { CommentEntity } from '../entities/db-entities/comment.entity';
 
 @Injectable()
 export class QueryCommentsRepository {
   constructor(
     @InjectDataSource() private dataSource: DataSource,
     private queryLikesRepository: QueryLikesRepository,
+    @InjectRepository(CommentEntity)
+    private typeOrmCommentRepository: Repository<CommentEntity>,
   ) {}
 
   async findAllComments(
@@ -119,32 +122,14 @@ export class QueryCommentsRepository {
   async findCommentById(
     commentId: string,
   ): Promise<ICommentOutputModel | null> {
-    const data = await this.dataSource.query(
-      ` SELECT
-          "comment".*,
-          "user"."login" as "userLogin"
-        FROM "comment"
-          LEFT JOIN "user" ON "user"."id" = "comment"."authorId"
-          WHERE "comment"."id" = $1 AND "user"."isBanned" = false
-      `,
-      [commentId],
-    );
+    const targetComment = await this.typeOrmCommentRepository
+      .createQueryBuilder('comment')
+      .innerJoinAndSelect('comment.user', 'user')
+      .where('comment.id = :commentId', { commentId })
+      .andWhere('user.isBanned = :isBanned', { isBanned: false })
+      .getOne();
 
-    return data[0] ? mapDbCommentToCommentOutputModel(data[0]) : null;
-  }
-
-  async findNotBannedUserCommentById(commentId: string): Promise<any> {
-    // const targetComment = await this.CommentModel.findById(commentId);
-    //
-    // if (!targetComment) throw new NotFoundException();
-    //
-    // const user: UserDocument = await this.UserModel.findById(
-    //   String(targetComment.userId),
-    // );
-    //
-    // if (!user || user.banInfo.isBanned) throw new NotFoundException();
-    //
-    // return mapDbCommentToCommentOutputModel(targetComment);
+    return mapDbCommentToCommentOutputModel(targetComment);
   }
 
   private async getCommentsDataByFilters(

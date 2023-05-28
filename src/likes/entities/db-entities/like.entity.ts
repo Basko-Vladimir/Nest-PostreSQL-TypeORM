@@ -3,7 +3,7 @@ import { BaseEntity } from '../../../common/common-db-entities';
 import { LikeStatus } from '../../../common/enums';
 import { UserEntity } from '../../../users/entities/db-entities/user.entity';
 import { PostEntity } from '../../../posts/entities/db-entities/post.entity';
-import { DbComment } from '../../../comments/entities/db-entities/comment.entity';
+import { CommentEntity } from '../../../comments/entities/db-entities/comment.entity';
 
 @Entity({ name: 'like' })
 export class DbLike extends BaseEntity {
@@ -34,7 +34,7 @@ export class DbLike extends BaseEntity {
   @JoinColumn({ name: 'postId' })
   post: PostEntity;
 
-  @ManyToOne(() => DbComment, (dbComment) => dbComment.likes)
+  @ManyToOne(() => CommentEntity, (dbComment) => dbComment.likes)
   @JoinColumn({ name: 'commentId' })
-  comment: DbComment;
+  comment: CommentEntity;
 }

@@ -17,14 +17,8 @@ export class CreateCommentUseCase
 {
   constructor(private commentsRepository: CommentsRepository) {}
 
-  async execute(command: CreateCommentCommand): Promise<ICommentOutputModel> {
+  async execute(command: CreateCommentCommand): Promise<string> {
     const { userId, postId, content } = command;
-    const createdComment = await this.commentsRepository.createComment(
-      userId,
-      postId,
-      content,
-    );
-
-    return mapDbCommentToCommentOutputModel(createdComment);
+    return this.commentsRepository.createComment(userId, postId, content);
   }
 }

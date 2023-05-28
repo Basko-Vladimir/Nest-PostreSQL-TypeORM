@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/common-db-entities';
 import { postsConstants } from '../../../common/constants';
 import { BlogEntity } from '../../../blogs/entities/db-entities/blog.entity';
-import { DbComment } from '../../../comments/entities/db-entities/comment.entity';
+import { CommentEntity } from '../../../comments/entities/db-entities/comment.entity';
 import { DbLike } from '../../../likes/entities/db-entities/like.entity';
 import { UserEntity } from '../../../users/entities/db-entities/user.entity';
 
@@ -35,8 +35,8 @@ export class PostEntity extends BaseEntity {
   @Column({ type: 'uuid' })
   userId: string;
 
-  @OneToMany(() => DbComment, (dbComment) => dbComment.post)
-  comments: DbComment[];
+  @OneToMany(() => CommentEntity, (dbComment) => dbComment.post)
+  comments: CommentEntity[];
 
   @OneToMany(() => DbLike, (dbLike) => dbLike.post)
   likes: DbLike[];

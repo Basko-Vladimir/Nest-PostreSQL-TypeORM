@@ -4,7 +4,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  NotFoundException,
   Param,
   Post,
   Put,
@@ -89,8 +88,6 @@ export class PostsController {
       postId,
     );
 
-    if (!postOutputModel) throw new NotFoundException();
-
     return this.queryBus.execute(new GetFullPostQuery(postOutputModel, userId));
   }
 
@@ -106,9 +103,11 @@ export class PostsController {
     @User('id') userId: string,
     @Body() createCommentForPostDto: CreateCommentForPostDto,
   ): Promise<ICommentWithLikeInfoOutputModel> {
-    const commentOutputModel = await this.commandBus.execute(
+    const createdCommentId = await this.commandBus.execute(
       new CreateCommentCommand(postId, userId, createCommentForPostDto.content),
     );
+    const commentOutputModel =
+      await this.queryCommentsRepository.findCommentById(createdCommentId);
 
     return {
       ...commentOutputModel,

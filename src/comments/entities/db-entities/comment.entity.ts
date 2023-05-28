@@ -8,7 +8,7 @@ import { DbLike } from '../../../likes/entities/db-entities/like.entity';
 const { MAX_CONTENT_LENGTH } = commentsConstants;
 
 @Entity({ name: 'comment' })
-export class DbComment extends BaseEntity {
+export class CommentEntity extends BaseEntity {
   @Column({
     type: 'varchar',
     length: MAX_CONTENT_LENGTH,

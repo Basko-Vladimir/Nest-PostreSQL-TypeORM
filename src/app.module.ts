@@ -66,7 +66,7 @@ import { BloggerUsersController } from './users/api/blogger-users.controller';
 import { UpdateUserBanStatusForBlogUseCase } from './users/application/use-cases/update-user-ban-status-for-blog.useCase';
 import { BannedUsersForBlogsRepository } from './users/infrastructure/banned-users-for-blogs-repository.service';
 import { DbBlockedUserForBlog } from './users/entities/db-entities/blocked-user-for-blog.entity';
-import { DbComment } from './comments/entities/db-entities/comment.entity';
+import { CommentEntity } from './comments/entities/db-entities/comment.entity';
 import { GetFullCommentUseCase } from './comments/application/use-cases/get-full-comment.useCase';
 import { CreateCommentUseCase } from './comments/application/use-cases/create-comment.useCase';
 import { QueryCommentsRepository } from './comments/infrastructure/query-comments.repository';
@@ -150,7 +150,7 @@ const useCases = [
       BlogEntity,
       PostEntity,
       DbBlockedUserForBlog,
-      DbComment,
+      CommentEntity,
       DbLike,
     ]),
     CqrsModule,

@@ -89,8 +89,8 @@ export class QueryBlogsRepository {
     const totalCount = await selectQueryBuilder.getCount();
     const blogs = await selectQueryBuilder
       .orderBy(`blog."${sortBy}"`, dbSortDirection)
-      .skip(skip)
       .take(pageSize)
+      .skip(skip)
       .getRawMany();
 
     return { blogs, totalCount, pageNumber, pageSize };

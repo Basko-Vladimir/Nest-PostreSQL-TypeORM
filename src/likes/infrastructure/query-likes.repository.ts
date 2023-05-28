@@ -35,12 +35,11 @@ export class QueryLikesRepository {
       .getCount();
 
     if (userId) {
-      const currentUserLike = await selectQueryBuilder.andWhere(
-        'user.id = :userId',
-        { userId },
-      );
+      const currentUserLike = await selectQueryBuilder
+        .andWhere('user.id = :userId', { userId })
+        .getOne();
 
-      myStatus = currentUserLike[0] ? currentUserLike[0].status : myStatus;
+      myStatus = currentUserLike ? currentUserLike.status : myStatus;
     }
 
     return {
@@ -80,7 +79,7 @@ export class QueryLikesRepository {
         .andWhere('like.postId = :postId', { postId })
         .getOne();
 
-      myStatus = currentUserLike[0] ? currentUserLike[0].status : myStatus;
+      myStatus = currentUserLike ? currentUserLike.status : myStatus;
     }
 
     return {

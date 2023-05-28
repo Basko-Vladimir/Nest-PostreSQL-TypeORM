@@ -5,7 +5,7 @@ import { EmailManager } from '../../../common/managers/email.manager';
 import { CreateUserDto } from '../../../users/api/dto/create-user.dto';
 import { generateExistingFieldError } from '../../../common/error-messages';
 import { IUserOutputModel } from '../../../users/api/dto/users-output-models.dto';
-import { mapDbUserToUserOutputModel } from '../../../users/mappers/users-mappers';
+import { mapUserEntityToUserOutputModel } from '../../../users/mappers/users-mappers';
 
 export class RegisterUserCommand {
   constructor(
@@ -53,7 +53,7 @@ export class RegisterUserUseCase
         user.email,
         user.emailConfirmation.confirmationCode,
       );
-      return mapDbUserToUserOutputModel(user);
+      return mapUserEntityToUserOutputModel(user);
     } catch (error) {
       console.log(error);
       await this.usersRepository.deleteUser(user.id);

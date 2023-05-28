@@ -3,7 +3,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { AllBannedUsersForSpecificBlogOutputModel } from '../api/dto/banned-users-for-specific-blog-output-model.dto';
 import { BannedUsersForSpecificBlogQueryParamsDto } from '../api/dto/banned-users-for-specific-blog-query-params.dto';
-import { mapDbUserToBannedUserForSpecificBlogOutputModel } from '../mappers/users-mappers';
+import { mapUserEntityToBannedUserForSpecificBlogOutputModel } from '../mappers/users-mappers';
 import { SortDirection, UserSortByField } from '../../common/enums';
 import {
   countSkipValue,
@@ -73,7 +73,7 @@ export class QueryBloggerUsersRepository {
 
     return {
       ...getCommonInfoForQueryAllRequests(totalCount, pageSize, pageNumber),
-      items: users.map(mapDbUserToBannedUserForSpecificBlogOutputModel),
+      items: users.map(mapUserEntityToBannedUserForSpecificBlogOutputModel),
     };
   }
 }

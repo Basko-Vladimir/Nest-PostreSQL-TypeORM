@@ -28,11 +28,11 @@ export class DbComment extends BaseEntity {
   @OneToMany(() => DbLike, (dbLike) => dbLike.comment)
   likes: DbLike[];
 
-  @ManyToOne(() => UserEntity, (dbUser) => dbUser.comments)
+  @ManyToOne(() => UserEntity, (userEntity) => userEntity.comments)
   @JoinColumn({ name: 'authorId' })
   user: UserEntity;
 
-  @ManyToOne(() => PostEntity, (dbPost) => dbPost.comments)
+  @ManyToOne(() => PostEntity, (postEntity) => postEntity.comments)
   @JoinColumn({ name: 'postId' })
   post: PostEntity;
 }

@@ -43,7 +43,7 @@ export class BlogEntity extends BlockableEntity {
   @JoinColumn({ name: 'ownerId' })
   user: UserEntity;
 
-  @OneToMany(() => PostEntity, (dbPost) => dbPost.blog)
+  @OneToMany(() => PostEntity, (postEntity) => postEntity.blog)
   posts: PostEntity[];
 
   @OneToMany(

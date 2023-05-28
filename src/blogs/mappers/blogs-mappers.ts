@@ -4,7 +4,7 @@ import {
 } from '../api/dto/blogs-output-models.dto';
 import { BlogEntity } from '../entities/db-entities/blog.entity';
 
-export const mapDbBlogToBlogOutputModel = (
+export const mapBlogEntityToBlogOutputModel = (
   blog: BlogEntity,
 ): IBlogOutputModel => {
   return {
@@ -17,7 +17,7 @@ export const mapDbBlogToBlogOutputModel = (
   };
 };
 
-export const mapDbBlogToBlogForAdminOutputModel = (
+export const mapBlogEntityToBlogForAdminOutputModel = (
   blog: BlogEntity,
 ): IBlogForAdminOutputModel => {
   return {

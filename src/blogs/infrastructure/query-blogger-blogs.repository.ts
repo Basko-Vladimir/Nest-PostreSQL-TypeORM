@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { BlogsQueryParamsDto } from '../api/dto/blogs-query-params.dto';
 import { AllBlogsOutputModel } from '../api/dto/blogs-output-models.dto';
 import { QueryBlogsRepository } from './query-blogs.repository';
-import { mapDbBlogToBlogOutputModel } from '../mappers/blogs-mappers';
+import { mapBlogEntityToBlogOutputModel } from '../mappers/blogs-mappers';
 import { getCommonInfoForQueryAllRequests } from '../../common/utils';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class QueryBloggerBlogsRepository extends QueryBlogsRepository {
 
     return {
       ...getCommonInfoForQueryAllRequests(totalCount, pageSize, pageNumber),
-      items: blogs.map(mapDbBlogToBlogOutputModel as any),
+      items: blogs.map(mapBlogEntityToBlogOutputModel as any),
     };
   }
 }

@@ -52,7 +52,7 @@ export class UserEntity extends BlockableEntity {
   @OneToMany(() => BlogEntity, (blogEntity) => blogEntity.user)
   blogs: BlogEntity[];
 
-  @OneToMany(() => PostEntity, (dbPost) => dbPost.user)
+  @OneToMany(() => PostEntity, (postEntity) => postEntity.user)
   posts: PostEntity[];
 
   @OneToMany(

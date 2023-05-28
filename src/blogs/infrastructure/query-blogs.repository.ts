@@ -12,7 +12,7 @@ import {
   AllBlogsOutputModel,
   IBlogOutputModel,
 } from '../api/dto/blogs-output-models.dto';
-import { mapDbBlogToBlogOutputModel } from '../mappers/blogs-mappers';
+import { mapBlogEntityToBlogOutputModel } from '../mappers/blogs-mappers';
 import { IBlog } from '../entities/interfaces';
 import { DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE } from '../../common/constants';
 import { BlogEntity } from '../entities/db-entities/blog.entity';
@@ -40,7 +40,7 @@ export class QueryBlogsRepository {
 
     return {
       ...getCommonInfoForQueryAllRequests(totalCount, pageSize, pageNumber),
-      items: blogs.map(mapDbBlogToBlogOutputModel),
+      items: blogs.map(mapBlogEntityToBlogOutputModel),
     };
   }
 
@@ -52,7 +52,7 @@ export class QueryBlogsRepository {
       .andWhere('blog.isBanned = :isBanned', { isBanned: false })
       .getOne();
 
-    return mapDbBlogToBlogOutputModel(targetBlog);
+    return mapBlogEntityToBlogOutputModel(targetBlog);
   }
 
   protected async getBlogsDataByQueryParams(

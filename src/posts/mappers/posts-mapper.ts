@@ -1,7 +1,7 @@
 import { IPostOutputModel } from '../api/dto/posts-output-models.dto';
 import { PostEntity } from '../entities/db-entities/post.entity';
 
-export const mapDbPostToPostOutputModel = (
+export const mapPostEntityToPostOutputModel = (
   post: PostEntity,
 ): IPostOutputModel => {
   return {

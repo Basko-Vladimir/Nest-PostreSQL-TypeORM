@@ -26,11 +26,11 @@ export class DbBlockedUserForBlog {
   })
   banDate: Date;
 
-  @ManyToOne(() => UserEntity, (dbUser) => dbUser.blockedUsersForBlog)
+  @ManyToOne(() => UserEntity, (userEntity) => userEntity.blockedUsersForBlog)
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
 
-  @ManyToOne(() => BlogEntity, (dbBlog) => dbBlog.blockedUsersForBlog)
+  @ManyToOne(() => BlogEntity, (blogEntity) => blogEntity.blockedUsersForBlog)
   @JoinColumn({ name: 'blogId' })
   blog: BlogEntity;
 }

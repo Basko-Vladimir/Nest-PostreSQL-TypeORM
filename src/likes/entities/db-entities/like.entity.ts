@@ -26,11 +26,11 @@ export class DbLike extends BaseEntity {
   })
   commentId: string;
 
-  @ManyToOne(() => UserEntity, (dbUser) => dbUser.likes)
+  @ManyToOne(() => UserEntity, (userEntity) => userEntity.likes)
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
 
-  @ManyToOne(() => PostEntity, (dbPost) => dbPost.likes)
+  @ManyToOne(() => PostEntity, (postEntity) => postEntity.likes)
   @JoinColumn({ name: 'postId' })
   post: PostEntity;
 

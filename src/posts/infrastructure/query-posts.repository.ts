@@ -13,7 +13,7 @@ import {
 } from '../../common/utils';
 import { PostSortByField, SortDirection } from '../../common/enums';
 import { DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE } from '../../common/constants';
-import { mapDbPostToPostOutputModel } from '../mappers/posts-mapper';
+import { mapPostEntityToPostOutputModel } from '../mappers/posts-mapper';
 import { PostEntity } from '../entities/db-entities/post.entity';
 
 @Injectable()
@@ -54,7 +54,7 @@ export class QueryPostsRepository {
 
     return {
       ...getCommonInfoForQueryAllRequests(totalCount, pageSize, pageNumber),
-      items: posts.map(mapDbPostToPostOutputModel),
+      items: posts.map(mapPostEntityToPostOutputModel),
     };
   }
 
@@ -66,6 +66,6 @@ export class QueryPostsRepository {
       .andWhere('blog.isBanned = :isBanned', { isBanned: false })
       .getOne();
 
-    return mapDbPostToPostOutputModel(targetPost);
+    return mapPostEntityToPostOutputModel(targetPost);
   }
 }

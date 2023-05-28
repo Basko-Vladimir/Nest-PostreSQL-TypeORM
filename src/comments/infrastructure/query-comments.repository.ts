@@ -127,9 +127,7 @@ export class QueryCommentsRepository {
     };
   }
 
-  async findCommentById(
-    commentId: string,
-  ): Promise<ICommentOutputModel | null> {
+  async findCommentById(commentId: string): Promise<ICommentOutputModel> {
     const targetComment = await this.typeOrmCommentRepository
       .createQueryBuilder('comment')
       .innerJoinAndSelect('comment.user', 'user')

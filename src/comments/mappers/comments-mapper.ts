@@ -4,16 +4,17 @@ import {
 } from '../api/dto/comments-output-models.dto';
 import { IComment } from '../entities/interfaces';
 import { LikesInfoOutputModel } from '../../likes/api/dto/likes-output-models.dto';
+import { CommentEntity } from '../entities/db-entities/comment.entity';
 
 export const mapCommentEntityToCommentOutputModel = (
-  comment: IComment,
+  comment: CommentEntity,
 ): ICommentOutputModel => {
   return {
     id: comment.id,
     content: comment.content,
     commentatorInfo: {
       userId: comment.authorId,
-      userLogin: comment.userLogin,
+      userLogin: comment.user.login,
     },
     createdAt: comment.createdAt.toISOString(),
   };

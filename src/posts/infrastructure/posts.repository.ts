@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { CreatePostForBlogDto } from '../../blogs/api/dto/create-post-for-blog.dto';
-import { IPost } from '../entities/interfaces';
 import { UpdatePostDto } from '../api/dto/update-post.dto';
 import { PostEntity } from '../entities/db-entities/post.entity';
 
@@ -14,19 +13,12 @@ export class PostsRepository {
     private typeOrmPostRepository: Repository<PostEntity>,
   ) {}
 
-  async findPostById(postId: string): Promise<IPost | null> {
-    const data = await this.dataSource.query(
-      ` SELECT
-          "post".*,
-          "blog"."name" as "blogName"
-        FROM "post"
-          LEFT JOIN "blog" ON "blog"."id" = "post"."blogId"
-          WHERE "post"."id" = $1
-      `,
-      [postId],
-    );
-
-    return data[0] || null;
+  async findPostById(postId: string): Promise<PostEntity> {
+    return this.typeOrmPostRepository
+      .createQueryBuilder('post')
+      .innerJoinAndSelect('post.blog', 'blogName')
+      .where('post.id = :postId', { postId })
+      .getOne();
   }
 
   async createPost(

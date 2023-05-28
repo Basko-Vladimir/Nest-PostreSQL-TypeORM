@@ -1,16 +1,16 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/common-db-entities';
 import { postsConstants } from '../../../common/constants';
-import { DbBlog } from '../../../blogs/entities/db-entities/blog.entity';
-import { DbComment } from '../../../comments/entities/db-entities/comment.entity';
-import { DbLike } from '../../../likes/entities/db-entities/like.entity';
+import { BlogEntity } from '../../../blogs/entities/db-entities/blog.entity';
+import { CommentEntity } from '../../../comments/entities/db-entities/comment.entity';
+import { LikeEntity } from '../../../likes/entities/db-entities/like.entity';
 import { UserEntity } from '../../../users/entities/db-entities/user.entity';
 
 const { MAX_TITLE_LENGTH, MAX_SHORT_DESCRIPTION_LENGTH, MAX_CONTENT_LENGTH } =
   postsConstants;
 
 @Entity({ name: 'post' })
-export class DbPost extends BaseEntity {
+export class PostEntity extends BaseEntity {
   @Column({
     type: 'varchar',
     length: MAX_TITLE_LENGTH,
@@ -35,17 +35,19 @@ export class DbPost extends BaseEntity {
   @Column({ type: 'uuid' })
   userId: string;
 
-  @OneToMany(() => DbComment, (dbComment) => dbComment.post)
-  comments: DbComment[];
+  @OneToMany(() => CommentEntity, (commentEntity) => commentEntity.post)
+  comments: CommentEntity[];
 
-  @OneToMany(() => DbLike, (dbLike) => dbLike.post)
-  likes: DbLike[];
+  @OneToMany(() => LikeEntity, (likeEntity) => likeEntity.post)
+  likes: LikeEntity[];
 
-  @ManyToOne(() => DbBlog, (dbBlog) => dbBlog.posts)
+  @ManyToOne(() => BlogEntity, (blogEntity) => blogEntity.posts, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'blogId' })
-  blog: DbBlog;
+  blog: BlogEntity;
 
-  @ManyToOne(() => UserEntity, (dbUser) => dbUser.posts)
+  @ManyToOne(() => UserEntity, (userEntity) => userEntity.posts)
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
 }

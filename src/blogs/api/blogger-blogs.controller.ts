@@ -80,7 +80,11 @@ export class BloggerBlogsController {
     @Body() creatingData: CreateBlogDto,
     @User() user: IUser,
   ): Promise<IBlogOutputModel> {
-    return this.commandBus.execute(new CreateBlogCommand(creatingData, user));
+    const createdBlogId = await this.commandBus.execute(
+      new CreateBlogCommand(creatingData, user),
+    );
+
+    return this.queryBlogsRepository.findBlogById(createdBlogId);
   }
 
   @Post(':blogId/posts')
@@ -91,8 +95,11 @@ export class BloggerBlogsController {
     @Body() createPostForBlogDto: CreatePostForBlogDto,
     @User('id') userId: string,
   ): Promise<IFullPostOutputModel> {
-    const postOutputModel = await this.commandBus.execute(
+    const createdPostId = await this.commandBus.execute(
       new CreatePostCommand(createPostForBlogDto, blogId, userId),
+    );
+    const postOutputModel = await this.queryPostsRepository.findPostById(
+      createdPostId,
     );
 
     return this.queryBus.execute(new GetFullPostQuery(postOutputModel, userId));

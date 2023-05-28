@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { add } from 'date-fns';
-import { DataSource, Repository } from 'typeorm';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from '../api/dto/create-user.dto';
 import { UserEntity } from '../entities/db-entities/user.entity';
@@ -18,14 +18,13 @@ const selectingUsersFields = [
 export class UsersRepository {
   constructor(
     @InjectRepository(UserEntity)
-    private typeOrmUsersRepository: Repository<UserEntity>,
+    private typeOrmUserRepository: Repository<UserEntity>,
     @InjectRepository(EmailConfirmationEntity)
     private typeOrmEmailConfirmationRepository: Repository<EmailConfirmationEntity>,
-    @InjectDataSource() private dataSource: DataSource,
   ) {}
 
   async findUserById(userId: string = null): Promise<UserEntity | null> {
-    return this.typeOrmUsersRepository
+    return this.typeOrmUserRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.emailConfirmation', 'emailConfirmation')
       .select(selectingUsersFields)
@@ -38,7 +37,7 @@ export class UsersRepository {
   ): Promise<UserEntity | null> {
     const { email, login } = userFilter;
 
-    return this.typeOrmUsersRepository
+    return this.typeOrmUserRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.emailConfirmation', 'emailConfirmation')
       .select(selectingUsersFields)
@@ -48,7 +47,7 @@ export class UsersRepository {
   }
 
   async findUserByConfirmationCode(code: string): Promise<UserEntity | null> {
-    return this.typeOrmUsersRepository
+    return this.typeOrmUserRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.emailConfirmation', 'emailConfirmation')
       .select(selectingUsersFields)
@@ -59,7 +58,7 @@ export class UsersRepository {
   async findUserByPasswordRecoveryCode(
     code: string,
   ): Promise<UserEntity | null> {
-    return this.typeOrmUsersRepository
+    return this.typeOrmUserRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.emailConfirmation', 'emailConfirmation')
       .select(selectingUsersFields)
@@ -73,7 +72,7 @@ export class UsersRepository {
     isConfirmed: boolean,
   ): Promise<UserEntity> {
     const { login, email } = createUserDto;
-    const createdUserData = await this.typeOrmUsersRepository
+    const createdUserData = await this.typeOrmUserRepository
       .createQueryBuilder()
       .insert()
       .into(UserEntity)
@@ -103,7 +102,7 @@ export class UsersRepository {
   ): Promise<void> {
     const banReason = isBanned ? reason : null;
 
-    await this.typeOrmUsersRepository
+    await this.typeOrmUserRepository
       .createQueryBuilder('user')
       .update(UserEntity)
       .set({ isBanned, banReason, banDate: isBanned ? new Date() : null })
@@ -138,7 +137,7 @@ export class UsersRepository {
     userId: string,
     passwordRecoveryCode: string,
   ): Promise<void> {
-    await this.typeOrmUsersRepository
+    await this.typeOrmUserRepository
       .createQueryBuilder()
       .update(UserEntity)
       .set({ passwordRecoveryCode })
@@ -151,7 +150,7 @@ export class UsersRepository {
     passwordHash: string,
     passwordRecoveryCode: string,
   ): Promise<void> {
-    await this.typeOrmUsersRepository
+    await this.typeOrmUserRepository
       .createQueryBuilder()
       .update(UserEntity)
       .set({ passwordHash, passwordRecoveryCode })
@@ -160,7 +159,7 @@ export class UsersRepository {
   }
 
   async deleteUser(userId: string): Promise<void> {
-    await this.typeOrmUsersRepository
+    await this.typeOrmUserRepository
       .createQueryBuilder('user')
       .delete()
       .from(UserEntity)
@@ -169,7 +168,7 @@ export class UsersRepository {
   }
 
   async deleteAllUsers(): Promise<void> {
-    await this.typeOrmUsersRepository
+    await this.typeOrmUserRepository
       .createQueryBuilder('user')
       .delete()
       .from(UserEntity)

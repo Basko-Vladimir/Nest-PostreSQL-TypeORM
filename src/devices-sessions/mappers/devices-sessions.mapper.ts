@@ -1,7 +1,7 @@
 import { DeviceSessionOutputModel } from '../api/dto/devices-sessions-output-models.dto';
 import { DeviceSessionEntity } from '../entities/db-entities/device-session.entity';
 
-export const mapDbDeviceSessionToDeviceSessionOutputModel = (
+export const mapDeviceSessionEntityToDeviceSessionOutputModel = (
   deviceSession: DeviceSessionEntity,
 ): DeviceSessionOutputModel => {
   return {

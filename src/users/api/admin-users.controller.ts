@@ -11,13 +11,13 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { CommandBus } from '@nestjs/cqrs';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UsersQueryParamsDto } from './dto/users-query-params.dto';
 import {
   AllUsersOutputModel,
   IUserOutputModel,
 } from './dto/users-output-models.dto';
-import { CommandBus } from '@nestjs/cqrs';
 import { CreateUserCommand } from '../application/use-cases/create-user.useCase';
 import { DeleteUserCommand } from '../application/use-cases/delete-user.useCase';
 import { QueryAdminUsersRepository } from '../infrastructure/query-admin-users-repository.service';

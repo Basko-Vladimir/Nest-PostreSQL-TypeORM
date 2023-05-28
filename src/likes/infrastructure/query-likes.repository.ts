@@ -1,56 +1,45 @@
-import { DataSource } from 'typeorm';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { LikeStatus } from '../../common/enums';
-import { mapDbLikeToLikeInfoOutputModel } from '../mappers/likes-mapper';
+import { mapLikeEntityToLikeInfoOutputModel } from '../mappers/likes-mapper';
 import {
   ExtendedLikesInfoOutputModel,
   LikesInfoOutputModel,
 } from '../api/dto/likes-output-models.dto';
+import { LikeEntity } from '../entities/db-entities/like.entity';
 
 @Injectable()
 export class QueryLikesRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(LikeEntity)
+    private typeOrmLikeRepository: Repository<LikeEntity>,
+  ) {}
 
   async getLikesInfo(
     userId: string,
     commentId: string,
   ): Promise<LikesInfoOutputModel> {
-    const likesCountData = await this.dataSource.query(
-      ` SELECT COUNT(*)
-        FROM "like"
-          INNER JOIN "user" ON "like"."userId" = "user"."id"
-          WHERE "commentId" = $1
-            AND "status" = '${LikeStatus.LIKE}'
-            AND "user"."isBanned" = false
-      `,
-      [commentId],
-    );
-    const dislikesCountData = await this.dataSource.query(
-      ` SELECT COUNT(*)
-        FROM "like"
-          INNER JOIN "user" ON "like"."userId" = "user"."id"
-          WHERE "commentId" = $1
-            AND "status" = '${LikeStatus.DISLIKE}'
-            AND "user"."isBanned" = false
-      `,
-      [commentId],
-    );
-    const likesCount = Number(likesCountData[0].count);
-    const dislikesCount = Number(dislikesCountData[0].count);
+    const selectQueryBuilder = this.typeOrmLikeRepository
+      .createQueryBuilder('like')
+      .innerJoinAndSelect('like.user', 'user')
+      .where('like.commentId = :commentId', { commentId })
+      .andWhere('user.isBanned = :isBanned', { isBanned: false });
     let myStatus = LikeStatus.NONE;
 
+    const likesCount = await selectQueryBuilder
+      .andWhere('like.status = :status', { status: LikeStatus.LIKE })
+      .getCount();
+    const dislikesCount = await selectQueryBuilder
+      .andWhere('like.status = :status', { status: LikeStatus.DISLIKE })
+      .getCount();
+
     if (userId) {
-      const currentUserLike = await this.dataSource.query(
-        ` SELECT *
-          FROM "like"
-            INNER JOIN "user" ON "like"."userId" = "user"."id"
-            WHERE "userId" = $1
-            AND "commentId" = $2
-            AND "user"."isBanned" = false
-        `,
-        [userId, commentId],
+      const currentUserLike = await selectQueryBuilder.andWhere(
+        'user.id = :userId',
+        { userId },
       );
+
       myStatus = currentUserLike[0] ? currentUserLike[0].status : myStatus;
     }
 
@@ -65,58 +54,32 @@ export class QueryLikesRepository {
     userId: string | null,
     postId: string,
   ): Promise<ExtendedLikesInfoOutputModel> {
-    const likesCountData = await this.dataSource.query(
-      ` SELECT COUNT(*)
-        FROM "like"
-          INNER JOIN "user" ON "like"."userId" = "user"."id"
-          WHERE "postId" = $1
-            AND "commentId" IS NULL
-            AND "status" = '${LikeStatus.LIKE}'
-            AND "user"."isBanned" = false
-      `,
-      [postId],
-    );
-    const dislikesCountData = await this.dataSource.query(
-      ` SELECT COUNT(*)
-        FROM "like"
-          INNER JOIN "user" ON "like"."userId" = "user"."id"
-          WHERE "postId" = $1
-            AND "commentId" IS NULL
-            AND "status" = '${LikeStatus.DISLIKE}'
-            AND "user"."isBanned" = false
-      `,
-      [postId],
-    );
-    const likesCount = Number(likesCountData[0].count);
-    const dislikesCount = Number(dislikesCountData[0].count);
-    const newestLikes = await this.dataSource.query(
-      ` SELECT "like".*, "user"."login" as "userLogin"
-        FROM "like"
-          INNER JOIN "user" ON "like"."userId" = "user"."id"
-          WHERE "like"."postId" = $1
-            AND "like"."commentId" IS NULL
-            AND "like"."status" = '${LikeStatus.LIKE}'
-            AND "user"."isBanned" = false
-          ORDER BY "like"."createdAt" DESC
-          LIMIT 3
-      `,
-      [postId],
-    );
-
+    const selectQueryBuilder = this.typeOrmLikeRepository
+      .createQueryBuilder('like')
+      .innerJoinAndSelect('like.user', 'user')
+      .where('like.commentId is Null')
+      .andWhere('user.isBanned = :isBanned', { isBanned: false });
     let myStatus = LikeStatus.NONE;
 
+    const likesCount = await selectQueryBuilder
+      .andWhere('like.status = :status', { status: LikeStatus.LIKE })
+      .getCount();
+    const dislikesCount = await selectQueryBuilder
+      .andWhere('like.status = :status', { status: LikeStatus.DISLIKE })
+      .getCount();
+    const newestLikes = await selectQueryBuilder
+      .andWhere('like.status = :status', { status: LikeStatus.LIKE })
+      .andWhere('like.postId = :postId', { postId })
+      .orderBy('like.createdAt', 'DESC')
+      .take(3)
+      .getMany();
+
     if (userId) {
-      const currentUserLike = await this.dataSource.query(
-        ` SELECT *
-          FROM "like"
-            INNER JOIN "user" ON "like"."userId" = "user"."id"
-            WHERE "userId" = $1
-              AND "postId" = $2
-              AND "commentId" IS NULL
-              AND "user"."isBanned" = false
-        `,
-        [userId, postId],
-      );
+      const currentUserLike = await selectQueryBuilder
+        .andWhere('user.id = :userId', { userId })
+        .andWhere('like.postId = :postId', { postId })
+        .getOne();
+
       myStatus = currentUserLike[0] ? currentUserLike[0].status : myStatus;
     }
 
@@ -124,7 +87,7 @@ export class QueryLikesRepository {
       likesCount,
       dislikesCount,
       myStatus,
-      newestLikes: newestLikes.map(mapDbLikeToLikeInfoOutputModel),
+      newestLikes: newestLikes.map(mapLikeEntityToLikeInfoOutputModel),
     };
   }
 }

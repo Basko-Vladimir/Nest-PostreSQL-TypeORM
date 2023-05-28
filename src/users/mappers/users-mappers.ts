@@ -3,7 +3,7 @@ import { IBannedUserForSpecificBlog } from '../api/dto/banned-users-for-specific
 import { IUser } from '../entities/interfaces';
 import { UserEntity } from '../entities/db-entities/user.entity';
 
-export const mapDbUserToUserOutputModel = (
+export const mapUserEntityToUserOutputModel = (
   user: UserEntity,
 ): IUserOutputModel => ({
   id: String(user.id),
@@ -17,7 +17,7 @@ export const mapDbUserToUserOutputModel = (
   },
 });
 
-export const mapDbUserToBannedUserForSpecificBlogOutputModel = (
+export const mapUserEntityToBannedUserForSpecificBlogOutputModel = (
   user: IUser,
 ): IBannedUserForSpecificBlog => ({
   id: user.id,

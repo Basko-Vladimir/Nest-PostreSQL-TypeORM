@@ -39,7 +39,7 @@ import { UpdateClientRequestUseCase } from './clients-requests/application/use-c
 import { CreateClientRequestUseCase } from './clients-requests/application/use-cases/create-client-request.useCase';
 import { UpdateManyClientsRequestsUseCase } from './clients-requests/application/use-cases/update-many-clients-requests.useCase';
 import { ClientsRequestsRepository } from './clients-requests/infrastructure/clients-requests.repository';
-import { DbBlog } from './blogs/entities/db-entities/blog.entity';
+import { BlogEntity } from './blogs/entities/db-entities/blog.entity';
 import { BloggerBlogsController } from './blogs/api/blogger-blogs.controller';
 import { BlogsRepository } from './blogs/infrastructure/blogs.repository';
 import { CreateBlogUseCase } from './blogs/application/use-cases/create-blog.useCase';
@@ -49,7 +49,7 @@ import { QueryBlogsRepository } from './blogs/infrastructure/query-blogs.reposit
 import { QueryPostsRepository } from './posts/infrastructure/query-posts.repository';
 import { DeleteBlogUseCase } from './blogs/application/use-cases/delete-blog.useCase';
 import { UpdateBlogUseCase } from './blogs/application/use-cases/update-blog.useCase';
-import { DbPost } from './posts/entities/db-entities/post.entity';
+import { PostEntity } from './posts/entities/db-entities/post.entity';
 import { CreatePostUseCase } from './posts/application/use-cases/create-post.useCase';
 import { GetFullPostUseCase } from './posts/application/use-cases/get-full-post.useCase';
 import { DeletePostUseCase } from './posts/application/use-cases/delete-post.useCase';
@@ -66,12 +66,12 @@ import { BloggerUsersController } from './users/api/blogger-users.controller';
 import { UpdateUserBanStatusForBlogUseCase } from './users/application/use-cases/update-user-ban-status-for-blog.useCase';
 import { BannedUsersForBlogsRepository } from './users/infrastructure/banned-users-for-blogs-repository.service';
 import { DbBlockedUserForBlog } from './users/entities/db-entities/blocked-user-for-blog.entity';
-import { DbComment } from './comments/entities/db-entities/comment.entity';
+import { CommentEntity } from './comments/entities/db-entities/comment.entity';
 import { GetFullCommentUseCase } from './comments/application/use-cases/get-full-comment.useCase';
 import { CreateCommentUseCase } from './comments/application/use-cases/create-comment.useCase';
 import { QueryCommentsRepository } from './comments/infrastructure/query-comments.repository';
 import { CommentsRepository } from './comments/infrastructure/comments.repository';
-import { DbLike } from './likes/entities/db-entities/like.entity';
+import { LikeEntity } from './likes/entities/db-entities/like.entity';
 import { QueryLikesRepository } from './likes/infrastructure/query-likes.repository';
 import { UpdatePostLikeStatusUseCase } from './posts/application/use-cases/update-post-like-status.useCase';
 import { CreateLikeUseCase } from './likes/application/use-cases/create-like.useCase';
@@ -147,11 +147,11 @@ const useCases = [
       EmailConfirmationEntity,
       DeviceSessionEntity,
       ClientRequestEntity,
-      DbBlog,
-      DbPost,
+      BlogEntity,
+      PostEntity,
       DbBlockedUserForBlog,
-      DbComment,
-      DbLike,
+      CommentEntity,
+      LikeEntity,
     ]),
     CqrsModule,
   ],

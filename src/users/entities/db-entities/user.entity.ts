@@ -1,12 +1,12 @@
 import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
 import { EmailConfirmationEntity } from './email-confirmation.entity';
 import { DeviceSessionEntity } from '../../../devices-sessions/entities/db-entities/device-session.entity';
-import { DbBlog } from '../../../blogs/entities/db-entities/blog.entity';
+import { BlogEntity } from '../../../blogs/entities/db-entities/blog.entity';
 import { BlockableEntity } from '../../../common/common-db-entities';
 import { DbBlockedUserForBlog } from './blocked-user-for-blog.entity';
-import { DbComment } from '../../../comments/entities/db-entities/comment.entity';
-import { DbLike } from '../../../likes/entities/db-entities/like.entity';
-import { DbPost } from '../../../posts/entities/db-entities/post.entity';
+import { CommentEntity } from '../../../comments/entities/db-entities/comment.entity';
+import { LikeEntity } from '../../../likes/entities/db-entities/like.entity';
+import { PostEntity } from '../../../posts/entities/db-entities/post.entity';
 import { usersConstants } from '../../../common/constants';
 
 const { MAX_LOGIN_LENGTH } = usersConstants;
@@ -39,18 +39,21 @@ export class UserEntity extends BlockableEntity {
 
   @OneToOne(
     () => EmailConfirmationEntity,
-    (dbEmailConfirmation) => dbEmailConfirmation.user,
+    (emailConfirmationEntity) => emailConfirmationEntity.user,
   )
   emailConfirmation: EmailConfirmationEntity;
 
-  @OneToMany(() => DeviceSessionEntity, (deviceSession) => deviceSession.user)
+  @OneToMany(
+    () => DeviceSessionEntity,
+    (deviceSessionEntity) => deviceSessionEntity.user,
+  )
   deviceSession: DeviceSessionEntity[];
 
-  @OneToMany(() => DbBlog, (dbBlog) => dbBlog.user)
-  blogs: DbBlog[];
+  @OneToMany(() => BlogEntity, (blogEntity) => blogEntity.user)
+  blogs: BlogEntity[];
 
-  @OneToMany(() => DbPost, (dbPost) => dbPost.user)
-  posts: DbPost[];
+  @OneToMany(() => PostEntity, (postEntity) => postEntity.user)
+  posts: PostEntity[];
 
   @OneToMany(
     () => DbBlockedUserForBlog,
@@ -58,9 +61,9 @@ export class UserEntity extends BlockableEntity {
   )
   blockedUsersForBlog: DbBlockedUserForBlog[];
 
-  @OneToMany(() => DbComment, (dbComment) => dbComment.user)
-  comments: DbComment[];
+  @OneToMany(() => CommentEntity, (commentEntity) => commentEntity.user)
+  comments: CommentEntity[];
 
-  @OneToMany(() => DbLike, (dbLike) => dbLike.user)
-  likes: DbLike[];
+  @OneToMany(() => LikeEntity, (likeEntity) => likeEntity.user)
+  likes: LikeEntity[];
 }

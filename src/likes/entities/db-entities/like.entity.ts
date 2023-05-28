@@ -2,11 +2,11 @@ import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BaseEntity } from '../../../common/common-db-entities';
 import { LikeStatus } from '../../../common/enums';
 import { UserEntity } from '../../../users/entities/db-entities/user.entity';
-import { DbPost } from '../../../posts/entities/db-entities/post.entity';
-import { DbComment } from '../../../comments/entities/db-entities/comment.entity';
+import { PostEntity } from '../../../posts/entities/db-entities/post.entity';
+import { CommentEntity } from '../../../comments/entities/db-entities/comment.entity';
 
 @Entity({ name: 'like' })
-export class DbLike extends BaseEntity {
+export class LikeEntity extends BaseEntity {
   @Column({
     type: 'enum',
     enum: LikeStatus,
@@ -26,15 +26,17 @@ export class DbLike extends BaseEntity {
   })
   commentId: string;
 
-  @ManyToOne(() => UserEntity, (dbUser) => dbUser.likes)
+  @ManyToOne(() => UserEntity, (userEntity) => userEntity.likes)
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
 
-  @ManyToOne(() => DbPost, (dbPost) => dbPost.likes)
+  @ManyToOne(() => PostEntity, (postEntity) => postEntity.likes, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'postId' })
-  post: DbPost;
+  post: PostEntity;
 
-  @ManyToOne(() => DbComment, (dbComment) => dbComment.likes)
+  @ManyToOne(() => CommentEntity, (commentEntity) => commentEntity.likes)
   @JoinColumn({ name: 'commentId' })
-  comment: DbComment;
+  comment: CommentEntity;
 }

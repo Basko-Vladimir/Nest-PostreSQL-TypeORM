@@ -1,7 +1,7 @@
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
-import { mapDbDeviceSessionToDeviceSessionOutputModel } from '../mappers/devices-sessions.mapper';
+import { mapDeviceSessionEntityToDeviceSessionOutputModel } from '../mappers/devices-sessions.mapper';
 import { DeviceSessionOutputModel } from '../api/dto/devices-sessions-output-models.dto';
 import { DeviceSessionEntity } from '../entities/db-entities/device-session.entity';
 
@@ -21,6 +21,8 @@ export class QueryDevicesSessionsRepository {
       .where('deviceSession.user = :userId', { userId })
       .getMany();
 
-    return devicesSessions.map(mapDbDeviceSessionToDeviceSessionOutputModel);
+    return devicesSessions.map(
+      mapDeviceSessionEntityToDeviceSessionOutputModel,
+    );
   }
 }

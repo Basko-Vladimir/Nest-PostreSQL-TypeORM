@@ -2,9 +2,11 @@ import {
   IBlogForAdminOutputModel,
   IBlogOutputModel,
 } from '../api/dto/blogs-output-models.dto';
-import { IBlog } from '../entities/interfaces';
+import { BlogEntity } from '../entities/db-entities/blog.entity';
 
-export const mapDbBlogToBlogOutputModel = (blog: IBlog): IBlogOutputModel => {
+export const mapBlogEntityToBlogOutputModel = (
+  blog: BlogEntity,
+): IBlogOutputModel => {
   return {
     id: blog.id,
     name: blog.name,
@@ -15,8 +17,8 @@ export const mapDbBlogToBlogOutputModel = (blog: IBlog): IBlogOutputModel => {
   };
 };
 
-export const mapDbBlogToBlogForAdminOutputModel = (
-  blog: IBlog,
+export const mapBlogEntityToBlogForAdminOutputModel = (
+  blog: BlogEntity,
 ): IBlogForAdminOutputModel => {
   return {
     id: blog.id,
@@ -27,7 +29,7 @@ export const mapDbBlogToBlogForAdminOutputModel = (
     createdAt: blog.createdAt.toISOString(),
     blogOwnerInfo: {
       userId: blog.ownerId,
-      userLogin: blog.ownerLogin,
+      userLogin: blog.user.login,
     },
     banInfo: {
       isBanned: blog.isBanned,

@@ -1,3 +1,5 @@
+import { DataSource, Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import {
   AllBloggerCommentsOutputModel,
@@ -8,23 +10,32 @@ import {
 import {
   countSkipValue,
   getCommonInfoForQueryAllRequests,
+  getDbSortDirection,
 } from '../../common/utils';
 import {
-  mapDbCommentToBloggerCommentOutputModel,
-  mapDbCommentToCommentOutputModel,
+  mapCommentEntityToBloggerCommentOutputModel,
+  mapCommentEntityToCommentOutputModel,
 } from '../mappers/comments-mapper';
 import { CommentSortByField, SortDirection } from '../../common/enums';
 import { CommentsQueryParamsDto } from '../api/dto/comments-query-params.dto';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
 import { QueryLikesRepository } from '../../likes/infrastructure/query-likes.repository';
 import { DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE } from '../../common/constants';
+import { CommentEntity } from '../entities/db-entities/comment.entity';
+
+interface ICommentsDataByQueryParams {
+  comments: CommentEntity[];
+  totalCount: number;
+  pageSize: number;
+  pageNumber: number;
+}
 
 @Injectable()
 export class QueryCommentsRepository {
   constructor(
     @InjectDataSource() private dataSource: DataSource,
     private queryLikesRepository: QueryLikesRepository,
+    @InjectRepository(CommentEntity)
+    private typeOrmCommentRepository: Repository<CommentEntity>,
   ) {}
 
   async findAllComments(
@@ -36,7 +47,7 @@ export class QueryCommentsRepository {
 
     return {
       ...getCommonInfoForQueryAllRequests(totalCount, pageSize, pageNumber),
-      items: comments.map(mapDbCommentToCommentOutputModel),
+      items: comments.map(mapCommentEntityToCommentOutputModel),
     };
   }
 
@@ -106,7 +117,7 @@ export class QueryCommentsRepository {
       );
 
       bloggerComments.push(
-        mapDbCommentToBloggerCommentOutputModel(comments[i], likesInfo),
+        mapCommentEntityToBloggerCommentOutputModel(comments[i], likesInfo),
       );
     }
 
@@ -116,93 +127,47 @@ export class QueryCommentsRepository {
     };
   }
 
-  async findCommentById(
-    commentId: string,
-  ): Promise<ICommentOutputModel | null> {
-    const data = await this.dataSource.query(
-      ` SELECT
-          "comment".*,
-          "user"."login" as "userLogin"
-        FROM "comment"
-          LEFT JOIN "user" ON "user"."id" = "comment"."authorId"
-          WHERE "comment"."id" = $1 AND "user"."isBanned" = false
-      `,
-      [commentId],
-    );
+  async findCommentById(commentId: string): Promise<ICommentOutputModel> {
+    const targetComment = await this.typeOrmCommentRepository
+      .createQueryBuilder('comment')
+      .innerJoinAndSelect('comment.user', 'user')
+      .where('comment.id = :commentId', { commentId })
+      .andWhere('user.isBanned = :isBanned', { isBanned: false })
+      .getOne();
 
-    return data[0] ? mapDbCommentToCommentOutputModel(data[0]) : null;
-  }
-
-  async findNotBannedUserCommentById(commentId: string): Promise<any> {
-    // const targetComment = await this.CommentModel.findById(commentId);
-    //
-    // if (!targetComment) throw new NotFoundException();
-    //
-    // const user: UserDocument = await this.UserModel.findById(
-    //   String(targetComment.userId),
-    // );
-    //
-    // if (!user || user.banInfo.isBanned) throw new NotFoundException();
-    //
-    // return mapDbCommentToCommentOutputModel(targetComment);
+    return mapCommentEntityToCommentOutputModel(targetComment);
   }
 
   private async getCommentsDataByFilters(
     queryParams: CommentsQueryParamsDto,
     isBanned?: boolean,
     postId?: string,
-  ): Promise<any> {
+  ): Promise<ICommentsDataByQueryParams> {
     const {
       sortBy = CommentSortByField.createdAt,
       sortDirection = SortDirection.desc,
       pageNumber = DEFAULT_PAGE_NUMBER,
       pageSize = DEFAULT_PAGE_SIZE,
     } = queryParams;
-    const offset = countSkipValue(pageNumber, pageSize);
-    const postIdCondition = postId
-      ? `WHERE "comment"."postId" = '${postId}'`
-      : '';
-    const isBannedCondition =
-      typeof isBanned === 'boolean'
-        ? `AND "user"."isBanned" = ${isBanned}`
-        : '';
-    const countResult = await this.dataSource.query(
-      ` SELECT COUNT(*)
-        FROM "comment"
-          LEFT JOIN "user" ON "user"."id" = "comment"."authorId"
-          ${postIdCondition}
-          ${isBannedCondition}
-      `,
-    );
-    const totalCount = countResult[0].count;
-    const comments = await this.dataSource.query(
-      ` SELECT
-          "comment".*,
-          "user"."login" as "userLogin"
-        FROM "comment"
-          LEFT JOIN "user" ON "user"."id" = "comment"."authorId"
-          ${postIdCondition}
-          ${isBannedCondition}
-        ORDER BY
-          CASE
-            WHEN $1 = 'asc' THEN
-              CASE
-                WHEN $2 = '${CommentSortByField.content}' THEN "comment"."content"
-                ELSE "comment"."createdAt"::varchar
-              END
-            END ASC,
-          CASE
-            WHEN $1 = 'desc' THEN
-              CASE
-                WHEN $2 = '${CommentSortByField.content}' THEN "comment"."content"
-                ELSE "comment"."createdAt"::varchar
-              END
-            END DESC
-          OFFSET $3 LIMIT $4
-      
-      `,
-      [sortDirection, sortBy, offset, pageSize],
-    );
+    const skip = countSkipValue(pageNumber, pageSize);
+    const dbSortDirection = getDbSortDirection(sortDirection);
+    const selectQueryBuilder = this.typeOrmCommentRepository
+      .createQueryBuilder('comment')
+      .innerJoinAndSelect('comment.user', 'user');
+
+    if (isBanned) {
+      selectQueryBuilder.where('user.isBanned = :isBanned', { isBanned });
+    }
+    if (postId) {
+      selectQueryBuilder.andWhere('comment.postId = :postId', { postId });
+    }
+
+    const totalCount = await selectQueryBuilder.getCount();
+    const comments = await selectQueryBuilder
+      .orderBy(`comment.${sortBy}`, dbSortDirection)
+      .skip(skip)
+      .take(pageSize)
+      .getMany();
 
     return {
       comments,

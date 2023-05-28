@@ -8,7 +8,7 @@ import {
   getCommonInfoForQueryAllRequests,
   getDbSortDirection,
 } from '../../common/utils';
-import { mapDbUserToUserOutputModel } from '../mappers/users-mappers';
+import { mapUserEntityToUserOutputModel } from '../mappers/users-mappers';
 import { AllUsersOutputModel } from '../api/dto/users-output-models.dto';
 import { UserEntity } from '../entities/db-entities/user.entity';
 import { DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE } from '../../common/constants';
@@ -17,7 +17,7 @@ import { DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE } from '../../common/constants';
 export class QueryAdminUsersRepository {
   constructor(
     @InjectRepository(UserEntity)
-    private typeOrmUsersRepository: Repository<UserEntity>,
+    private typeOrmUserRepository: Repository<UserEntity>,
   ) {}
 
   async findAllUsers(
@@ -34,7 +34,7 @@ export class QueryAdminUsersRepository {
     } = queryParams;
     const skip = countSkipValue(pageNumber, pageSize);
     const dbSortDirection = getDbSortDirection(sortDirection);
-    const selectQueryBuilder = this.typeOrmUsersRepository
+    const selectQueryBuilder = this.typeOrmUserRepository
       .createQueryBuilder('user')
       .select('user');
 
@@ -63,7 +63,7 @@ export class QueryAdminUsersRepository {
 
     return {
       ...getCommonInfoForQueryAllRequests(totalCount, pageSize, pageNumber),
-      items: users.map(mapDbUserToUserOutputModel),
+      items: users.map(mapUserEntityToUserOutputModel),
     };
   }
 }

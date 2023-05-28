@@ -1,7 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CommentsRepository } from '../../infrastructure/comments.repository';
-import { mapDbCommentToCommentOutputModel } from '../../mappers/comments-mapper';
-import { ICommentOutputModel } from '../../api/dto/comments-output-models.dto';
 
 export class CreateCommentCommand {
   constructor(
@@ -17,14 +15,8 @@ export class CreateCommentUseCase
 {
   constructor(private commentsRepository: CommentsRepository) {}
 
-  async execute(command: CreateCommentCommand): Promise<ICommentOutputModel> {
+  async execute(command: CreateCommentCommand): Promise<string> {
     const { userId, postId, content } = command;
-    const createdComment = await this.commentsRepository.createComment(
-      userId,
-      postId,
-      content,
-    );
-
-    return mapDbCommentToCommentOutputModel(createdComment);
+    return this.commentsRepository.createComment(userId, postId, content);
   }
 }

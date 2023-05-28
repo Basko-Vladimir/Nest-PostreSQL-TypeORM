@@ -2,14 +2,14 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { blogsConstants } from '../../../common/constants';
 import { UserEntity } from '../../../users/entities/db-entities/user.entity';
 import { BlockableEntity } from '../../../common/common-db-entities';
-import { DbPost } from '../../../posts/entities/db-entities/post.entity';
+import { PostEntity } from '../../../posts/entities/db-entities/post.entity';
 import { DbBlockedUserForBlog } from '../../../users/entities/db-entities/blocked-user-for-blog.entity';
 
 const { MAX_NAME_LENGTH, MAX_WEBSITE_URL_LENGTH, MAX_DESCRIPTION_LENGTH } =
   blogsConstants;
 
 @Entity({ name: 'blog' })
-export class DbBlog extends BlockableEntity {
+export class BlogEntity extends BlockableEntity {
   @Column({
     type: 'varchar',
     length: MAX_NAME_LENGTH,
@@ -37,12 +37,14 @@ export class DbBlog extends BlockableEntity {
   @Column({ type: 'uuid' })
   ownerId: string;
 
-  @ManyToOne(() => UserEntity, (dbUser) => dbUser.blogs)
+  @ManyToOne(() => UserEntity, (userEntity) => userEntity.blogs, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'ownerId' })
   user: UserEntity;
 
-  @OneToMany(() => DbPost, (dbPost) => dbPost.blog)
-  posts: DbPost[];
+  @OneToMany(() => PostEntity, (postEntity) => postEntity.blog)
+  posts: PostEntity[];
 
   @OneToMany(
     () => DbBlockedUserForBlog,

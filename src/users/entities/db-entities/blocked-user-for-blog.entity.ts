@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { UserEntity } from './user.entity';
-import { DbBlog } from '../../../blogs/entities/db-entities/blog.entity';
+import { BlogEntity } from '../../../blogs/entities/db-entities/blog.entity';
 
 @Entity({ name: 'blockedUserForBlog' })
 export class DbBlockedUserForBlog {
@@ -26,11 +26,11 @@ export class DbBlockedUserForBlog {
   })
   banDate: Date;
 
-  @ManyToOne(() => UserEntity, (dbUser) => dbUser.blockedUsersForBlog)
+  @ManyToOne(() => UserEntity, (userEntity) => userEntity.blockedUsersForBlog)
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
 
-  @ManyToOne(() => DbBlog, (dbBlog) => dbBlog.blockedUsersForBlog)
+  @ManyToOne(() => BlogEntity, (blogEntity) => blogEntity.blockedUsersForBlog)
   @JoinColumn({ name: 'blogId' })
-  blog: DbBlog;
+  blog: BlogEntity;
 }

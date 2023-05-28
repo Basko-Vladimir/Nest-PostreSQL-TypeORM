@@ -10,8 +10,6 @@ import { generateCustomBadRequestException } from '../utils';
 import { UsersRepository } from '../../users/infrastructure/users.repository';
 import { BlogsRepository } from '../../blogs/infrastructure/blogs.repository';
 import { IdValidator } from '../validators/uuid.validator';
-import { IBlog } from '../../blogs/entities/interfaces';
-import { UserEntity } from '../../users/entities/db-entities/user.entity';
 
 @Injectable()
 export class BindBlogWithUserGuard implements CanActivate {
@@ -25,20 +23,15 @@ export class BindBlogWithUserGuard implements CanActivate {
     const { id: blogId, userId } = request.params;
     const blogIdValidationErrors = await validate(new IdValidator(blogId));
     const userIdValidationErrors = await validate(new IdValidator(userId));
-    let targetBlog: IBlog, targetUser: UserEntity;
 
     if (blogIdValidationErrors.length || userIdValidationErrors.length) {
       generateCustomBadRequestException('Invalid paramsId', 'paramsId');
     }
 
-    try {
-      targetUser = await this.usersRepository.findUserById(userId);
-      targetBlog = await this.blogsRepository.findBlogById(blogId);
+    const targetUser = await this.usersRepository.findUserById(userId);
+    const targetBlog = await this.blogsRepository.findBlogById(blogId);
 
-      if (!targetUser || !targetBlog) throw new NotFoundException();
-    } catch {
-      generateCustomBadRequestException('Invalid paramsId', 'paramsId');
-    }
+    if (!targetUser || !targetBlog) throw new NotFoundException();
 
     if (targetBlog.ownerId) {
       generateCustomBadRequestException(

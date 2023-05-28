@@ -1,19 +1,21 @@
 import { Injectable } from '@nestjs/common';
+import { DataSource, Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { BlogsQueryParamsDto } from '../api/dto/blogs-query-params.dto';
 import { BlogSortByField, SortDirection } from '../../common/enums';
 import {
   countSkipValue,
   getCommonInfoForQueryAllRequests,
+  getDbSortDirection,
 } from '../../common/utils';
 import {
   AllBlogsOutputModel,
   IBlogOutputModel,
 } from '../api/dto/blogs-output-models.dto';
-import { mapDbBlogToBlogOutputModel } from '../mappers/blogs-mappers';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { mapBlogEntityToBlogOutputModel } from '../mappers/blogs-mappers';
 import { IBlog } from '../entities/interfaces';
 import { DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE } from '../../common/constants';
+import { BlogEntity } from '../entities/db-entities/blog.entity';
 
 interface IBlogsDataByQueryParams {
   blogs: IBlog[];
@@ -24,7 +26,11 @@ interface IBlogsDataByQueryParams {
 
 @Injectable()
 export class QueryBlogsRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource() private dataSource: DataSource,
+    @InjectRepository(BlogEntity)
+    private typeOrmBlogRepository: Repository<BlogEntity>,
+  ) {}
 
   async findAllBlogs(
     queryParams: BlogsQueryParamsDto,
@@ -34,22 +40,19 @@ export class QueryBlogsRepository {
 
     return {
       ...getCommonInfoForQueryAllRequests(totalCount, pageSize, pageNumber),
-      items: blogs.map(mapDbBlogToBlogOutputModel),
+      items: blogs.map(mapBlogEntityToBlogOutputModel),
     };
   }
 
   async findBlogById(blogId: string): Promise<IBlogOutputModel | null> {
-    const data = await this.dataSource.query(
-      ` SELECT *
-        FROM "blog"
-          WHERE "id" = $1 AND "isBanned" = false
-      `,
-      [blogId],
-    );
+    const targetBlog = await this.typeOrmBlogRepository
+      .createQueryBuilder('blog')
+      .select()
+      .where('blog.id = :blogId', { blogId })
+      .andWhere('blog.isBanned = :isBanned', { isBanned: false })
+      .getOne();
 
-    if (!data.length) return null;
-
-    return mapDbBlogToBlogOutputModel(data[0]);
+    return mapBlogEntityToBlogOutputModel(targetBlog);
   }
 
   protected async getBlogsDataByQueryParams(
@@ -64,49 +67,31 @@ export class QueryBlogsRepository {
       pageSize = DEFAULT_PAGE_SIZE,
       searchNameTerm = '',
     } = queryParams;
-    const offset = countSkipValue(pageNumber, pageSize);
-    const isBannedCondition =
-      typeof isBanned === 'boolean'
-        ? `AND "blog"."isBanned" = ${isBanned}`
-        : '';
-    const userIdCondition = userId ? `AND "blog"."ownerId" = '${userId}'` : '';
-    const countResult = await this.dataSource.query(
-      ` SELECT COUNT(*)
-        FROM "blog"
-          LEFT JOIN "user" ON "user"."id" = "blog"."ownerId"
-          WHERE "name" ILIKE $1 ${isBannedCondition} ${userIdCondition}
-      `,
-      [`%${searchNameTerm}%`],
-    );
-    const totalCount = countResult[0].count;
-    const blogs = await this.dataSource.query(
-      ` SELECT
-          "blog".*,
-          "user"."login" as "ownerLogin"
-        FROM "blog"
-          LEFT JOIN "user" ON "user"."id" = "blog"."ownerId"
-          WHERE "name" ILIKE $1 ${isBannedCondition} ${userIdCondition}
-          ORDER BY
-            CASE
-              WHEN $2 = 'asc' THEN
-                CASE
-                  WHEN $3 = '${BlogSortByField.websiteUrl}' THEN "websiteUrl"
-                  WHEN $3 = '${BlogSortByField.name}' THEN "name"
-                  ELSE "blog"."createdAt"::varchar
-                END
-              END ASC,
-            CASE
-              WHEN $2 = 'desc' THEN
-                CASE
-                  WHEN $3 = '${BlogSortByField.websiteUrl}' THEN "websiteUrl"
-                  WHEN $3 = '${BlogSortByField.name}' THEN "name"
-                  ELSE "blog"."createdAt"::varchar
-                END
-              END DESC
-          OFFSET $4 LIMIT $5
-      `,
-      [`%${searchNameTerm}%`, sortDirection, sortBy, offset, pageSize],
-    );
+    const skip = countSkipValue(pageNumber, pageSize);
+    const dbSortDirection = getDbSortDirection(sortDirection);
+    const selectQueryBuilder = this.typeOrmBlogRepository
+      .createQueryBuilder('blog')
+      .innerJoinAndSelect('blog.user', 'user')
+      .select(['blog.*', 'user.login as "ownerLogin"']);
+
+    if (typeof isBanned === 'boolean') {
+      selectQueryBuilder.where('blog.isBanned = :isBanned', { isBanned });
+    }
+    if (searchNameTerm) {
+      selectQueryBuilder.andWhere('blog.name ilike :searchNameTerm', {
+        searchNameTerm: `%${searchNameTerm}%`,
+      });
+    }
+    if (userId) {
+      selectQueryBuilder.andWhere('blog.ownerId = :userId', { userId });
+    }
+
+    const totalCount = await selectQueryBuilder.getCount();
+    const blogs = await selectQueryBuilder
+      .orderBy(`blog."${sortBy}"`, dbSortDirection)
+      .skip(skip)
+      .take(pageSize)
+      .getRawMany();
 
     return { blogs, totalCount, pageNumber, pageSize };
   }

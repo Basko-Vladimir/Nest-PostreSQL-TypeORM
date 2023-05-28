@@ -67,7 +67,7 @@ export class QueryBlogsRepository {
       pageSize = DEFAULT_PAGE_SIZE,
       searchNameTerm = '',
     } = queryParams;
-    const skip = countSkipValue(pageNumber, pageSize);
+    const offset = countSkipValue(pageNumber, pageSize);
     const dbSortDirection = getDbSortDirection(sortDirection);
     const selectQueryBuilder = this.typeOrmBlogRepository
       .createQueryBuilder('blog')
@@ -89,8 +89,8 @@ export class QueryBlogsRepository {
     const totalCount = await selectQueryBuilder.getCount();
     const blogs = await selectQueryBuilder
       .orderBy(`blog."${sortBy}"`, dbSortDirection)
-      .take(pageSize)
-      .skip(skip)
+      .limit(pageSize)
+      .offset(offset)
       .getRawMany();
 
     return { blogs, totalCount, pageNumber, pageSize };

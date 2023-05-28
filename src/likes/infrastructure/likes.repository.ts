@@ -1,35 +1,35 @@
-import { DataSource } from 'typeorm';
-import { InjectDataSource } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
-import { ILike } from '../entities/interfaces';
 import { LikeStatus } from '../../common/enums';
+import { LikeEntity } from '../entities/db-entities/like.entity';
 
 @Injectable()
 export class LikesRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(LikeEntity)
+    private typeOrmLikeRepository: Repository<LikeEntity>,
+  ) {}
 
   async getLikeByFilter(
     userId: string,
     postId: string,
     commentId: string = null,
-  ): Promise<ILike | null> {
-    const paramsArray = [userId, postId];
-    let commentIdCondition = '"commentId" IS NULL';
+  ): Promise<LikeEntity> {
+    const selectQueryBuilder = this.typeOrmLikeRepository
+      .createQueryBuilder('like')
+      .select('like')
+      .where('like.userId = :userId', { userId })
+      .andWhere('like.postId = :postId', { postId })
+      .andWhere('like.commentId is Null', { postId });
 
     if (commentId) {
-      commentIdCondition = '"commentId" = $3';
-      paramsArray.push(commentId);
+      selectQueryBuilder.andWhere('like.commentId = :commentId', { commentId });
+    } else {
+      selectQueryBuilder.andWhere('like.commentId is Null');
     }
 
-    const data = await this.dataSource.query(
-      ` SELECT *
-        FROM "like"
-          WHERE "userId" = $1 AND "postId" = $2 AND ${commentIdCondition}
-      `,
-      paramsArray,
-    );
-
-    return data[0] || null;
+    return selectQueryBuilder.getOne();
   }
 
   async createLike(
@@ -38,13 +38,12 @@ export class LikesRepository {
     status: LikeStatus,
     commentId: string,
   ): Promise<void> {
-    await this.dataSource.query(
-      ` INSERT INTO "like"
-          ("userId", "postId", "status", "commentId")
-          VALUES($1, $2, $3, $4)
-      `,
-      [userId, postId, status, commentId],
-    );
+    await this.typeOrmLikeRepository
+      .createQueryBuilder()
+      .insert()
+      .into(LikeEntity)
+      .values({ userId, postId, status, commentId })
+      .execute();
   }
 
   async updateLike(
@@ -53,24 +52,19 @@ export class LikesRepository {
     status: LikeStatus,
     commentId: string,
   ): Promise<void> {
-    const paramsArray = [status, userId, postId];
-    let commentIdCondition = '"commentId" IS NULL';
+    const updateQueryBuilder = this.typeOrmLikeRepository
+      .createQueryBuilder()
+      .update(LikeEntity)
+      .set({ status })
+      .where('userId = :userId', { userId })
+      .andWhere('postId = :postId', { postId });
 
     if (commentId) {
-      commentIdCondition = '"commentId" = $4';
-      paramsArray.push(commentId);
+      updateQueryBuilder.andWhere('commentId = :commentId', { commentId });
+    } else {
+      updateQueryBuilder.andWhere('commentId is Null');
     }
 
-    await this.dataSource.query(
-      ` UPDATE "like"
-          SET "status" = $1
-          WHERE "userId" = $2 AND "postId" = $3 AND ${commentIdCondition}
-      `,
-      paramsArray,
-    );
-  }
-
-  async deleteAllLikes(): Promise<void> {
-    return this.dataSource.query(`DELETE FROM "like"`);
+    await updateQueryBuilder.execute();
   }
 }

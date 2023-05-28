@@ -3,7 +3,7 @@ import { BaseEntity } from '../../../common/common-db-entities';
 import { postsConstants } from '../../../common/constants';
 import { BlogEntity } from '../../../blogs/entities/db-entities/blog.entity';
 import { CommentEntity } from '../../../comments/entities/db-entities/comment.entity';
-import { DbLike } from '../../../likes/entities/db-entities/like.entity';
+import { LikeEntity } from '../../../likes/entities/db-entities/like.entity';
 import { UserEntity } from '../../../users/entities/db-entities/user.entity';
 
 const { MAX_TITLE_LENGTH, MAX_SHORT_DESCRIPTION_LENGTH, MAX_CONTENT_LENGTH } =
@@ -38,8 +38,8 @@ export class PostEntity extends BaseEntity {
   @OneToMany(() => CommentEntity, (dbComment) => dbComment.post)
   comments: CommentEntity[];
 
-  @OneToMany(() => DbLike, (dbLike) => dbLike.post)
-  likes: DbLike[];
+  @OneToMany(() => LikeEntity, (dbLike) => dbLike.post)
+  likes: LikeEntity[];
 
   @ManyToOne(() => BlogEntity, (blogEntity) => blogEntity.posts, {
     onDelete: 'CASCADE',

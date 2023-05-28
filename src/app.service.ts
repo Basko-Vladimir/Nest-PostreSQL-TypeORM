@@ -28,7 +28,6 @@ export class AppService {
   async clearDatabase(): Promise<void> {
     await Promise.all([
       await this.bannedUsersForBlogsRepository.deleteAllBannedUsersForBlogs(),
-      await this.likesRepository.deleteAllLikes(),
       await this.commentsRepository.deleteAllComments(),
       await this.postsRepository.deleteAllPosts(),
       await this.usersRepository.deleteAllUsers(),

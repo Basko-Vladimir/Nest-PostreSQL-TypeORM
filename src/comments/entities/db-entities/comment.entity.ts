@@ -3,7 +3,7 @@ import { BaseEntity } from '../../../common/common-db-entities';
 import { commentsConstants } from '../../../common/constants';
 import { UserEntity } from '../../../users/entities/db-entities/user.entity';
 import { PostEntity } from '../../../posts/entities/db-entities/post.entity';
-import { DbLike } from '../../../likes/entities/db-entities/like.entity';
+import { LikeEntity } from '../../../likes/entities/db-entities/like.entity';
 
 const { MAX_CONTENT_LENGTH } = commentsConstants;
 
@@ -25,8 +25,8 @@ export class CommentEntity extends BaseEntity {
   })
   postId: string;
 
-  @OneToMany(() => DbLike, (dbLike) => dbLike.comment)
-  likes: DbLike[];
+  @OneToMany(() => LikeEntity, (dbLike) => dbLike.comment)
+  likes: LikeEntity[];
 
   @ManyToOne(() => UserEntity, (userEntity) => userEntity.comments)
   @JoinColumn({ name: 'authorId' })

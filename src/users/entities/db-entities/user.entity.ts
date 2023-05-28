@@ -5,7 +5,7 @@ import { BlogEntity } from '../../../blogs/entities/db-entities/blog.entity';
 import { BlockableEntity } from '../../../common/common-db-entities';
 import { DbBlockedUserForBlog } from './blocked-user-for-blog.entity';
 import { CommentEntity } from '../../../comments/entities/db-entities/comment.entity';
-import { DbLike } from '../../../likes/entities/db-entities/like.entity';
+import { LikeEntity } from '../../../likes/entities/db-entities/like.entity';
 import { PostEntity } from '../../../posts/entities/db-entities/post.entity';
 import { usersConstants } from '../../../common/constants';
 
@@ -64,6 +64,6 @@ export class UserEntity extends BlockableEntity {
   @OneToMany(() => CommentEntity, (dbComment) => dbComment.user)
   comments: CommentEntity[];
 
-  @OneToMany(() => DbLike, (dbLike) => dbLike.user)
-  likes: DbLike[];
+  @OneToMany(() => LikeEntity, (dbLike) => dbLike.user)
+  likes: LikeEntity[];
 }

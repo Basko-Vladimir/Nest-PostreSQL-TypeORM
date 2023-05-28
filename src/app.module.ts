@@ -71,7 +71,7 @@ import { GetFullCommentUseCase } from './comments/application/use-cases/get-full
 import { CreateCommentUseCase } from './comments/application/use-cases/create-comment.useCase';
 import { QueryCommentsRepository } from './comments/infrastructure/query-comments.repository';
 import { CommentsRepository } from './comments/infrastructure/comments.repository';
-import { DbLike } from './likes/entities/db-entities/like.entity';
+import { LikeEntity } from './likes/entities/db-entities/like.entity';
 import { QueryLikesRepository } from './likes/infrastructure/query-likes.repository';
 import { UpdatePostLikeStatusUseCase } from './posts/application/use-cases/update-post-like-status.useCase';
 import { CreateLikeUseCase } from './likes/application/use-cases/create-like.useCase';
@@ -151,7 +151,7 @@ const useCases = [
       PostEntity,
       DbBlockedUserForBlog,
       CommentEntity,
-      DbLike,
+      LikeEntity,
     ]),
     CqrsModule,
   ],

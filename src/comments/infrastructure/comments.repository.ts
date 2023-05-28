@@ -1,4 +1,4 @@
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { CommentEntity } from '../entities/db-entities/comment.entity';
@@ -6,7 +6,6 @@ import { CommentEntity } from '../entities/db-entities/comment.entity';
 @Injectable()
 export class CommentsRepository {
   constructor(
-    private dataSource: DataSource,
     @InjectRepository(CommentEntity)
     private typeOrmCommentRepository: Repository<CommentEntity>,
   ) {}
@@ -41,16 +40,11 @@ export class CommentsRepository {
   }
 
   async updateComment(commentId: string, content: string): Promise<void> {
-    await this.dataSource.query(
-      ` UPDATE "comment"
-        SET "content" = $1
-          WHERE "id" = $2
-      `,
-      [content, commentId],
-    );
-  }
-
-  async deleteAllComments(): Promise<void> {
-    return this.dataSource.query(`DELETE FROM "comment"`);
+    await this.typeOrmCommentRepository
+      .createQueryBuilder()
+      .update(CommentEntity)
+      .set({ content })
+      .where('id = :commentId', { commentId })
+      .execute();
   }
 }

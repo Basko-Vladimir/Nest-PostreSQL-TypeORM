@@ -20,8 +20,7 @@ export class LikesRepository {
       .createQueryBuilder('like')
       .select('like')
       .where('like.userId = :userId', { userId })
-      .andWhere('like.postId = :postId', { postId })
-      .andWhere('like.commentId is Null', { postId });
+      .andWhere('like.postId = :postId', { postId });
 
     if (commentId) {
       selectQueryBuilder.andWhere('like.commentId = :commentId', { commentId });

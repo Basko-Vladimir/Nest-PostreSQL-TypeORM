@@ -1,12 +1,12 @@
-import { ILike } from '../entities/interfaces';
 import { LikeInfoOutputModel } from '../api/dto/likes-output-models.dto';
+import { LikeEntity } from '../entities/db-entities/like.entity';
 
 export const mapLikeEntityToLikeInfoOutputModel = (
-  like: ILike,
+  like: LikeEntity,
 ): LikeInfoOutputModel => {
   return {
-    userId: like.userId,
-    login: like.userLogin,
     addedAt: like.createdAt.toISOString(),
+    userId: like.userId,
+    login: like.user.login,
   };
 };

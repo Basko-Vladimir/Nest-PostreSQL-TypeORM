@@ -1,7 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CommentsRepository } from '../../infrastructure/comments.repository';
-import { mapDbCommentToCommentOutputModel } from '../../mappers/comments-mapper';
-import { ICommentOutputModel } from '../../api/dto/comments-output-models.dto';
 
 export class CreateCommentCommand {
   constructor(

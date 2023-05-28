@@ -2,7 +2,7 @@ import { DataSource } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { LikeStatus } from '../../common/enums';
-import { mapDbLikeToLikeInfoOutputModel } from '../mappers/likes-mapper';
+import { mapLikeEntityToLikeInfoOutputModel } from '../mappers/likes-mapper';
 import {
   ExtendedLikesInfoOutputModel,
   LikesInfoOutputModel,
@@ -124,7 +124,7 @@ export class QueryLikesRepository {
       likesCount,
       dislikesCount,
       myStatus,
-      newestLikes: newestLikes.map(mapDbLikeToLikeInfoOutputModel),
+      newestLikes: newestLikes.map(mapLikeEntityToLikeInfoOutputModel),
     };
   }
 }

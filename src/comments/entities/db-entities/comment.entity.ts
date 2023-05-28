@@ -25,7 +25,7 @@ export class CommentEntity extends BaseEntity {
   })
   postId: string;
 
-  @OneToMany(() => LikeEntity, (dbLike) => dbLike.comment)
+  @OneToMany(() => LikeEntity, (likeEntity) => likeEntity.comment)
   likes: LikeEntity[];
 
   @ManyToOne(() => UserEntity, (userEntity) => userEntity.comments)

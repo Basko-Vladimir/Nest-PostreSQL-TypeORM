@@ -36,7 +36,7 @@ export class LikeEntity extends BaseEntity {
   @JoinColumn({ name: 'postId' })
   post: PostEntity;
 
-  @ManyToOne(() => CommentEntity, (dbComment) => dbComment.likes)
+  @ManyToOne(() => CommentEntity, (commentEntity) => commentEntity.likes)
   @JoinColumn({ name: 'commentId' })
   comment: CommentEntity;
 }

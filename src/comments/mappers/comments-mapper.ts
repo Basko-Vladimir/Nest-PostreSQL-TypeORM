@@ -5,7 +5,7 @@ import {
 import { IComment } from '../entities/interfaces';
 import { LikesInfoOutputModel } from '../../likes/api/dto/likes-output-models.dto';
 
-export const mapDbCommentToCommentOutputModel = (
+export const mapCommentEntityToCommentOutputModel = (
   comment: IComment,
 ): ICommentOutputModel => {
   return {
@@ -19,7 +19,7 @@ export const mapDbCommentToCommentOutputModel = (
   };
 };
 
-export const mapDbCommentToBloggerCommentOutputModel = (
+export const mapCommentEntityToBloggerCommentOutputModel = (
   comment: IComment,
   likesInfo: LikesInfoOutputModel,
 ): IBloggerCommentOutputModel => ({

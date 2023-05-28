@@ -13,8 +13,8 @@ import {
   getDbSortDirection,
 } from '../../common/utils';
 import {
-  mapDbCommentToBloggerCommentOutputModel,
-  mapDbCommentToCommentOutputModel,
+  mapCommentEntityToBloggerCommentOutputModel,
+  mapCommentEntityToCommentOutputModel,
 } from '../mappers/comments-mapper';
 import { CommentSortByField, SortDirection } from '../../common/enums';
 import { CommentsQueryParamsDto } from '../api/dto/comments-query-params.dto';
@@ -47,7 +47,7 @@ export class QueryCommentsRepository {
 
     return {
       ...getCommonInfoForQueryAllRequests(totalCount, pageSize, pageNumber),
-      items: comments.map(mapDbCommentToCommentOutputModel),
+      items: comments.map(mapCommentEntityToCommentOutputModel),
     };
   }
 
@@ -117,7 +117,7 @@ export class QueryCommentsRepository {
       );
 
       bloggerComments.push(
-        mapDbCommentToBloggerCommentOutputModel(comments[i], likesInfo),
+        mapCommentEntityToBloggerCommentOutputModel(comments[i], likesInfo),
       );
     }
 
@@ -137,7 +137,7 @@ export class QueryCommentsRepository {
       .andWhere('user.isBanned = :isBanned', { isBanned: false })
       .getOne();
 
-    return mapDbCommentToCommentOutputModel(targetComment);
+    return mapCommentEntityToCommentOutputModel(targetComment);
   }
 
   private async getCommentsDataByFilters(

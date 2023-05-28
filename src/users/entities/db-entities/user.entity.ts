@@ -61,9 +61,9 @@ export class UserEntity extends BlockableEntity {
   )
   blockedUsersForBlog: DbBlockedUserForBlog[];
 
-  @OneToMany(() => CommentEntity, (dbComment) => dbComment.user)
+  @OneToMany(() => CommentEntity, (commentEntity) => commentEntity.user)
   comments: CommentEntity[];
 
-  @OneToMany(() => LikeEntity, (dbLike) => dbLike.user)
+  @OneToMany(() => LikeEntity, (likeEntity) => likeEntity.user)
   likes: LikeEntity[];
 }

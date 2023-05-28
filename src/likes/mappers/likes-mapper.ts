@@ -1,7 +1,7 @@
 import { ILike } from '../entities/interfaces';
 import { LikeInfoOutputModel } from '../api/dto/likes-output-models.dto';
 
-export const mapDbLikeToLikeInfoOutputModel = (
+export const mapLikeEntityToLikeInfoOutputModel = (
   like: ILike,
 ): LikeInfoOutputModel => {
   return {

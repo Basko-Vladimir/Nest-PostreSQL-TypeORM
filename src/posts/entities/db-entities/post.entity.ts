@@ -35,10 +35,10 @@ export class PostEntity extends BaseEntity {
   @Column({ type: 'uuid' })
   userId: string;
 
-  @OneToMany(() => CommentEntity, (dbComment) => dbComment.post)
+  @OneToMany(() => CommentEntity, (commentEntity) => commentEntity.post)
   comments: CommentEntity[];
 
-  @OneToMany(() => LikeEntity, (dbLike) => dbLike.post)
+  @OneToMany(() => LikeEntity, (likeEntity) => likeEntity.post)
   likes: LikeEntity[];
 
   @ManyToOne(() => BlogEntity, (blogEntity) => blogEntity.posts, {

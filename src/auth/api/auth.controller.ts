@@ -52,28 +52,28 @@ export class AuthController {
 
   @Post('registration')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(ClientsRequestsGuard) //Temporary turned off ClientsRequestsGuard
+  @UseGuards() //Temporary turned off ClientsRequestsGuard
   async registration(@Body() createUserDto: CreateUserDto): Promise<void> {
     await this.commandBus.execute(new RegisterUserCommand(createUserDto));
   }
 
   @Post('registration-confirmation')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(ClientsRequestsGuard, RegistrationConfirmationGuard) //Temporary removing ClientsRequestsGuard
+  @UseGuards(RegistrationConfirmationGuard) //Temporary removing ClientsRequestsGuard
   async confirmRegistration(@User() user: UserEntity): Promise<void> {
     await this.commandBus.execute(new ConfirmRegistrationCommand(user.id));
   }
 
   @Post('registration-email-resending')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(ClientsRequestsGuard, ResendingRegistrationEmailGuard) //Temporary removing ClientsRequestsGuard
+  @UseGuards(ResendingRegistrationEmailGuard) //Temporary removing ClientsRequestsGuard
   async resendRegistrationEmail(@User() user: UserEntity): Promise<void> {
     await this.commandBus.execute(new ResendRegistrationEmailCommand(user));
   }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(ClientsRequestsGuard) //Temporary turned off ClientsRequestsGuard
+  @UseGuards() //Temporary turned off ClientsRequestsGuard
   async login(
     @Body() loginUserDto: LoginUserDto,
     @Res({ passthrough: true }) response: Response,
@@ -95,7 +95,7 @@ export class AuthController {
 
   @Post('password-recovery')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(ClientsRequestsGuard) //Temporary turned off ClientsRequestsGuard
+  @UseGuards() //Temporary turned off ClientsRequestsGuard
   async recoverPassword(@Body() emailDto: EmailDto): Promise<void> {
     return this.commandBus.execute(new RecoverPasswordCommand(emailDto));
   }

@@ -72,7 +72,7 @@ export class QueryBlogsRepository {
     const selectQueryBuilder = this.typeOrmBlogRepository
       .createQueryBuilder('blog')
       .innerJoinAndSelect('blog.user', 'user')
-      .select(['blog.*', 'user.login as "ownerLogin"']);
+      .select(['blog', 'user.login']);
 
     if (typeof isBanned === 'boolean') {
       selectQueryBuilder.where('blog.isBanned = :isBanned', { isBanned });
@@ -88,10 +88,10 @@ export class QueryBlogsRepository {
 
     const totalCount = await selectQueryBuilder.getCount();
     const blogs = await selectQueryBuilder
-      .orderBy(`blog."${sortBy}"`, dbSortDirection)
+      .orderBy(`blog.${sortBy}`, dbSortDirection)
       .limit(pageSize)
       .offset(offset)
-      .getRawMany();
+      .getMany();
 
     return { blogs, totalCount, pageNumber, pageSize };
   }

@@ -51,13 +51,12 @@ export class PostsController {
     @Query() queryParams: PostsQueryParamsDto,
     @User('id') userId: string,
   ): Promise<BlogAllFullPostsOutputModel> {
-    userId = userId ? String(userId) : null;
     const allPostsOutputModel = await this.queryPostsRepository.findAllPosts(
       queryParams,
     );
 
     return this.queryBus.execute(
-      new GetAllFullPostsQuery(allPostsOutputModel, userId),
+      new GetAllFullPostsQuery(allPostsOutputModel, userId || null),
     );
   }
 

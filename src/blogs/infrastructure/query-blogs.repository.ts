@@ -49,7 +49,6 @@ export class QueryBlogsRepository {
       .createQueryBuilder('blog')
       .select()
       .where('blog.id = :blogId', { blogId })
-      .andWhere('blog.isBanned = :isBanned', { isBanned: false })
       .getOne();
 
     return mapBlogEntityToBlogOutputModel(targetBlog);

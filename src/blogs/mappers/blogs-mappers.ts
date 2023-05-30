@@ -7,6 +7,8 @@ import { BlogEntity } from '../entities/db-entities/blog.entity';
 export const mapBlogEntityToBlogOutputModel = (
   blog: BlogEntity,
 ): IBlogOutputModel => {
+  if (!blog) return null;
+
   return {
     id: blog.id,
     name: blog.name,

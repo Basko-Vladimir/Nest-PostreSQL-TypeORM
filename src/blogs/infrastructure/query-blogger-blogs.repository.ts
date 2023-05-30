@@ -16,7 +16,7 @@ export class QueryBloggerBlogsRepository extends QueryBlogsRepository {
 
     return {
       ...getCommonInfoForQueryAllRequests(totalCount, pageSize, pageNumber),
-      items: blogs.map(mapBlogEntityToBlogOutputModel as any),
+      items: blogs.map(mapBlogEntityToBlogOutputModel),
     };
   }
 }

@@ -15,6 +15,8 @@ export class CommentsRepository {
       .createQueryBuilder('comment')
       .innerJoinAndSelect('comment.user', 'user')
       .where('comment.id = :commentId', { commentId })
+      .where('comment.id = :commentId', { commentId })
+      .andWhere('user.isBanned = :isBanned', { isBanned: false })
       .getOne();
   }
 

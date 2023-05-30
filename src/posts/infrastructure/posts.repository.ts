@@ -16,7 +16,7 @@ export class PostsRepository {
   async findPostById(postId: string): Promise<PostEntity> {
     return this.typeOrmPostRepository
       .createQueryBuilder('post')
-      .innerJoinAndSelect('post.blog', 'blogName')
+      .innerJoinAndSelect('post.blog', 'blog')
       .where('post.id = :postId', { postId })
       .getOne();
   }

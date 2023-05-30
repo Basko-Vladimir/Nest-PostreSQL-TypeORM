@@ -25,7 +25,7 @@ export class AddUserToRequestGuard implements CanActivate {
         const user = await this.usersRepository.findUserById(
           tokenPayload.userId,
         );
-        if (user) request.context = { user };
+        if (user) request.context = { ...request.context, user };
       }
     }
 

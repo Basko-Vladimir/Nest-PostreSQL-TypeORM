@@ -18,6 +18,7 @@ export class PostsRepository {
       .createQueryBuilder('post')
       .innerJoinAndSelect('post.blog', 'blog')
       .where('post.id = :postId', { postId })
+      .andWhere('blog.isBanned = :isBanned', { isBanned: false })
       .getOne();
   }
 

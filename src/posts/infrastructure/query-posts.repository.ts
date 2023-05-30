@@ -38,7 +38,8 @@ export class QueryPostsRepository {
 
     const selectQueryBuilder = this.typeOrmPostRepository
       .createQueryBuilder('post')
-      .innerJoinAndSelect('post.blog', 'blog');
+      .innerJoin('post.blog', 'blog')
+      .select(['post', 'blog.name']);
     const dbSortDirection = getDbSortDirection(sortDirection);
 
     if (blogId) {
@@ -61,7 +62,8 @@ export class QueryPostsRepository {
   async findPostById(postId: string): Promise<IPostOutputModel> {
     const targetPost = await this.typeOrmPostRepository
       .createQueryBuilder('post')
-      .innerJoinAndSelect('post.blog', 'blog')
+      .innerJoin('post.blog', 'blog')
+      .select(['post', 'blog.name'])
       .where('post.id = :postId', { postId })
       .andWhere('blog.isBanned = :isBanned', { isBanned: false })
       .getOne();

@@ -1,4 +1,11 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { BlogsQueryParamsDto } from './dto/blogs-query-params.dto';
 import {
@@ -36,7 +43,11 @@ export class BlogsController {
   @ParamIdType([IdTypes.BLOG_ID])
   @UseGuards(CheckExistingEntityGuard)
   async findBlogById(@Param('id') blogId: string): Promise<IBlogOutputModel> {
-    return this.queryBlogsRepository.findBlogById(blogId);
+    const targetBlog = await this.queryBlogsRepository.findBlogById(blogId);
+
+    if (!targetBlog) throw new NotFoundException();
+
+    return targetBlog;
   }
 
   @Get(':blogId/posts')

@@ -48,7 +48,7 @@ export class QueryPostsRepository {
 
     const totalCount = await selectQueryBuilder.getCount();
     const posts = await selectQueryBuilder
-      .orderBy(`blog.${sortBy}`, dbSortDirection)
+      .orderBy(`post.${sortBy}`, dbSortDirection)
       .offset(offset)
       .limit(pageSize)
       .getMany();

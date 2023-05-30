@@ -18,7 +18,6 @@ export class BlogsRepository {
       .createQueryBuilder('blog')
       .select('blog')
       .where('blog.id = :blogId', { blogId })
-      .andWhere('blog.isBanned = :isBanned', { isBanned: false })
       .getOne();
   }
 

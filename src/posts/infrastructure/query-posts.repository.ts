@@ -38,7 +38,7 @@ export class QueryPostsRepository {
 
     const selectQueryBuilder = this.typeOrmPostRepository
       .createQueryBuilder('post')
-      .leftJoin('post.blog', 'blog')
+      .innerJoin('post.blog', 'blog')
       .select(['post', 'blog.name']);
     const dbSortDirection = getDbSortDirection(sortDirection);
 

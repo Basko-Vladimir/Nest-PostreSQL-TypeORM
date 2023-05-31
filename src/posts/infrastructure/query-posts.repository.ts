@@ -29,12 +29,12 @@ export class QueryPostsRepository {
     blogId?: string,
   ): Promise<AllPostsOutputModel> {
     const {
-      pageSize = 10,
-      pageNumber = 1,
+      pageSize = DEFAULT_PAGE_SIZE,
+      pageNumber = DEFAULT_PAGE_NUMBER,
       sortBy = PostSortByField.createdAt,
       sortDirection = SortDirection.desc,
     } = queryParams;
-    const offset = countSkipValue(pageNumber, pageSize);
+    const skip = countSkipValue(pageNumber, pageSize);
 
     const selectQueryBuilder = this.typeOrmPostRepository
       .createQueryBuilder('post')
@@ -50,8 +50,8 @@ export class QueryPostsRepository {
     const totalCount = await selectQueryBuilder.getCount();
     const posts = await selectQueryBuilder
       .orderBy(`post.${sortBy}`, dbSortDirection)
-      .limit(pageSize)
-      .offset(offset)
+      .take(pageSize)
+      .skip(skip)
       .getMany();
 
     return {

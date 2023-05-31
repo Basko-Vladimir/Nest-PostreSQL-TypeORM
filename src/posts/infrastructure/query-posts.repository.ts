@@ -29,8 +29,8 @@ export class QueryPostsRepository {
     blogId?: string,
   ): Promise<AllPostsOutputModel> {
     const {
-      pageSize = DEFAULT_PAGE_SIZE,
-      pageNumber = DEFAULT_PAGE_NUMBER,
+      pageSize = 10,
+      pageNumber = 1,
       sortBy = PostSortByField.createdAt,
       sortDirection = SortDirection.desc,
     } = queryParams;

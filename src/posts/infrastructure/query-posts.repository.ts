@@ -39,11 +39,12 @@ export class QueryPostsRepository {
     const selectQueryBuilder = this.typeOrmPostRepository
       .createQueryBuilder('post')
       .innerJoin('post.blog', 'blog')
-      .select(['post', 'blog.name']);
+      .select(['post', 'blog.name'])
+      .where('blog.isBanned = :isBanned', { isBanned: false });
     const dbSortDirection = getDbSortDirection(sortDirection);
 
     if (blogId) {
-      selectQueryBuilder.where('post.blogId = :blogId', { blogId });
+      selectQueryBuilder.andWhere('post.blogId = :blogId', { blogId });
     }
 
     const totalCount = await selectQueryBuilder.getCount();

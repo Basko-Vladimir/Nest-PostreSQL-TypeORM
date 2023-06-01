@@ -12,6 +12,7 @@ export enum BlogSortByField {
 export enum PostSortByField {
   createdAt = 'createdAt',
   title = 'title',
+  blogName = 'blogName',
   shortDescription = 'shortDescription',
   content = 'content',
 }

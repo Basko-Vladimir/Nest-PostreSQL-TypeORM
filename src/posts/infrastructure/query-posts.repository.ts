@@ -42,6 +42,8 @@ export class QueryPostsRepository {
       sortDirection = SortDirection.desc,
     } = queryParams;
     const skip = countSkipValue(pageNumber, pageSize);
+    const sortByValue =
+      sortBy === PostSortByField.blogName ? 'blog.name' : `post.${sortBy}`;
 
     const selectQueryBuilder = this.NEWtypeOrmPostRepository.createQueryBuilder(
       'post',
@@ -92,7 +94,7 @@ export class QueryPostsRepository {
 
     const totalCount = await selectQueryBuilder.getCount();
     const posts = await selectQueryBuilder
-      .orderBy(`post.${sortBy}`, dbSortDirection)
+      .orderBy(sortByValue, dbSortDirection)
       .take(pageSize)
       .skip(skip)
       .getMany();

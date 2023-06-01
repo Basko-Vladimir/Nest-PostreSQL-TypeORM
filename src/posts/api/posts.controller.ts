@@ -12,13 +12,11 @@ import {
 } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { PostsQueryParamsDto } from './dto/posts-query-params.dto';
-import { BlogAllFullPostsOutputModel } from '../../blogs/api/dto/blogs-output-models.dto';
 import { BearerAuthGuard } from '../../common/guards/bearer-auth.guard';
 import { User } from '../../common/decorators/user.decorator';
 import { AddUserToRequestGuard } from '../../common/guards/add-user-to-request.guard';
 import { QueryPostsRepository } from '../infrastructure/query-posts.repository';
 import { GetFullPostQuery } from '../application/use-cases/get-full-post.useCase';
-import { GetAllFullPostsQuery } from '../application/use-cases/get-all-full-posts.useCase';
 import { ParamIdType } from '../../common/decorators/param-id-type.decorator';
 import { IdTypes, LikeStatus } from '../../common/enums';
 import { CheckExistingEntityGuard } from '../../common/guards/check-existing-entity.guard';
@@ -50,13 +48,11 @@ export class PostsController {
   async findAllPosts(
     @Query() queryParams: PostsQueryParamsDto,
     @User('id') userId: string,
-  ): Promise<BlogAllFullPostsOutputModel> {
-    const allPostsOutputModel = await this.queryPostsRepository.findAllPosts(
+  ): Promise<any> {
+    return this.queryPostsRepository.findAllPosts(
       queryParams,
-    );
-
-    return this.queryBus.execute(
-      new GetAllFullPostsQuery(allPostsOutputModel, userId || null),
+      null,
+      userId || null,
     );
   }
 

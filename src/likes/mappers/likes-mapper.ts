@@ -10,3 +10,14 @@ export const mapLikeEntityToLikeInfoOutputModel = (
     login: like.user.login,
   };
 };
+
+export const NEWmapLikeEntityToLikeInfoOutputModel = (
+  like: LikeEntity,
+  userLogin: string,
+): LikeInfoOutputModel => {
+  return {
+    addedAt: like.createdAt.toISOString(),
+    userId: like.userId,
+    login: userLogin,
+  };
+};

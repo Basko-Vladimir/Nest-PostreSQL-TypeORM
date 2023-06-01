@@ -18,7 +18,6 @@ import { AddUserToRequestGuard } from '../../common/guards/add-user-to-request.g
 import { User } from '../../common/decorators/user.decorator';
 import { QueryBlogsRepository } from '../infrastructure/query-blogs.repository';
 import { QueryPostsRepository } from '../../posts/infrastructure/query-posts.repository';
-import { GetAllFullPostsQuery } from '../../posts/application/use-cases/get-all-full-posts.useCase';
 import { ParamIdType } from '../../common/decorators/param-id-type.decorator';
 import { IdTypes } from '../../common/enums';
 import { CheckExistingEntityGuard } from '../../common/guards/check-existing-entity.guard';
@@ -58,13 +57,10 @@ export class BlogsController {
     @Param('blogId') blogId: string,
     @User('id') userId: string,
   ): Promise<BlogAllFullPostsOutputModel> {
-    const allPostsOutputModel = await this.queryPostsRepository.findAllPosts(
+    return this.queryPostsRepository.findAllPosts(
       queryParams,
       blogId,
-    );
-
-    return this.queryBus.execute(
-      new GetAllFullPostsQuery(allPostsOutputModel, userId),
+      userId || null,
     );
   }
 }

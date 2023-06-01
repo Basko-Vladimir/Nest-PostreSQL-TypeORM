@@ -97,8 +97,6 @@ export class QueryPostsRepository {
       .skip(skip)
       .getMany();
 
-    console.log(posts);
-
     return {
       ...getCommonInfoForQueryAllRequests(totalCount, pageSize, pageNumber),
       items: posts.map(NEWmapPostEntityToPostOutputModel),

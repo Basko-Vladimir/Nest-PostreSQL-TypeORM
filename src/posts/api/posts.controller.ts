@@ -49,7 +49,6 @@ export class PostsController {
     @Query() queryParams: PostsQueryParamsDto,
     @User('id') userId: string,
   ): Promise<any> {
-    console.log({ queryParams });
     return this.queryPostsRepository.findAllPosts(
       queryParams,
       null,

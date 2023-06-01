@@ -57,7 +57,8 @@ export class QueryLikesRepository {
       .createQueryBuilder('like')
       .innerJoinAndSelect('like.user', 'user')
       .where('like.commentId is Null')
-      .andWhere('user.isBanned = :isBanned', { isBanned: false });
+      .andWhere('user.isBanned = :isBanned', { isBanned: false })
+      .andWhere('like.postId = :postId', { postId });
     let myStatus = LikeStatus.NONE;
 
     const likesCount = await selectQueryBuilder
@@ -68,7 +69,6 @@ export class QueryLikesRepository {
       .getCount();
     const newestLikes = await selectQueryBuilder
       .andWhere('like.status = :status', { status: LikeStatus.LIKE })
-      .andWhere('like.postId = :postId', { postId })
       .orderBy('like.createdAt', 'DESC')
       .limit(3)
       .getMany();
@@ -76,7 +76,6 @@ export class QueryLikesRepository {
     if (userId) {
       const currentUserLike = await selectQueryBuilder
         .andWhere('user.id = :userId', { userId })
-        .andWhere('like.postId = :postId', { postId })
         .getOne();
 
       myStatus = currentUserLike ? currentUserLike.status : myStatus;

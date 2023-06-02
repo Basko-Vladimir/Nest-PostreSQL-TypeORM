@@ -65,7 +65,7 @@ import { QueryBloggerUsersRepository } from './users/infrastructure/query-blogge
 import { BloggerUsersController } from './users/api/blogger-users.controller';
 import { UpdateUserBanStatusForBlogUseCase } from './users/application/use-cases/update-user-ban-status-for-blog.useCase';
 import { BannedUsersForBlogsRepository } from './users/infrastructure/banned-users-for-blogs-repository.service';
-import { DbBlockedUserForBlog } from './users/entities/db-entities/blocked-user-for-blog.entity';
+import { BlockedUserForBlogEntity } from './users/entities/db-entities/blocked-user-for-blog.entity';
 import { CommentEntity } from './comments/entities/db-entities/comment.entity';
 import { GetFullCommentUseCase } from './comments/application/use-cases/get-full-comment.useCase';
 import { CreateCommentUseCase } from './comments/application/use-cases/create-comment.useCase';
@@ -149,7 +149,7 @@ const useCases = [
       ClientRequestEntity,
       BlogEntity,
       PostEntity,
-      DbBlockedUserForBlog,
+      BlockedUserForBlogEntity,
       CommentEntity,
       LikeEntity,
     ]),

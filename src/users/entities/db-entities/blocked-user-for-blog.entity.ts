@@ -3,7 +3,7 @@ import { UserEntity } from './user.entity';
 import { BlogEntity } from '../../../blogs/entities/db-entities/blog.entity';
 
 @Entity({ name: 'blockedUserForBlog' })
-export class DbBlockedUserForBlog {
+export class BlockedUserForBlogEntity {
   @PrimaryColumn({ type: 'uuid' })
   userId: string;
 
@@ -26,11 +26,15 @@ export class DbBlockedUserForBlog {
   })
   banDate: Date;
 
-  @ManyToOne(() => UserEntity, (userEntity) => userEntity.blockedUsersForBlog)
+  @ManyToOne(() => UserEntity, (userEntity) => userEntity.blockedUsersForBlog, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
 
-  @ManyToOne(() => BlogEntity, (blogEntity) => blogEntity.blockedUsersForBlog)
+  @ManyToOne(() => BlogEntity, (blogEntity) => blogEntity.blockedUsersForBlog, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'blogId' })
   blog: BlogEntity;
 }

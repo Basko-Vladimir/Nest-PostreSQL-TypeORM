@@ -2,8 +2,8 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { BlogEntity } from '../../../blogs/entities/db-entities/blog.entity';
 
-@Entity({ name: 'blockedUserForBlog' })
-export class BlockedUserForBlogEntity {
+@Entity({ name: 'bannedUserForBlog' })
+export class BannedUserForBlogEntity {
   @PrimaryColumn({ type: 'uuid' })
   userId: string;
 
@@ -26,13 +26,13 @@ export class BlockedUserForBlogEntity {
   })
   banDate: Date;
 
-  @ManyToOne(() => UserEntity, (userEntity) => userEntity.blockedUsersForBlog, {
+  @ManyToOne(() => UserEntity, (userEntity) => userEntity.bannedUsersForBlog, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
 
-  @ManyToOne(() => BlogEntity, (blogEntity) => blogEntity.blockedUsersForBlog, {
+  @ManyToOne(() => BlogEntity, (blogEntity) => blogEntity.bannedUsersForBlog, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'blogId' })

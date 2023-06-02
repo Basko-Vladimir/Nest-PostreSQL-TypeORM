@@ -47,13 +47,13 @@ export class BloggerUsersController {
   @ParamIdType([IdTypes.USER_ID])
   @UseGuards(CheckExistingEntityGuard, BearerAuthGuard)
   async updateUserBanStatusForBlog(
-    @Param('id') blockedUserId: string,
+    @Param('id') bannedUserId: string,
     @Body() updateUserBanStatusForBlogDto: UpdateUserBanStatusForBlogDto,
     @User('id') currentUserId: string,
   ): Promise<void> {
     return this.commandBus.execute(
       new UpdateUserBanStatusForBlogCommand(
-        blockedUserId,
+        bannedUserId,
         currentUserId,
         updateUserBanStatusForBlogDto,
       ),

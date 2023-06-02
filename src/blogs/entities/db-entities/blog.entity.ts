@@ -3,7 +3,7 @@ import { blogsConstants } from '../../../common/constants';
 import { UserEntity } from '../../../users/entities/db-entities/user.entity';
 import { BlockableEntity } from '../../../common/common-db-entities';
 import { PostEntity } from '../../../posts/entities/db-entities/post.entity';
-import { BlockedUserForBlogEntity } from '../../../users/entities/db-entities/blocked-user-for-blog.entity';
+import { BannedUserForBlogEntity } from '../../../users/entities/db-entities/banned-user-for-blog.entity';
 
 const { MAX_NAME_LENGTH, MAX_WEBSITE_URL_LENGTH, MAX_DESCRIPTION_LENGTH } =
   blogsConstants;
@@ -47,8 +47,8 @@ export class BlogEntity extends BlockableEntity {
   posts: PostEntity[];
 
   @OneToMany(
-    () => BlockedUserForBlogEntity,
-    (blockedUserForBlogEntity) => blockedUserForBlogEntity.blog,
+    () => BannedUserForBlogEntity,
+    (bannedUserForBlogEntity) => bannedUserForBlogEntity.blog,
   )
-  blockedUsersForBlog: BlockedUserForBlogEntity[];
+  bannedUsersForBlog: BannedUserForBlogEntity[];
 }

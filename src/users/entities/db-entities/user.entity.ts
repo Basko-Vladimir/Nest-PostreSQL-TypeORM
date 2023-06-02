@@ -3,7 +3,7 @@ import { EmailConfirmationEntity } from './email-confirmation.entity';
 import { DeviceSessionEntity } from '../../../devices-sessions/entities/db-entities/device-session.entity';
 import { BlogEntity } from '../../../blogs/entities/db-entities/blog.entity';
 import { BlockableEntity } from '../../../common/common-db-entities';
-import { BlockedUserForBlogEntity } from './blocked-user-for-blog.entity';
+import { BannedUserForBlogEntity } from './banned-user-for-blog.entity';
 import { CommentEntity } from '../../../comments/entities/db-entities/comment.entity';
 import { LikeEntity } from '../../../likes/entities/db-entities/like.entity';
 import { PostEntity } from '../../../posts/entities/db-entities/post.entity';
@@ -56,10 +56,10 @@ export class UserEntity extends BlockableEntity {
   posts: PostEntity[];
 
   @OneToMany(
-    () => BlockedUserForBlogEntity,
-    (blockedUserForBlogEntity) => blockedUserForBlogEntity.user,
+    () => BannedUserForBlogEntity,
+    (bannedUserForBlogEntity) => bannedUserForBlogEntity.user,
   )
-  blockedUsersForBlog: BlockedUserForBlogEntity[];
+  bannedUsersForBlog: BannedUserForBlogEntity[];
 
   @OneToMany(() => CommentEntity, (commentEntity) => commentEntity.user)
   comments: CommentEntity[];

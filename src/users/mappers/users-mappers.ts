@@ -1,7 +1,7 @@
 import { IUserOutputModel } from '../api/dto/users-output-models.dto';
-import { IBannedUserForSpecificBlog } from '../api/dto/banned-users-for-specific-blog-output-model.dto';
-import { IUser } from '../entities/interfaces';
+import { IBannedUserForBlogOutputModel } from '../api/dto/banned-users-for-specific-blog-output-model.dto';
 import { UserEntity } from '../entities/db-entities/user.entity';
+import { BannedUserForBlogEntity } from '../entities/db-entities/banned-user-for-blog.entity';
 
 export const mapUserEntityToUserOutputModel = (
   user: UserEntity,
@@ -17,16 +17,14 @@ export const mapUserEntityToUserOutputModel = (
   },
 });
 
-export const mapUserEntityToBannedUserForSpecificBlogOutputModel = (
-  user: IUser,
-): IBannedUserForSpecificBlog => ({
-  id: user.id,
-  login: user.login,
+export const mapBannedUserForBlogEntityToBannedUserForBlogOutputModel = (
+  data: BannedUserForBlogEntity,
+): IBannedUserForBlogOutputModel => ({
+  id: data.userId,
+  login: data.user.login,
   banInfo: {
-    isBanned: user.isBannedForSpecificBlog,
-    banDate: user.banDateForSpecificBlog
-      ? user.banDateForSpecificBlog.toISOString()
-      : null,
-    banReason: user.banReasonForSpecificBlog,
+    isBanned: data.isBanned,
+    banDate: data.banDate ? data.banDate.toISOString() : null,
+    banReason: data.banReason,
   },
 });

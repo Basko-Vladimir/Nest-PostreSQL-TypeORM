@@ -20,7 +20,7 @@ export interface IUser {
   banReasonForSpecificBlog?: string;
 }
 
-export interface IBlockedUserForBlog {
+export interface IBannedUserForBlog {
   userId: string;
   blogId: string;
   isBanned: boolean;

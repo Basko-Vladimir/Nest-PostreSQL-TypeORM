@@ -7,7 +7,7 @@ import { BannedUsersForBlogsRepository } from '../../infrastructure/banned-users
 
 export class UpdateUserBanStatusForBlogCommand {
   constructor(
-    public blockedUserId: string,
+    public bannedUserId: string,
     public currentUserId: string,
     public updateUserBanStatusForBlogDto: UpdateUserBanStatusForBlogDto,
   ) {}
@@ -25,7 +25,7 @@ export class UpdateUserBanStatusForBlogUseCase
 
   async execute(command: UpdateUserBanStatusForBlogCommand): Promise<void> {
     const {
-      blockedUserId,
+      bannedUserId,
       updateUserBanStatusForBlogDto: { blogId, banReason, isBanned },
       currentUserId,
     } = command;
@@ -43,13 +43,13 @@ export class UpdateUserBanStatusForBlogUseCase
     const bannedUserForBlog =
       await this.bannedUsersForBlogsRepository.findBannedUserForBlog(
         targetBlog.id,
-        blockedUserId,
+        bannedUserId,
       );
 
     if (bannedUserForBlog) {
       return this.bannedUsersForBlogsRepository.updateUserBanStatusForSpecificBlog(
         blogId,
-        blockedUserId,
+        bannedUserId,
         isBannedValue,
         banReason,
         banDate,
@@ -58,7 +58,7 @@ export class UpdateUserBanStatusForBlogUseCase
 
     return this.bannedUsersForBlogsRepository.createBannedUserForBlog(
       blogId,
-      blockedUserId,
+      bannedUserId,
       isBannedValue,
       banReason,
     );

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { IBlockedUserForBlog } from '../entities/interfaces';
+import { IBannedUserForBlog } from '../entities/interfaces';
 
 @Injectable()
 export class BannedUsersForBlogsRepository {
@@ -10,10 +10,10 @@ export class BannedUsersForBlogsRepository {
   async findBannedUserForBlog(
     blogId: string,
     userId: string,
-  ): Promise<IBlockedUserForBlog | null> {
+  ): Promise<IBannedUserForBlog | null> {
     const data = await this.dataSource.query(
       ` SELECT *
-        FROM "blockedUserForBlog"
+        FROM "bannedUserForBlog"
           WHERE "blogId" = $1 AND "userId" = $2
       `,
       [blogId, userId],
@@ -29,7 +29,7 @@ export class BannedUsersForBlogsRepository {
     banReason: string,
   ): Promise<void> {
     await this.dataSource.query(
-      ` INSERT INTO "blockedUserForBlog"
+      ` INSERT INTO "bannedUserForBlog"
         ("blogId", "userId", "isBanned", "banReason", "banDate")
         VALUES($1, $2, ${isBanned}, $3, NOW())
       `,
@@ -45,7 +45,7 @@ export class BannedUsersForBlogsRepository {
     banDate: string,
   ): Promise<void> {
     await this.dataSource.query(
-      ` UPDATE "blockedUserForBlog"
+      ` UPDATE "bannedUserForBlog"
           SET "isBanned" = ${isBanned}, "banReason" = $1, "banDate" = $2
           WHERE "blogId" = $3 AND "userId" = $4
       `,
@@ -54,7 +54,7 @@ export class BannedUsersForBlogsRepository {
   }
 
   async deleteAllBannedUsersForBlogs(): Promise<void> {
-    return this.dataSource.query(`DELETE FROM "blockedUserForBlog"`);
+    return this.dataSource.query(`DELETE FROM "bannedUserForBlog"`);
   }
 
   async checkUserForBanForBlog(
@@ -63,7 +63,7 @@ export class BannedUsersForBlogsRepository {
   ): Promise<boolean> {
     const data = await this.dataSource.query(
       ` SELECT *
-        FROM "blockedUserForBlog"
+        FROM "bannedUserForBlog"
           WHERE "blogId" = $1 AND "userId" = $2
       `,
       [blogId, userId],

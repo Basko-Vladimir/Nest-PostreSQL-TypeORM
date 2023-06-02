@@ -8,7 +8,7 @@ import {
 import { BannedUsersForBlogsRepository } from '../../users/infrastructure/banned-users-for-blogs-repository.service';
 
 @Injectable()
-export class CheckUserForBanByPostGuard implements CanActivate {
+export class CheckUserOnBanByPostGuard implements CanActivate {
   constructor(
     private bannedUsersForBlogsRepository: BannedUsersForBlogsRepository,
   ) {}
@@ -17,7 +17,7 @@ export class CheckUserForBanByPostGuard implements CanActivate {
     const request: Request = context.switchToHttp().getRequest();
     const { user, post } = request.context;
     const isUserBannedForSpecificBlog =
-      await this.bannedUsersForBlogsRepository.checkUserForBanForBlog(
+      await this.bannedUsersForBlogsRepository.checkUserOnBanForBlog(
         user.id,
         post.blogId,
       );

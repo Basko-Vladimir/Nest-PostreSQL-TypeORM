@@ -4,7 +4,6 @@ import { DevicesSessionsRepository } from './devices-sessions/infrastructure/dev
 import { ClientsRequestsRepository } from './clients-requests/infrastructure/clients-requests.repository';
 import { BlogsRepository } from './blogs/infrastructure/blogs.repository';
 import { PostsRepository } from './posts/infrastructure/posts.repository';
-import { BannedUsersForBlogsRepository } from './users/infrastructure/banned-users-for-blogs-repository.service';
 
 @Injectable()
 export class AppService {
@@ -14,7 +13,6 @@ export class AppService {
     private clientsRequestsRepository: ClientsRequestsRepository,
     private blogsRepository: BlogsRepository,
     private postsRepository: PostsRepository,
-    private bannedUsersForBlogsRepository: BannedUsersForBlogsRepository,
   ) {}
 
   getHello(): string {
@@ -23,7 +21,6 @@ export class AppService {
 
   async clearDatabase(): Promise<void> {
     await Promise.all([
-      await this.bannedUsersForBlogsRepository.deleteAllBannedUsersForBlogs(),
       await this.postsRepository.deleteAllPosts(),
       await this.usersRepository.deleteAllUsers(),
       await this.clientsRequestsRepository.deleteAllClientRequests(),

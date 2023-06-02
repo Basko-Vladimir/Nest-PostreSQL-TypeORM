@@ -27,7 +27,7 @@ import {
 } from '../../comments/api/dto/comments-output-models.dto';
 import { CreateCommentCommand } from '../../comments/application/use-cases/create-comment.useCase';
 import { QueryCommentsRepository } from '../../comments/infrastructure/query-comments.repository';
-import { CheckUserForBanByPostGuard } from '../../common/guards/check-user-for-ban-by-post.guard';
+import { CheckUserOnBanByPostGuard } from '../../common/guards/check-user-on-ban-by-post-guard.service';
 import { UpdateLikeStatusDto } from '../../likes/api/dto/update-like-status.dto';
 import { UpdatePostLikeStatusCommand } from '../application/use-cases/update-post-like-status.useCase';
 import { CommentsQueryParamsDto } from '../../comments/api/dto/comments-query-params.dto';
@@ -91,7 +91,7 @@ export class PostsController {
   @UseGuards(
     CheckExistingEntityGuard,
     BearerAuthGuard,
-    CheckUserForBanByPostGuard,
+    CheckUserOnBanByPostGuard,
   )
   async createCommentForPost(
     @Param('postId') postId: string,

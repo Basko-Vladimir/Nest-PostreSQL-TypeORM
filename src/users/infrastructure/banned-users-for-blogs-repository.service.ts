@@ -1,25 +1,26 @@
 import { Injectable } from '@nestjs/common';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { IBannedUserForBlog } from '../entities/interfaces';
+import { BannedUserForBlogEntity } from '../entities/db-entities/banned-user-for-blog.entity';
 
 @Injectable()
 export class BannedUsersForBlogsRepository {
-  constructor(@InjectDataSource() private dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(BannedUserForBlogEntity)
+    private typeOrmBannedUserForBlogRepository: Repository<BannedUserForBlogEntity>,
+  ) {}
 
   async findBannedUserForBlog(
     blogId: string,
     userId: string,
   ): Promise<IBannedUserForBlog | null> {
-    const data = await this.dataSource.query(
-      ` SELECT *
-        FROM "bannedUserForBlog"
-          WHERE "blogId" = $1 AND "userId" = $2
-      `,
-      [blogId, userId],
-    );
-
-    return data[0] || null;
+    return this.typeOrmBannedUserForBlogRepository
+      .createQueryBuilder('bannedUserForBlog')
+      .select('bannedUserForBlog')
+      .where('bannedUserForBlog.blogId = :blogId', { blogId })
+      .andWhere('bannedUserForBlog.userId = :userId', { userId })
+      .getOne();
   }
 
   async createBannedUserForBlog(
@@ -28,13 +29,12 @@ export class BannedUsersForBlogsRepository {
     isBanned: boolean,
     banReason: string,
   ): Promise<void> {
-    await this.dataSource.query(
-      ` INSERT INTO "bannedUserForBlog"
-        ("blogId", "userId", "isBanned", "banReason", "banDate")
-        VALUES($1, $2, ${isBanned}, $3, NOW())
-      `,
-      [blogId, userId, banReason],
-    );
+    await this.typeOrmBannedUserForBlogRepository
+      .createQueryBuilder()
+      .insert()
+      .into(BannedUserForBlogEntity)
+      .values({ blogId, userId, isBanned, banReason, banDate: new Date() })
+      .execute();
   }
 
   async updateUserBanStatusForSpecificBlog(
@@ -44,31 +44,21 @@ export class BannedUsersForBlogsRepository {
     banReason: string,
     banDate: string,
   ): Promise<void> {
-    await this.dataSource.query(
-      ` UPDATE "bannedUserForBlog"
-          SET "isBanned" = ${isBanned}, "banReason" = $1, "banDate" = $2
-          WHERE "blogId" = $3 AND "userId" = $4
-      `,
-      [banReason, banDate, blogId, userId],
-    );
+    await this.typeOrmBannedUserForBlogRepository
+      .createQueryBuilder()
+      .update(BannedUserForBlogEntity)
+      .set({ isBanned, banDate, banReason })
+      .where('blogId = :blogId', { blogId })
+      .andWhere('userId = :userId', { userId })
+      .execute();
   }
 
-  async deleteAllBannedUsersForBlogs(): Promise<void> {
-    return this.dataSource.query(`DELETE FROM "bannedUserForBlog"`);
-  }
-
-  async checkUserForBanForBlog(
+  async checkUserOnBanForBlog(
     userId: string,
     blogId: string,
   ): Promise<boolean> {
-    const data = await this.dataSource.query(
-      ` SELECT *
-        FROM "bannedUserForBlog"
-          WHERE "blogId" = $1 AND "userId" = $2
-      `,
-      [blogId, userId],
-    );
+    const user = await this.findBannedUserForBlog(blogId, userId);
 
-    return Boolean(data[0]?.isBanned);
+    return Boolean(user?.isBanned);
   }
 }

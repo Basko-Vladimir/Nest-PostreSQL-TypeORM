@@ -24,7 +24,6 @@ import { CreateBlogCommand } from '../application/use-cases/create-blog.useCase'
 import { CreatePostForBlogDto } from './dto/create-post-for-blog.dto';
 import { IFullPostOutputModel } from '../../posts/api/dto/posts-output-models.dto';
 import { CreatePostCommand } from '../../posts/application/use-cases/create-post.useCase';
-import { GetFullPostQuery } from '../../posts/application/use-cases/get-full-post.useCase';
 import { QueryPostsRepository } from '../../posts/infrastructure/query-posts.repository';
 import { DeleteBlogCommand } from '../application/use-cases/delete-blog.useCase';
 import { UpdateBlogDto } from './dto/update-blog.dto';
@@ -98,11 +97,8 @@ export class BloggerBlogsController {
     const createdPostId = await this.commandBus.execute(
       new CreatePostCommand(createPostForBlogDto, blogId, userId),
     );
-    const postOutputModel = await this.queryPostsRepository.findPostById(
-      createdPostId,
-    );
 
-    return this.queryBus.execute(new GetFullPostQuery(postOutputModel, userId));
+    return this.queryPostsRepository.findPostById(createdPostId, userId);
   }
 
   @Delete(':id')

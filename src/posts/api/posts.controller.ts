@@ -16,7 +16,6 @@ import { BearerAuthGuard } from '../../common/guards/bearer-auth.guard';
 import { User } from '../../common/decorators/user.decorator';
 import { AddUserToRequestGuard } from '../../common/guards/add-user-to-request.guard';
 import { QueryPostsRepository } from '../infrastructure/query-posts.repository';
-import { GetFullPostQuery } from '../application/use-cases/get-full-post.useCase';
 import { ParamIdType } from '../../common/decorators/param-id-type.decorator';
 import { IdTypes, LikeStatus } from '../../common/enums';
 import { CheckExistingEntityGuard } from '../../common/guards/check-existing-entity.guard';
@@ -79,11 +78,7 @@ export class PostsController {
     @Param('id') postId: string,
     @User('id') userId: string,
   ): Promise<IFullPostOutputModel> {
-    const postOutputModel = await this.queryPostsRepository.findPostById(
-      postId,
-    );
-
-    return this.queryBus.execute(new GetFullPostQuery(postOutputModel, userId));
+    return this.queryPostsRepository.findPostById(postId, userId);
   }
 
   @Post(':postId/comments')

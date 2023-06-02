@@ -85,7 +85,9 @@ export class QueryLikesRepository {
       likesCount,
       dislikesCount,
       myStatus,
-      newestLikes: newestLikes.map(mapLikeEntityToLikeInfoOutputModel),
+      newestLikes: newestLikes.map((like) =>
+        mapLikeEntityToLikeInfoOutputModel(like),
+      ),
     };
   }
 }

@@ -2,7 +2,10 @@ import { DataSource, Repository } from 'typeorm';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { PostsQueryParamsDto } from '../api/dto/posts-query-params.dto';
-import { IPostOutputModel } from '../api/dto/posts-output-models.dto';
+import {
+  AllPostsOutputModel,
+  IFullPostOutputModel,
+} from '../api/dto/posts-output-models.dto';
 import {
   countSkipValue,
   getCommonInfoForQueryAllRequests,
@@ -12,7 +15,6 @@ import { LikeStatus, PostSortByField, SortDirection } from '../../common/enums';
 import { DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE } from '../../common/constants';
 import {
   mapPostEntityToPostOutputModel,
-  NEWmapPostEntityToPostOutputModel,
   RawFullPost,
 } from '../mappers/posts-mapper';
 import { PostEntity } from '../entities/db-entities/post.entity';
@@ -23,9 +25,7 @@ export class QueryPostsRepository {
   constructor(
     @InjectDataSource() private dataSource: DataSource,
     @InjectRepository(PostEntity)
-    private NEWtypeOrmPostRepository: Repository<RawFullPost>,
-    @InjectRepository(PostEntity)
-    private typeOrmPostRepository: Repository<PostEntity>,
+    private typeOrmPostRepository: Repository<RawFullPost>,
     @InjectRepository(LikeEntity)
     private typeOrmLikeRepository: Repository<LikeEntity>,
   ) {}
@@ -34,7 +34,7 @@ export class QueryPostsRepository {
     queryParams: PostsQueryParamsDto,
     blogId?: string,
     userId?: string,
-  ): Promise<any> {
+  ): Promise<AllPostsOutputModel> {
     const {
       pageSize = DEFAULT_PAGE_SIZE,
       pageNumber = DEFAULT_PAGE_NUMBER,
@@ -45,11 +45,10 @@ export class QueryPostsRepository {
     const sortByValue =
       sortBy === PostSortByField.blogName ? 'blog.name' : `post.${sortBy}`;
 
-    const selectQueryBuilder = this.NEWtypeOrmPostRepository.createQueryBuilder(
-      'post',
-    )
+    const selectQueryBuilder = this.typeOrmPostRepository
+      .createQueryBuilder('post')
       .innerJoin('post.blog', 'blog')
-      .innerJoin('post.user', 'user')
+      .innerJoin('post.user', 'user') //TODO need to rework we need user of every Like, but not such who created post
       .leftJoinAndMapOne(
         'post.myLike',
         LikeEntity,
@@ -81,7 +80,7 @@ export class QueryPostsRepository {
       .select([
         'post',
         'blog.name',
-        'user.login',
+        'user.login', //TODO need to rework we need user of every Like, but not such who created post
         'myLike.status',
         'newestLike',
       ])
@@ -101,19 +100,54 @@ export class QueryPostsRepository {
 
     return {
       ...getCommonInfoForQueryAllRequests(totalCount, pageSize, pageNumber),
-      items: posts.map(NEWmapPostEntityToPostOutputModel),
+      items: posts.map(mapPostEntityToPostOutputModel),
     };
   }
 
-  async findPostById(postId: string): Promise<IPostOutputModel> {
+  async findPostById(
+    postId: string,
+    userId: string,
+  ): Promise<IFullPostOutputModel> {
+    const newestLikes = await this.typeOrmLikeRepository
+      .createQueryBuilder('like')
+      .innerJoin('like.user', 'user')
+      .select(['like', 'user.login'])
+      .where('like.postId = :postId', { postId })
+      .andWhere('like.status = :status', { status: LikeStatus.LIKE })
+      .orderBy('like.createdAt', 'DESC')
+      .limit(3)
+      .getMany();
+
     const targetPost = await this.typeOrmPostRepository
       .createQueryBuilder('post')
       .innerJoin('post.blog', 'blog')
-      .select(['post', 'blog.name'])
+      .innerJoin('post.user', 'user')
+      .leftJoinAndMapOne(
+        'post.myLike',
+        LikeEntity,
+        'myLike',
+        'post.id = myLike.postId and myLike.userId = :userId',
+        { userId },
+      )
+      .loadRelationCountAndMap('post.likesCount', 'post.likes', 'like', (qb) =>
+        qb.where('like.status = :likeStatus', {
+          likeStatus: LikeStatus.LIKE,
+        }),
+      )
+      .loadRelationCountAndMap(
+        'post.dislikesCount',
+        'post.likes',
+        'like',
+        (qb) =>
+          qb.where('like.status = :likeStatus', {
+            likeStatus: LikeStatus.DISLIKE,
+          }),
+      )
+      .select(['post', 'blog.name', 'myLike.status'])
       .where('post.id = :postId', { postId })
       .andWhere('blog.isBanned = :isBanned', { isBanned: false })
       .getOne();
 
-    return mapPostEntityToPostOutputModel(targetPost);
+    return mapPostEntityToPostOutputModel({ ...targetPost, newestLikes });
   }
 }

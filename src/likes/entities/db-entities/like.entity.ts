@@ -26,7 +26,9 @@ export class LikeEntity extends BaseEntity {
   })
   commentId: string;
 
-  @ManyToOne(() => UserEntity, (userEntity) => userEntity.likes)
+  @ManyToOne(() => UserEntity, (userEntity) => userEntity.likes, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
 
@@ -36,7 +38,9 @@ export class LikeEntity extends BaseEntity {
   @JoinColumn({ name: 'postId' })
   post: PostEntity;
 
-  @ManyToOne(() => CommentEntity, (commentEntity) => commentEntity.likes)
+  @ManyToOne(() => CommentEntity, (commentEntity) => commentEntity.likes, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'commentId' })
   comment: CommentEntity;
 }

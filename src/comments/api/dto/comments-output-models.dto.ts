@@ -24,7 +24,8 @@ export interface ICommentWithLikeInfoOutputModel extends ICommentOutputModel {
   likesInfo: LikesInfoOutputModel;
 }
 
-export interface IBloggerCommentOutputModel extends ICommentOutputModel {
+export interface IBloggerCommentOutputModel
+  extends ICommentWithLikeInfoOutputModel {
   postInfo: IPostInfo;
 }
 

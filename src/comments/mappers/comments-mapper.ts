@@ -3,6 +3,8 @@ import {
   ICommentOutputModel,
 } from '../api/dto/comments-output-models.dto';
 import { CommentEntity } from '../entities/db-entities/comment.entity';
+import { IRawCommentWithLikeInfo } from '../entities/interfaces';
+import { LikeStatus } from '../../common/enums';
 
 export const mapCommentEntityToCommentOutputModel = (
   comment: CommentEntity,
@@ -19,15 +21,20 @@ export const mapCommentEntityToCommentOutputModel = (
 };
 
 export const mapCommentEntityToBloggerCommentOutputModel = (
-  comment: CommentEntity,
+  comment: IRawCommentWithLikeInfo,
 ): IBloggerCommentOutputModel => ({
   id: comment.id,
   content: comment.content,
+  createdAt: comment.createdAt.toISOString(),
   commentatorInfo: {
     userId: comment.authorId,
     userLogin: comment.user.login,
   },
-  createdAt: comment.createdAt.toISOString(),
+  likesInfo: {
+    likesCount: comment.likesCount,
+    dislikesCount: comment.dislikesCount,
+    myStatus: comment.myLike ? comment.myLike.status : LikeStatus.NONE,
+  },
   postInfo: {
     id: comment.postId,
     title: comment.post.title,

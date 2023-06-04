@@ -75,11 +75,11 @@ export class BlogsRepository {
   }
 
   async deleteBlog(blogId: string): Promise<void> {
-    await this.dataSource.query(`DELETE FROM "blog" WHERE id = $1`, [blogId]);
-  }
-
-  //Unused method, since cascade deleting has been set in relations of BlogEntity
-  async deleteAllBlogs(): Promise<void> {
-    return this.dataSource.query(`DELETE FROM "blog"`);
+    await this.typeOrmBlogRepository
+      .createQueryBuilder('blog')
+      .delete()
+      .from(BlogEntity)
+      .where('blog.id = :blogId', { blogId })
+      .execute();
   }
 }

@@ -52,6 +52,7 @@ export class QueryCommentsRepository {
 
   async findAllBloggerComments(
     queryParams: CommentsQueryParamsDto,
+    userId: string,
   ): Promise<AllBloggerCommentsOutputModel> {
     const {
       sortBy = CommentSortByField.createdAt,
@@ -78,7 +79,8 @@ export class QueryCommentsRepository {
         'blog.name',
         'user.login',
       ])
-      .where('user.isBanned = false');
+      .where('user.isBanned = false')
+      .andWhere('comment.authorId = :userId', { userId });
 
     const totalCount = await selectQueryBuilder.getCount();
     const bloggerComments = await selectQueryBuilder

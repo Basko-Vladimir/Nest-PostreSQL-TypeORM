@@ -47,7 +47,9 @@ export class PostEntity extends BaseEntity {
   @JoinColumn({ name: 'blogId' })
   blog: BlogEntity;
 
-  @ManyToOne(() => UserEntity, (userEntity) => userEntity.posts)
+  @ManyToOne(() => UserEntity, (userEntity) => userEntity.posts, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
 }

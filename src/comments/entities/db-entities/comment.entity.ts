@@ -28,7 +28,9 @@ export class CommentEntity extends BaseEntity {
   @OneToMany(() => LikeEntity, (likeEntity) => likeEntity.comment)
   likes: LikeEntity[];
 
-  @ManyToOne(() => UserEntity, (userEntity) => userEntity.comments)
+  @ManyToOne(() => UserEntity, (userEntity) => userEntity.comments, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'authorId' })
   user: UserEntity;
 

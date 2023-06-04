@@ -43,13 +43,13 @@ export class BlogsRepository {
     updateBlogDto: UpdateBlogDto,
   ): Promise<void> {
     const { name, websiteUrl, description } = updateBlogDto;
-    await this.dataSource.query(
-      `UPDATE "blog"
-        SET "name" = $1, "websiteUrl" = $2, "description" = $3
-        WHERE "id" = $4
-       `,
-      [name, websiteUrl, description, blogId],
-    );
+
+    await this.typeOrmBlogRepository
+      .createQueryBuilder('blog')
+      .update()
+      .set({ name, websiteUrl, description })
+      .where('blog.id = :blogId', { blogId })
+      .execute();
   }
 
   async updateBlogBanStatus(

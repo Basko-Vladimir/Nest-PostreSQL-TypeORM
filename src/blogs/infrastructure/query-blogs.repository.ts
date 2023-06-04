@@ -13,12 +13,11 @@ import {
   IBlogOutputModel,
 } from '../api/dto/blogs-output-models.dto';
 import { mapBlogEntityToBlogOutputModel } from '../mappers/blogs-mappers';
-import { IBlog } from '../entities/interfaces';
 import { DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE } from '../../common/constants';
 import { BlogEntity } from '../entities/db-entities/blog.entity';
 
 interface IBlogsDataByQueryParams {
-  blogs: IBlog[];
+  blogs: BlogEntity[];
   totalCount: number;
   pageSize: number;
   pageNumber: number;

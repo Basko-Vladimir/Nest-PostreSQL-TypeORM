@@ -25,7 +25,7 @@ export const mapCommentEntityToBloggerCommentOutputModel = (
   content: comment.content,
   commentatorInfo: {
     userId: comment.authorId,
-    userLogin: comment.post.blog.user.login,
+    userLogin: comment.user.login,
   },
   createdAt: comment.createdAt.toISOString(),
   postInfo: {

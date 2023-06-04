@@ -66,7 +66,7 @@ export class QueryCommentsRepository {
       .createQueryBuilder('comment')
       .innerJoinAndSelect('comment.post', 'post', 'comment.postId = post.id')
       .innerJoinAndSelect('post.blog', 'blog', 'post.blogId = blog.id')
-      .innerJoinAndSelect('blog.user', 'user', 'blog.ownerId = user.id')
+      .innerJoinAndSelect('comment.user', 'user', 'comment.authorId = user.id')
       .select([
         'comment.id',
         'comment.createdAt',

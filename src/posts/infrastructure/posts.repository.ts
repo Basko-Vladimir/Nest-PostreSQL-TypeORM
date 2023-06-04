@@ -55,15 +55,11 @@ export class PostsRepository {
   }
 
   async deletePost(postId: string): Promise<void> {
-    await this.dataSource.query(
-      `DELETE FROM "post"
-        WHERE "id" = $1
-      `,
-      [postId],
-    );
-  }
-
-  async deleteAllPosts(): Promise<void> {
-    return this.dataSource.query(`DELETE FROM "post"`);
+    await this.typeOrmPostRepository
+      .createQueryBuilder('post')
+      .delete()
+      .from(PostEntity)
+      .where('post.id = :postId', { postId })
+      .execute();
   }
 }

@@ -2,8 +2,6 @@ import {
   IBloggerCommentOutputModel,
   ICommentOutputModel,
 } from '../api/dto/comments-output-models.dto';
-import { IComment } from '../entities/interfaces';
-import { LikesInfoOutputModel } from '../../likes/api/dto/likes-output-models.dto';
 import { CommentEntity } from '../entities/db-entities/comment.entity';
 
 export const mapCommentEntityToCommentOutputModel = (
@@ -21,21 +19,19 @@ export const mapCommentEntityToCommentOutputModel = (
 };
 
 export const mapCommentEntityToBloggerCommentOutputModel = (
-  comment: IComment,
-  likesInfo: LikesInfoOutputModel,
+  comment: CommentEntity,
 ): IBloggerCommentOutputModel => ({
   id: comment.id,
   content: comment.content,
   commentatorInfo: {
     userId: comment.authorId,
-    userLogin: comment.userLogin,
+    userLogin: comment.user.login,
   },
   createdAt: comment.createdAt.toISOString(),
   postInfo: {
     id: comment.postId,
-    blogId: comment.blogId,
-    blogName: comment.blogName,
-    title: comment.postTitle,
+    title: comment.post.title,
+    blogId: comment.post.blog.id,
+    blogName: comment.post.blog.name,
   },
-  likesInfo,
 });

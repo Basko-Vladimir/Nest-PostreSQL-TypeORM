@@ -4,7 +4,6 @@ import { Injectable } from '@nestjs/common';
 import {
   AllBloggerCommentsOutputModel,
   AllCommentsOutputModel,
-  IBloggerCommentOutputModel,
   ICommentOutputModel,
 } from '../api/dto/comments-output-models.dto';
 import {
@@ -53,77 +52,44 @@ export class QueryCommentsRepository {
 
   async findAllBloggerComments(
     queryParams: CommentsQueryParamsDto,
-    userId: string,
   ): Promise<AllBloggerCommentsOutputModel> {
-    const { sortBy, sortDirection, pageSize, pageNumber } = queryParams;
-    const offset = countSkipValue(pageNumber, pageSize);
+    const {
+      sortBy = CommentSortByField.createdAt,
+      sortDirection = SortDirection.desc,
+      pageSize = DEFAULT_PAGE_SIZE,
+      pageNumber = DEFAULT_PAGE_NUMBER,
+    } = queryParams;
+    const skip = countSkipValue(pageNumber, pageSize);
+    const dbSortDirection = getDbSortDirection(sortDirection);
+    const selectQueryBuilder = this.typeOrmCommentRepository
+      .createQueryBuilder('comment')
+      .innerJoin('comment.user', 'user', 'user.id = comment.authorId')
+      .innerJoin('comment.post', 'post', 'comment.authorId = post.userId')
+      .innerJoin('post.blog', 'blog', 'post.userId = blog.ownerId')
+      .select([
+        'comment.id',
+        'comment.createdAt',
+        'comment.updatedAt',
+        'comment.content',
+        'comment.authorId',
+        'comment.postId',
+        'post.title',
+        'blog.id',
+        'blog.name',
+        'user.login',
+      ])
+      .where('user.isBanned = false');
 
-    const countResult = await this.dataSource.query(
-      ` SELECT COUNT(DISTINCT "comment"."content")
-        FROM "comment"
-          INNER JOIN "user" ON "user"."id" = "comment"."authorId"
-          INNER JOIN "post" ON "post"."userId" = "comment"."authorId"
-          INNER JOIN "blog" ON "post"."userId" = "blog"."ownerId"
-          WHERE "comment"."authorId" = $1 AND "user"."isBanned" = false
-      `,
-      [userId],
-    );
-    const totalCount = countResult[0].count;
-    const comments = await this.dataSource.query(
-      ` SELECT *
-        FROM (
-            SELECT DISTINCT ON ("comment"."content")
-              "comment"."id",
-              "comment"."createdAt",
-              "comment"."updatedAt",
-              "comment"."content",
-              "comment"."authorId",
-              "comment"."postId",
-              "post"."title" as "postTitle",
-              "blog"."id" as "blogId",
-              "blog"."name" as "blogName",
-              "user"."login" as "userLogin"
-            FROM "comment"
-            INNER JOIN "user" ON "user"."id" = "comment"."authorId"
-              INNER JOIN "post" ON "post"."userId" = "comment"."authorId"
-              INNER JOIN "blog" ON "post"."userId" = "blog"."ownerId"
-              WHERE "comment"."authorId" = $1 AND "user"."isBanned" = false
-              ORDER BY "comment"."content") t
-        ORDER BY
-          CASE
-            WHEN $2 = 'asc' THEN
-              CASE
-                WHEN $3 = '${CommentSortByField.content}' THEN t."content"
-                ELSE t."createdAt"::varchar
-              END
-            END ASC,
-          CASE
-            WHEN $2 = 'desc' THEN
-              CASE
-                WHEN $3 = '${CommentSortByField.content}' THEN t."content"
-                ELSE t."createdAt"::varchar
-              END
-            END DESC
-        OFFSET $4 LIMIT $5
-      `,
-      [userId, sortBy, sortDirection, offset, pageSize],
-    );
-    const bloggerComments: IBloggerCommentOutputModel[] = [];
-
-    for (let i = 0; i < comments.length; i++) {
-      const likesInfo = await this.queryLikesRepository.getLikesInfo(
-        userId,
-        comments[i].id,
-      );
-
-      bloggerComments.push(
-        mapCommentEntityToBloggerCommentOutputModel(comments[i], likesInfo),
-      );
-    }
+    const totalCount = await selectQueryBuilder.getCount();
+    const bloggerComments = await selectQueryBuilder
+      .orderBy(`comment.${sortBy}`, dbSortDirection)
+      .take(pageSize)
+      .skip(skip)
+      .getMany();
 
     return {
       ...getCommonInfoForQueryAllRequests(totalCount, pageSize, pageNumber),
-      items: bloggerComments,
+      items: bloggerComments.map(mapCommentEntityToBloggerCommentOutputModel),
     };
   }
 

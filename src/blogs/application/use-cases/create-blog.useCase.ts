@@ -1,10 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CreateBlogDto } from '../../api/dto/create-blog.dto';
 import { BlogsRepository } from '../../infrastructure/blogs.repository';
-import { IUser } from '../../../users/entities/interfaces';
+import { UserEntity } from '../../../users/entities/db-entities/user.entity';
 
 export class CreateBlogCommand {
-  constructor(public createBlogDto: CreateBlogDto, public user: IUser) {}
+  constructor(public createBlogDto: CreateBlogDto, public user: UserEntity) {}
 }
 
 @CommandHandler(CreateBlogCommand)

@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IBannedUserForBlog } from '../entities/interfaces';
 import { BannedUserForBlogEntity } from '../entities/db-entities/banned-user-for-blog.entity';
 
 @Injectable()
@@ -14,7 +13,7 @@ export class BannedUsersForBlogsRepository {
   async findBannedUserForBlog(
     blogId: string,
     userId: string,
-  ): Promise<IBannedUserForBlog | null> {
+  ): Promise<BannedUserForBlogEntity | null> {
     return this.typeOrmBannedUserForBlogRepository
       .createQueryBuilder('bannedUserForBlog')
       .select('bannedUserForBlog')

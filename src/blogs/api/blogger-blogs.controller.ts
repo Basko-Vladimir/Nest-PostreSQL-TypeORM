@@ -33,7 +33,6 @@ import { DeletePostCommand } from '../../posts/application/use-cases/delete-post
 import { UpdatePostCommand } from '../../posts/application/use-cases/update-post.useCase';
 import { UpdatePostForBlogDto } from './dto/update-post-for-blog.dto';
 import { QueryBloggerBlogsRepository } from '../infrastructure/query-blogger-blogs.repository';
-import { IUser } from '../../users/entities/interfaces';
 import { CheckExistingEntityGuard } from '../../common/guards/check-existing-entity.guard';
 import { ParamIdType } from '../../common/decorators/param-id-type.decorator';
 import { IdTypes } from '../../common/enums';
@@ -41,6 +40,7 @@ import { BlogsQueryParamsDto } from './dto/blogs-query-params.dto';
 import { CommentsQueryParamsDto } from '../../comments/api/dto/comments-query-params.dto';
 import { AllBloggerCommentsOutputModel } from '../../comments/api/dto/comments-output-models.dto';
 import { GetAllBloggerCommentsQuery } from '../../comments/application/use-cases/get-all-blogger-comments.useCase';
+import { UserEntity } from '../../users/entities/db-entities/user.entity';
 
 @Controller('blogger/blogs')
 @UseGuards(BearerAuthGuard)
@@ -67,7 +67,7 @@ export class BloggerBlogsController {
   @Get('comments')
   async findAllBloggerComments(
     @Query() queryParams: CommentsQueryParamsDto,
-    @User() user: IUser,
+    @User() user: UserEntity,
   ): Promise<AllBloggerCommentsOutputModel> {
     return this.queryBus.execute(
       new GetAllBloggerCommentsQuery(queryParams, user.id),
@@ -77,7 +77,7 @@ export class BloggerBlogsController {
   @Post()
   async createBlog(
     @Body() creatingData: CreateBlogDto,
-    @User() user: IUser,
+    @User() user: UserEntity,
   ): Promise<IBlogOutputModel> {
     const createdBlogId = await this.commandBus.execute(
       new CreateBlogCommand(creatingData, user),

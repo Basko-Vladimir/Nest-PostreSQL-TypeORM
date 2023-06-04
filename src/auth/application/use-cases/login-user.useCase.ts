@@ -36,7 +36,6 @@ export class LoginUserUseCase implements ICommandHandler<LoginUserCommand> {
       password,
     );
 
-    console.log({ loginNyUserId: userId });
     const { accessToken, refreshToken } =
       await this.authService.createNewTokensPair(
         { userId },

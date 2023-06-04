@@ -64,9 +64,9 @@ export class QueryCommentsRepository {
     const dbSortDirection = getDbSortDirection(sortDirection);
     const selectQueryBuilder = this.typeOrmCommentRepository
       .createQueryBuilder('comment')
-      .innerJoin('comment.user', 'user', 'user.id = comment.authorId')
-      .innerJoin('comment.post', 'post', 'comment.authorId = post.userId')
-      .innerJoin('post.blog', 'blog', 'post.userId = blog.ownerId')
+      .innerJoinAndSelect('comment.post', 'post', 'comment.postId = post.id')
+      .innerJoinAndSelect('post.blog', 'blog', 'post.blogId = blog.id')
+      .innerJoinAndSelect('blog.user', 'user', 'blog.ownerId = user.id')
       .select([
         'comment.id',
         'comment.createdAt',
@@ -80,7 +80,7 @@ export class QueryCommentsRepository {
         'user.login',
       ])
       .where('user.isBanned = false')
-      .andWhere('comment.authorId = :userId', { userId });
+      .andWhere('blog.ownerId = :userId', { userId });
 
     const totalCount = await selectQueryBuilder.getCount();
     const bloggerComments = await selectQueryBuilder

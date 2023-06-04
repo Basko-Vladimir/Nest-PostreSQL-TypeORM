@@ -48,8 +48,6 @@ export class RegisterUserUseCase
       isConfirmedByDefault,
     );
 
-    console.log({ createdUserId: user.id });
-
     try {
       this.emailManager.formRegistrationEmail(
         user.email,

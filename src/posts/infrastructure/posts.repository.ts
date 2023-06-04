@@ -45,13 +45,13 @@ export class PostsRepository {
     updatePostDto: UpdatePostDto,
   ): Promise<void> {
     const { title, content, shortDescription, blogId } = updatePostDto;
-    await this.dataSource.query(
-      `UPDATE "post"
-        SET "title" = $1, "content" = $2, "shortDescription" = $3, "blogId" = $4
-        WHERE "id" = $5
-       `,
-      [title, content, shortDescription, blogId, postId],
-    );
+
+    await this.typeOrmPostRepository
+      .createQueryBuilder('post')
+      .update()
+      .set({ title, content, shortDescription, blogId })
+      .where('post.id = :postId', { postId })
+      .execute();
   }
 
   async deletePost(postId: string): Promise<void> {

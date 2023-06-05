@@ -1,7 +1,6 @@
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
-import { IClientRequest } from '../entities/interfaces';
 import { ClientRequestEntity } from '../entities/db-entities/client-request.entity';
 
 @Injectable()
@@ -14,7 +13,7 @@ export class ClientsRequestsRepository {
   async getClientRequestsByFilter(
     ip: string,
     endpoint: string,
-  ): Promise<IClientRequest[]> {
+  ): Promise<ClientRequestEntity[]> {
     return this.typeOrmClientRequestRepository
       .createQueryBuilder('clientRequest')
       .select('clientRequest')

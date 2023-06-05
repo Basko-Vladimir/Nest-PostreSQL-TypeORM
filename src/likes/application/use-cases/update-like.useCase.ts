@@ -1,10 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { LikeStatus } from '../../../common/enums';
 import { LikesRepository } from '../../infrastructure/likes.repository';
-import { ILike } from '../../entities/interfaces';
+import { LikeEntity } from '../../entities/db-entities/like.entity';
 
 export class UpdateLikeCommand {
-  constructor(public like: ILike, public status: LikeStatus) {}
+  constructor(public like: LikeEntity, public status: LikeStatus) {}
 }
 
 @CommandHandler(UpdateLikeCommand)

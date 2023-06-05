@@ -3,12 +3,12 @@ import { UpdateLikeCommand } from '../../../likes/application/use-cases/update-l
 import { CreateLikeCommand } from '../../../likes/application/use-cases/create-like.useCase';
 import { LikeStatus } from '../../../common/enums';
 import { LikesRepository } from '../../../likes/infrastructure/likes.repository';
-import { IComment } from '../../entities/interfaces';
+import { CommentEntity } from '../../entities/db-entities/comment.entity';
 
 export class UpdateCommentLikeStatusCommand {
   constructor(
     public userId: string,
-    public comment: IComment,
+    public comment: CommentEntity,
     public newStatus: LikeStatus,
   ) {}
 }

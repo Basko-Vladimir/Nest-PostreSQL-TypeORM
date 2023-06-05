@@ -33,8 +33,8 @@ import { RecoverPasswordCommand } from '../application/use-cases/recover-passwor
 import { ChangePasswordCommand } from '../application/use-cases/change-password.useCase';
 import { RefreshTokensCommand } from '../application/use-cases/refresh-tokens.useCase';
 import { LogoutCommand } from '../application/use-cases/logout.useCase';
-import { IDeviceSession } from '../../devices-sessions/entities/interfaces';
 import { UserEntity } from '../../users/entities/db-entities/user.entity';
+import { DeviceSessionEntity } from '../../devices-sessions/entities/db-entities/device-session.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -117,7 +117,7 @@ export class AuthController {
   @UseGuards(RefreshTokenGuard)
   async refreshTokens(
     @User() user: UserEntity,
-    @Session() session: IDeviceSession,
+    @Session() session: DeviceSessionEntity,
     @Res({ passthrough: true }) response: Response,
   ): Promise<LoginOutputModel> {
     const { accessToken, refreshToken, refreshTokenSettings } =
@@ -131,7 +131,7 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(RefreshTokenGuard)
-  async logout(@Session() session: IDeviceSession): Promise<void> {
+  async logout(@Session() session: DeviceSessionEntity): Promise<void> {
     return this.commandBus.execute(new LogoutCommand(String(session.id)));
   }
 }

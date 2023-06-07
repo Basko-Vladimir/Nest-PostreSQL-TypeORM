@@ -6,11 +6,11 @@ import {
   ACCESS_TOKEN_LIFE_TIME,
   REFRESH_TOKEN_LIFE_TIME,
 } from '../../../common/constants';
-import { IDeviceSession } from '../../../devices-sessions/entities/interfaces';
 import { UpdateDeviceSessionCommand } from '../../../devices-sessions/application/use-cases/update-device-session.useCase';
+import { DeviceSessionEntity } from '../../../devices-sessions/entities/db-entities/device-session.entity';
 
 export class RefreshTokensCommand {
-  constructor(public userId: string, public session: IDeviceSession) {}
+  constructor(public userId: string, public session: DeviceSessionEntity) {}
 }
 
 @CommandHandler(RefreshTokensCommand)

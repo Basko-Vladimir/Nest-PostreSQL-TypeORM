@@ -26,7 +26,7 @@ import { DeleteCommentCommand } from '../application/use-cases/delete-comment.us
 import { UpdateCommentCommand } from '../application/use-cases/update-comment.useCase';
 import { LikeStatusDto } from '../../likes/api/dto/like-status.dto';
 import { Comment } from '../../common/decorators/comment.decorator';
-import { IComment } from '../entities/interfaces';
+import { CommentEntity } from '../entities/db-entities/comment.entity';
 
 @Controller('comments')
 export class CommentsController {
@@ -77,7 +77,7 @@ export class CommentsController {
   @ParamIdType([IdTypes.COMMENT_ID])
   @UseGuards(CheckExistingEntityGuard, BearerAuthGuard)
   async updateCommentLikeStatus(
-    @Comment() comment: IComment,
+    @Comment() comment: CommentEntity,
     @User('id') userId: string,
     @Body() likeStatusDto: LikeStatusDto,
   ): Promise<void> {

@@ -1,9 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ClientsRequestsRepository } from '../../infrastructure/clients-requests.repository';
-import { IClientRequest } from '../../entities/interfaces';
+import { ClientRequestEntity } from '../../entities/db-entities/client-request.entity';
 
 export class UpdateClientRequestCommand {
-  constructor(public clientRequest: IClientRequest) {}
+  constructor(public clientRequest: ClientRequestEntity) {}
 }
 
 @CommandHandler(UpdateClientRequestCommand)

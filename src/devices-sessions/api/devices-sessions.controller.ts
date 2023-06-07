@@ -13,10 +13,10 @@ import { QueryDevicesSessionsRepository } from '../infrastructure/query-devices-
 import { CommandBus } from '@nestjs/cqrs';
 import { DeleteAllDevicesSessionsExceptCurrentCommand } from '../application/use-cases/delete-all-devices-sessions-except-current.useCase';
 import { DeleteDeviceSessionCommand } from '../application/use-cases/delete-device-session.useCase';
-import { IDeviceSession } from '../entities/interfaces';
 import { RefreshTokenGuard } from '../../common/guards/refresh-token.guard';
 import { DeleteDeviceSessionGuard } from '../../common/guards/delete-device-session.guard';
 import { UserEntity } from '../../users/entities/db-entities/user.entity';
+import { DeviceSessionEntity } from '../entities/db-entities/device-session.entity';
 
 @Controller('security')
 export class DevicesSessionsController {
@@ -39,7 +39,7 @@ export class DevicesSessionsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(RefreshTokenGuard)
   async deleteAllDevicesSessionsExceptCurrent(
-    @Session() session: IDeviceSession,
+    @Session() session: DeviceSessionEntity,
   ): Promise<void> {
     await this.commandBus.execute(
       new DeleteAllDevicesSessionsExceptCurrentCommand(session.id),

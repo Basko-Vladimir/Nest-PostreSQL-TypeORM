@@ -21,6 +21,8 @@ import { IdTypes } from '../../../common/enums';
 import { DeleteQuizQuestionCommand } from '../application/use-cases/delete-quiz-question.useCase';
 import { UpdateQuizQuestionDto } from './dto/update-quiz-question.dto';
 import { UpdateQuizQuestionCommand } from '../application/use-cases/update-quiz-question.useCase';
+import { UpdateQuizQuestionPublishStatusCommand } from '../application/use-cases/update-quiz-question-publish-status.useCase';
+import { UpdateQuizQuestionPublishStatusDto } from './dto/update-quiz-question-publish-status.dto';
 
 @Controller('sa/quiz/questions')
 @UseGuards(BasicAuthGuard)
@@ -53,6 +55,23 @@ export class AdminQuestionsController {
   ): Promise<void> {
     return this.commandBus.execute(
       new UpdateQuizQuestionCommand(questionId, updateQuizQuestionDto),
+    );
+  }
+
+  @Put(':id/publish')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ParamIdType([IdTypes.QUIZ_QUESTION_ID])
+  @UseGuards(CheckExistingEntityGuard)
+  async updateQuizQuestionPublishStatus(
+    @Param('id') questionId: string,
+    @Body()
+    updateQuizQuestionPublishStatusDto: UpdateQuizQuestionPublishStatusDto,
+  ): Promise<void> {
+    return this.commandBus.execute(
+      new UpdateQuizQuestionPublishStatusCommand(
+        questionId,
+        updateQuizQuestionPublishStatusDto.published,
+      ),
     );
   }
 

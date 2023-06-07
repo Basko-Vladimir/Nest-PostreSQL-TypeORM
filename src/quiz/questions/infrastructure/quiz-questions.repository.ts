@@ -45,6 +45,18 @@ export class QuizQuestionsRepository {
       .execute();
   }
 
+  async updateQuizQuestionPublishStatus(
+    questionId: string,
+    isPublished: boolean,
+  ): Promise<void> {
+    await this.typeOrmQuizQuestionRepository
+      .createQueryBuilder('question')
+      .update()
+      .set({ isPublished })
+      .where('question.id = :questionId', { questionId })
+      .execute();
+  }
+
   async deleteQuizQuestion(questionId: string): Promise<void> {
     await this.typeOrmQuizQuestionRepository
       .createQueryBuilder('question')

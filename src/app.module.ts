@@ -90,6 +90,7 @@ import { QuizQuestionsRepository } from './quiz/questions/infrastructure/quiz-qu
 import { CreateQuizQuestionUseCase } from './quiz/questions/application/use-cases/create-quiz-question.useCase';
 import { DeleteQuizQuestionUseCase } from './quiz/questions/application/use-cases/delete-quiz-question.useCase';
 import { UpdateQuizQuestionUseCase } from './quiz/questions/application/use-cases/update-quiz-question.useCase';
+import { UpdateQuizQuestionPublishStatusUseCase } from './quiz/questions/application/use-cases/update-quiz-question-publish-status.useCase';
 
 const useCases = [
   RegisterUserUseCase,
@@ -134,6 +135,7 @@ const useCases = [
   CreateQuizQuestionUseCase,
   DeleteQuizQuestionUseCase,
   UpdateQuizQuestionUseCase,
+  UpdateQuizQuestionPublishStatusUseCase,
 ];
 
 @Module({

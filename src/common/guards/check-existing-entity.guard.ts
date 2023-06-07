@@ -14,6 +14,7 @@ import { generateCustomBadRequestException } from '../utils';
 import { PostsRepository } from '../../posts/infrastructure/posts.repository';
 import { IdValidator } from '../validators/uuid.validator';
 import { CommentsRepository } from '../../comments/infrastructure/comments.repository';
+import { QuizQuestionsRepository } from '../../quiz/questions/infrastructure/quiz-questions.repository';
 
 @Injectable()
 export class CheckExistingEntityGuard implements CanActivate {
@@ -23,6 +24,7 @@ export class CheckExistingEntityGuard implements CanActivate {
     private blogsRepository: BlogsRepository,
     private postsRepository: PostsRepository,
     private commentsRepository: CommentsRepository,
+    private quizQuestionsRepository: QuizQuestionsRepository,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -62,6 +64,13 @@ export class CheckExistingEntityGuard implements CanActivate {
         case IdTypes.USER_ID: {
           const user = await this.usersRepository.findUserById(currentId);
           CheckExistingEntityGuard.checkEntity(user);
+          break;
+        }
+        case IdTypes.QUIZ_QUESTION_ID: {
+          const question = await this.quizQuestionsRepository.findQuestionById(
+            currentId,
+          );
+          CheckExistingEntityGuard.checkEntity(question);
           break;
         }
       }

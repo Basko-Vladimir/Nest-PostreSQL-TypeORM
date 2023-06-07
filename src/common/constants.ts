@@ -35,3 +35,8 @@ export const commentsConstants = {
   MIN_CONTENT_LENGTH: 20,
   MAX_CONTENT_LENGTH: 300,
 };
+
+export const quizQuestions = {
+  MIN_BODY_LENGTH: 10,
+  MAX_BODY_LENGTH: 500,
+};

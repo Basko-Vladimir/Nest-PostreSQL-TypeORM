@@ -83,7 +83,11 @@ import { DeleteCommentUseCase } from './comments/application/use-cases/delete-co
 import { UpdateCommentUseCase } from './comments/application/use-cases/update-comment.useCase';
 import { UpdateCommentLikeStatusUseCase } from './comments/application/use-cases/update-comment-like-status.useCase';
 import { GetAllBloggerCommentsUseCase } from './comments/application/use-cases/get-all-blogger-comments.useCase';
-import { QuestionEntity } from './quiz/questions/entities/question.entity';
+import { QuizQuestionEntity } from './quiz/questions/entities/quizQuestionEntity';
+import { AdminQuestionsController } from './quiz/questions/api/admin-questions.controller';
+import { QueryQuizQuestionsRepository } from './quiz/questions/infrastructure/query-quiz-quetions.repository';
+import { QuizQuestionsRepository } from './quiz/questions/infrastructure/quiz-questions.repository';
+import { CreateQuizQuestionUseCase } from './quiz/questions/application/use-cases/create-quiz-question.useCase';
 
 const useCases = [
   RegisterUserUseCase,
@@ -125,6 +129,7 @@ const useCases = [
   UpdateCommentUseCase,
   UpdateCommentLikeStatusUseCase,
   GetAllBloggerCommentsUseCase,
+  CreateQuizQuestionUseCase,
 ];
 
 @Module({
@@ -153,7 +158,7 @@ const useCases = [
       BannedUserForBlogEntity,
       CommentEntity,
       LikeEntity,
-      QuestionEntity,
+      QuizQuestionEntity,
     ]),
     CqrsModule,
   ],
@@ -168,6 +173,7 @@ const useCases = [
     AdminBlogsController,
     PostsController,
     CommentsController,
+    AdminQuestionsController,
   ],
   providers: [
     AppService,
@@ -193,6 +199,8 @@ const useCases = [
     QueryCommentsRepository,
     LikesRepository,
     QueryLikesRepository,
+    QuizQuestionsRepository,
+    QueryQuizQuestionsRepository,
     ...useCases,
   ],
 })

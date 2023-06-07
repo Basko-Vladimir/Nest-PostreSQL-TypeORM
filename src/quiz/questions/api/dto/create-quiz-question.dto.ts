@@ -11,7 +11,7 @@ export class CreateQuizQuestionDto {
   readonly body: string;
 
   @IsString({ each: true })
-  @IsArray()
   @ArrayMinSize(1)
+  @IsArray()
   readonly correctAnswers: string[];
 }

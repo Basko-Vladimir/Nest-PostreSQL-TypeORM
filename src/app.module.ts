@@ -88,6 +88,7 @@ import { AdminQuestionsController } from './quiz/questions/api/admin-questions.c
 import { QueryQuizQuestionsRepository } from './quiz/questions/infrastructure/query-quiz-quetions.repository';
 import { QuizQuestionsRepository } from './quiz/questions/infrastructure/quiz-questions.repository';
 import { CreateQuizQuestionUseCase } from './quiz/questions/application/use-cases/create-quiz-question.useCase';
+import { DeleteQuizQuestionUseCase } from './quiz/questions/application/use-cases/delete-quiz-question.useCase';
 
 const useCases = [
   RegisterUserUseCase,
@@ -130,6 +131,7 @@ const useCases = [
   UpdateCommentLikeStatusUseCase,
   GetAllBloggerCommentsUseCase,
   CreateQuizQuestionUseCase,
+  DeleteQuizQuestionUseCase,
 ];
 
 @Module({

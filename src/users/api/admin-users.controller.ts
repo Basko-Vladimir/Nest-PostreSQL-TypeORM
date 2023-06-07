@@ -47,10 +47,7 @@ export class AdminUsersController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ParamIdType([IdTypes.USER_ID])
   @UseGuards(BasicAuthGuard, CheckExistingEntityGuard)
-  async deleteUser(
-    @Param('id')
-    userId: string,
-  ): Promise<void> {
+  async deleteUser(@Param('id') userId: string): Promise<void> {
     return this.commandBus.execute(new DeleteUserCommand(userId));
   }
 

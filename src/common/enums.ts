@@ -50,6 +50,7 @@ export enum IdTypes {
   POST_ID = 'postId',
   USER_ID = 'userId',
   COMMENT_ID = 'commentId',
+  QUIZ_QUESTION_ID = 'quizQuestionId',
 }
 
 export enum BanStatus {

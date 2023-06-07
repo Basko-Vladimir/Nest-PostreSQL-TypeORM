@@ -10,6 +10,16 @@ export class QuizQuestionsRepository {
     private typeOrmQuizQuestionRepository: Repository<QuizQuestionEntity>,
   ) {}
 
+  async findQuestionById(
+    questionId: string,
+  ): Promise<QuizQuestionEntity | null> {
+    return this.typeOrmQuizQuestionRepository
+      .createQueryBuilder('question')
+      .select('question')
+      .where('question.id = :questionId', { questionId })
+      .getOne();
+  }
+
   async createQuizQuestion(body: string, answers: string): Promise<string> {
     const createdQuestionData = await this.typeOrmQuizQuestionRepository
       .createQueryBuilder()
@@ -20,6 +30,15 @@ export class QuizQuestionsRepository {
       .execute();
 
     return createdQuestionData.identifiers[0].id;
+  }
+
+  async deleteQuizQuestion(questionId: string): Promise<void> {
+    await this.typeOrmQuizQuestionRepository
+      .createQueryBuilder('question')
+      .delete()
+      .from(QuizQuestionEntity)
+      .where('question.id = :questionId', { questionId })
+      .execute();
   }
 
   async deleteAllQuizQuestions(): Promise<void> {

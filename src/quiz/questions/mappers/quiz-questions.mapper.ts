@@ -12,6 +12,6 @@ export const mapQuizQuestionEntityToQuizQuestionOutputModel = (
     correctAnswers,
     published: question.isPublished,
     createdAt: question.createdAt.toISOString(),
-    updatedAt: question.updatedAt.toISOString(),
+    updatedAt: question.updatedAt?.toISOString() || null,
   };
 };

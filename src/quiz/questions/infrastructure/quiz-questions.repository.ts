@@ -40,7 +40,7 @@ export class QuizQuestionsRepository {
     await this.typeOrmQuizQuestionRepository
       .createQueryBuilder('question')
       .update()
-      .set({ body, answers })
+      .set({ body, answers, updatedAt: new Date() })
       .where('question.id = :questionId', { questionId })
       .execute();
   }
@@ -52,7 +52,7 @@ export class QuizQuestionsRepository {
     await this.typeOrmQuizQuestionRepository
       .createQueryBuilder('question')
       .update()
-      .set({ isPublished })
+      .set({ isPublished, updatedAt: new Date() })
       .where('question.id = :questionId', { questionId })
       .execute();
   }

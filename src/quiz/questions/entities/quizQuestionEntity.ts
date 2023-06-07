@@ -1,8 +1,15 @@
-import { Column, Entity } from 'typeorm';
-import { BaseEntity } from '../../../common/common-db-entities';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity({ name: 'question' })
-export class QuizQuestionEntity extends BaseEntity {
+export class QuizQuestionEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
   @Column({ type: 'text', nullable: true, default: null })
   body: string;
 
@@ -11,4 +18,10 @@ export class QuizQuestionEntity extends BaseEntity {
 
   @Column({ type: 'json', nullable: null, default: null })
   answers: string;
+
+  @Column({ type: 'timestamptz', nullable: true, default: null })
+  updatedAt: Date;
+
+  @CreateDateColumn()
+  createdAt: Date;
 }

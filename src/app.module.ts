@@ -85,7 +85,7 @@ import { UpdateCommentLikeStatusUseCase } from './comments/application/use-cases
 import { GetAllBloggerCommentsUseCase } from './comments/application/use-cases/get-all-blogger-comments.useCase';
 import { QuizQuestionEntity } from './quiz/questions/entities/quizQuestionEntity';
 import { AdminQuestionsController } from './quiz/questions/api/admin-questions.controller';
-import { QueryQuizQuestionsRepository } from './quiz/questions/infrastructure/query-quiz-quetions.repository';
+import { QueryAdminQuizQuestionsRepository } from './quiz/questions/infrastructure/query-admin-quiz-quetions.repository';
 import { QuizQuestionsRepository } from './quiz/questions/infrastructure/quiz-questions.repository';
 import { CreateQuizQuestionUseCase } from './quiz/questions/application/use-cases/create-quiz-question.useCase';
 import { DeleteQuizQuestionUseCase } from './quiz/questions/application/use-cases/delete-quiz-question.useCase';
@@ -206,7 +206,7 @@ const useCases = [
     LikesRepository,
     QueryLikesRepository,
     QuizQuestionsRepository,
-    QueryQuizQuestionsRepository,
+    QueryAdminQuizQuestionsRepository,
     ...useCases,
   ],
 })

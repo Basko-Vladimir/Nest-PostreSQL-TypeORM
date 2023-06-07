@@ -1,3 +1,5 @@
+import { AllEntitiesOutputModel } from '../../../../common/types';
+
 export interface IQuizQuestionOutputModel {
   id: string;
   body: string;
@@ -6,3 +8,6 @@ export interface IQuizQuestionOutputModel {
   createdAt: string;
   updatedAt: string;
 }
+
+export type AllQuizQuestionsOutputModel =
+  AllEntitiesOutputModel<IQuizQuestionOutputModel>;

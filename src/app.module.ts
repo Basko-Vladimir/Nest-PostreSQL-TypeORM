@@ -83,6 +83,7 @@ import { DeleteCommentUseCase } from './comments/application/use-cases/delete-co
 import { UpdateCommentUseCase } from './comments/application/use-cases/update-comment.useCase';
 import { UpdateCommentLikeStatusUseCase } from './comments/application/use-cases/update-comment-like-status.useCase';
 import { GetAllBloggerCommentsUseCase } from './comments/application/use-cases/get-all-blogger-comments.useCase';
+import { QuestionEntity } from './quiz/questions/entities/question.entity';
 
 const useCases = [
   RegisterUserUseCase,
@@ -152,6 +153,7 @@ const useCases = [
       BannedUserForBlogEntity,
       CommentEntity,
       LikeEntity,
+      QuestionEntity,
     ]),
     CqrsModule,
   ],

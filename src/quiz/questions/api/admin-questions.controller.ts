@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import { BasicAuthGuard } from '../../../common/guards/basic-auth.guard';
@@ -18,6 +19,8 @@ import { CheckExistingEntityGuard } from '../../../common/guards/check-existing-
 import { ParamIdType } from '../../../common/decorators/param-id-type.decorator';
 import { IdTypes } from '../../../common/enums';
 import { DeleteQuizQuestionCommand } from '../application/use-cases/delete-quiz-question.useCase';
+import { UpdateQuizQuestionDto } from './dto/update-quiz-question.dto';
+import { UpdateQuizQuestionCommand } from '../application/use-cases/update-quiz-question.useCase';
 
 @Controller('sa/quiz/questions')
 @UseGuards(BasicAuthGuard)
@@ -37,6 +40,19 @@ export class AdminQuestionsController {
 
     return this.queryQuizQuestionsRepository.findQuizQuestionById(
       createdQuestionId,
+    );
+  }
+
+  @Put(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ParamIdType([IdTypes.QUIZ_QUESTION_ID])
+  @UseGuards(CheckExistingEntityGuard)
+  async updateQuizQuestion(
+    @Param('id') questionId: string,
+    @Body() updateQuizQuestionDto: UpdateQuizQuestionDto,
+  ): Promise<void> {
+    return this.commandBus.execute(
+      new UpdateQuizQuestionCommand(questionId, updateQuizQuestionDto),
     );
   }
 

@@ -89,6 +89,7 @@ import { QueryQuizQuestionsRepository } from './quiz/questions/infrastructure/qu
 import { QuizQuestionsRepository } from './quiz/questions/infrastructure/quiz-questions.repository';
 import { CreateQuizQuestionUseCase } from './quiz/questions/application/use-cases/create-quiz-question.useCase';
 import { DeleteQuizQuestionUseCase } from './quiz/questions/application/use-cases/delete-quiz-question.useCase';
+import { UpdateQuizQuestionUseCase } from './quiz/questions/application/use-cases/update-quiz-question.useCase';
 
 const useCases = [
   RegisterUserUseCase,
@@ -132,6 +133,7 @@ const useCases = [
   GetAllBloggerCommentsUseCase,
   CreateQuizQuestionUseCase,
   DeleteQuizQuestionUseCase,
+  UpdateQuizQuestionUseCase,
 ];
 
 @Module({

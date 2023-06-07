@@ -32,6 +32,19 @@ export class QuizQuestionsRepository {
     return createdQuestionData.identifiers[0].id;
   }
 
+  async updateQuizQuestion(
+    questionId: string,
+    body: string,
+    answers: string,
+  ): Promise<void> {
+    await this.typeOrmQuizQuestionRepository
+      .createQueryBuilder('question')
+      .update()
+      .set({ body, answers })
+      .where('question.id = :questionId', { questionId })
+      .execute();
+  }
+
   async deleteQuizQuestion(questionId: string): Promise<void> {
     await this.typeOrmQuizQuestionRepository
       .createQueryBuilder('question')

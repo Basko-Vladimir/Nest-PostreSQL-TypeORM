@@ -39,7 +39,7 @@ export enum ClientRequestSortByField {
 }
 
 export enum QuizQuestionsSortByField {
-  body = 'login',
+  body = 'body',
   createdAt = 'createdAt',
   updatedAt = 'updatedAt',
 }

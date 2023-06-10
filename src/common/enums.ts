@@ -80,3 +80,9 @@ export enum Roles {
   BLOGGER = 'blogger',
   PUBLIC_USER = 'user',
 }
+
+export enum QuizGameStatus {
+  PENDING_SECOND_PLAYER = 'PendingSecondPlayer',
+  ACTIVE = 'Active',
+  FINISHED = 'Finished',
+}

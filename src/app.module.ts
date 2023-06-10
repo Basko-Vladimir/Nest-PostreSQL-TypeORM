@@ -91,6 +91,7 @@ import { CreateQuizQuestionUseCase } from './quiz/questions/application/use-case
 import { DeleteQuizQuestionUseCase } from './quiz/questions/application/use-cases/delete-quiz-question.useCase';
 import { UpdateQuizQuestionUseCase } from './quiz/questions/application/use-cases/update-quiz-question.useCase';
 import { UpdateQuizQuestionPublishStatusUseCase } from './quiz/questions/application/use-cases/update-quiz-question-publish-status.useCase';
+import { QuizGameEntity } from './quiz/games/entities/quiz-game.entity';
 
 const useCases = [
   RegisterUserUseCase,
@@ -165,6 +166,7 @@ const useCases = [
       CommentEntity,
       LikeEntity,
       QuizQuestionEntity,
+      QuizGameEntity,
     ]),
     CqrsModule,
   ],

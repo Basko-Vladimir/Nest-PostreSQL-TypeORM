@@ -2,8 +2,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { QuizGameEntity } from '../../games/entities/quiz-game.entity';
 
 @Entity({ name: 'question' })
 export class QuizQuestionEntity {
@@ -24,4 +27,12 @@ export class QuizQuestionEntity {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @ManyToMany(
+    () => QuizGameEntity,
+    (quizGameEntity) => quizGameEntity.questions,
+    { eager: true },
+  )
+  @JoinTable()
+  games: QuizGameEntity[];
 }

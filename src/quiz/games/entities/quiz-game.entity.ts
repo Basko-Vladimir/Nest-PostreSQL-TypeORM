@@ -1,6 +1,7 @@
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, ManyToMany } from 'typeorm';
 import { BaseEntity } from '../../../common/common-db-entities';
 import { QuizGameStatus } from '../../../common/enums';
+import { QuizQuestionEntity } from '../../questions/entities/quizQuestionEntity';
 
 @Entity({ name: 'game' })
 export class QuizGameEntity extends BaseEntity {
@@ -28,4 +29,10 @@ export class QuizGameEntity extends BaseEntity {
 
   @Column({ type: 'timestamptz', nullable: true, default: null })
   finishGameDate: Date;
+
+  @ManyToMany(
+    () => QuizQuestionEntity,
+    (quizQuestionEntity) => quizQuestionEntity.games,
+  )
+  questions: QuizQuestionEntity[];
 }

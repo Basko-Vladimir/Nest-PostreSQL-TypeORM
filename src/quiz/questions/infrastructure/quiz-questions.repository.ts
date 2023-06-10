@@ -20,12 +20,15 @@ export class QuizQuestionsRepository {
       .getOne();
   }
 
-  async createQuizQuestion(body: string, answers: string): Promise<string> {
+  async createQuizQuestion(
+    body: string,
+    correctAnswers: string,
+  ): Promise<string> {
     const createdQuestionData = await this.typeOrmQuizQuestionRepository
       .createQueryBuilder()
       .insert()
       .into(QuizQuestionEntity)
-      .values({ body, answers })
+      .values({ body, correctAnswers })
       .returning('id')
       .execute();
 
@@ -35,12 +38,12 @@ export class QuizQuestionsRepository {
   async updateQuizQuestion(
     questionId: string,
     body: string,
-    answers: string,
+    correctAnswers: string,
   ): Promise<void> {
     await this.typeOrmQuizQuestionRepository
       .createQueryBuilder('question')
       .update()
-      .set({ body, answers, updatedAt: new Date() })
+      .set({ body, correctAnswers, updatedAt: new Date() })
       .where('question.id = :questionId', { questionId })
       .execute();
   }

@@ -20,7 +20,7 @@ export class QuizQuestionEntity {
   isPublished: boolean;
 
   @Column({ type: 'json', nullable: null, default: null })
-  answers: string;
+  correctAnswers: string;
 
   @Column({ type: 'timestamptz', nullable: true, default: null })
   updatedAt: Date;

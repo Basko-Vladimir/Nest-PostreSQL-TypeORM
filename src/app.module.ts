@@ -93,6 +93,12 @@ import { UpdateQuizQuestionUseCase } from './quiz/questions/application/use-case
 import { UpdateQuizQuestionPublishStatusUseCase } from './quiz/questions/application/use-cases/update-quiz-question-publish-status.useCase';
 import { QuizGameEntity } from './quiz/games/entities/quiz-game.entity';
 import { QuizAnswerEntity } from './quiz/answers/entities/quiz-answer.entity';
+import { GameController } from './quiz/games/api/game.controller';
+import { ConnectToGameUseCase } from './quiz/games/application/use-cases/connect-to-game.useCase';
+import { QuizGameRepository } from './quiz/games/infrastructure/quiz-game.repository';
+import { QueryQuizGameRepository } from './quiz/games/infrastructure/query-quiz-game.repository';
+import { GameQuestionEntity } from './quiz/games/entities/game-question.entity';
+import { GameUserEntity } from './quiz/games/entities/game-user.entity';
 
 const useCases = [
   RegisterUserUseCase,
@@ -138,6 +144,7 @@ const useCases = [
   DeleteQuizQuestionUseCase,
   UpdateQuizQuestionUseCase,
   UpdateQuizQuestionPublishStatusUseCase,
+  ConnectToGameUseCase,
 ];
 
 @Module({
@@ -169,6 +176,8 @@ const useCases = [
       QuizQuestionEntity,
       QuizGameEntity,
       QuizAnswerEntity,
+      GameQuestionEntity,
+      GameUserEntity,
     ]),
     CqrsModule,
   ],
@@ -184,6 +193,7 @@ const useCases = [
     PostsController,
     CommentsController,
     AdminQuestionsController,
+    GameController,
   ],
   providers: [
     AppService,
@@ -211,6 +221,8 @@ const useCases = [
     QueryLikesRepository,
     QuizQuestionsRepository,
     QueryAdminQuizQuestionsRepository,
+    QuizGameRepository,
+    QueryQuizGameRepository,
     ...useCases,
   ],
 })

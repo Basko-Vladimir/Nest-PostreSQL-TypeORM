@@ -2,7 +2,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -40,6 +39,5 @@ export class QuizQuestionEntity {
     () => QuizGameEntity,
     (quizGameEntity) => quizGameEntity.questions,
   )
-  @JoinTable()
   games: QuizGameEntity[];
 }

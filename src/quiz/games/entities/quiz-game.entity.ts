@@ -10,7 +10,7 @@ export class QuizGameEntity extends BaseEntity {
   @Column({ type: 'uuid' })
   firstPlayerId: string;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: 'uuid', nullable: true, default: null })
   secondPlayerId: string;
 
   @Column({ type: 'integer', default: 0 })
@@ -42,9 +42,10 @@ export class QuizGameEntity extends BaseEntity {
     () => QuizQuestionEntity,
     (quizQuestionEntity) => quizQuestionEntity.games,
   )
+  @JoinTable({ name: 'gameQuestion' })
   questions: QuizQuestionEntity[];
 
   @ManyToMany(() => UserEntity, (userEntity) => userEntity.games)
-  @JoinTable()
+  @JoinTable({ name: 'gameUser' })
   users: UserEntity[];
 }

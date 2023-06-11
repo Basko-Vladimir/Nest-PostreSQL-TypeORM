@@ -1,7 +1,8 @@
+import { Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QuizQuestionEntity } from '../entities/quiz-question.entity';
-import { Repository } from 'typeorm';
+import { QUESTIONS_AMOUNT_IN_ONE_GAME } from '../../../common/constants';
 
 @Injectable()
 export class QuizQuestionsRepository {
@@ -9,6 +10,16 @@ export class QuizQuestionsRepository {
     @InjectRepository(QuizQuestionEntity)
     private typeOrmQuizQuestionRepository: Repository<QuizQuestionEntity>,
   ) {}
+
+  async findRandomQuestions(): Promise<QuizQuestionEntity[]> {
+    return this.typeOrmQuizQuestionRepository
+      .createQueryBuilder('question')
+      .select('question')
+      .where('question.isPublished = true')
+      .orderBy('Random()')
+      .limit(QUESTIONS_AMOUNT_IN_ONE_GAME)
+      .getMany();
+  }
 
   async findQuestionById(
     questionId: string,

@@ -3,6 +3,7 @@ import { DeviceSessionEntity } from '../devices-sessions/entities/db-entities/de
 import { PostEntity } from '../posts/entities/db-entities/post.entity';
 import { BlogEntity } from '../blogs/entities/db-entities/blog.entity';
 import { CommentEntity } from '../comments/entities/db-entities/comment.entity';
+import { QuizGameEntity } from '../quiz/games/entities/quiz-game.entity';
 
 declare global {
   declare namespace Express {
@@ -13,6 +14,7 @@ declare global {
         blog?: BlogEntity;
         post?: PostEntity;
         comment?: CommentEntity;
+        game?: QuizGameEntity;
       };
     }
   }

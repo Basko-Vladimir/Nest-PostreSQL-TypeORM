@@ -10,7 +10,7 @@ interface IPlayerProgress {
   score: number;
 }
 
-export interface IGameOutputModel {
+export interface IQuizGameOutputModel {
   id: string;
   firstPlayerProgress: IPlayerProgress;
   secondPlayerProgress: IPlayerProgress;

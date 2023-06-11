@@ -4,9 +4,11 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { QuizGameEntity } from '../../games/entities/quiz-game.entity';
+import { QuizAnswerEntity } from '../../answers/entities/quiz-answer.entity';
 
 @Entity({ name: 'question' })
 export class QuizQuestionEntity {
@@ -28,10 +30,15 @@ export class QuizQuestionEntity {
   @CreateDateColumn()
   createdAt: Date;
 
+  @OneToMany(
+    () => QuizAnswerEntity,
+    (quizAnswerEntity) => quizAnswerEntity.question,
+  )
+  answers: QuizAnswerEntity[];
+
   @ManyToMany(
     () => QuizGameEntity,
     (quizGameEntity) => quizGameEntity.questions,
-    { eager: true },
   )
   @JoinTable()
   games: QuizGameEntity[];

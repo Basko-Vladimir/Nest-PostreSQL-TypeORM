@@ -1,4 +1,4 @@
-import { QuizQuestionEntity } from '../entities/quizQuestionEntity';
+import { QuizQuestionEntity } from '../entities/quiz-question.entity';
 import { IQuizQuestionOutputModel } from '../api/dto/quiz-questions-output-models.dto';
 
 export const mapQuizQuestionEntityToQuizQuestionOutputModel = (

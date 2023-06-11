@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, OneToOne } from 'typeorm';
+import { Column, Entity, ManyToMany, OneToMany, OneToOne } from 'typeorm';
 import { EmailConfirmationEntity } from './email-confirmation.entity';
 import { DeviceSessionEntity } from '../../../devices-sessions/entities/db-entities/device-session.entity';
 import { BlogEntity } from '../../../blogs/entities/db-entities/blog.entity';
@@ -8,6 +8,8 @@ import { CommentEntity } from '../../../comments/entities/db-entities/comment.en
 import { LikeEntity } from '../../../likes/entities/db-entities/like.entity';
 import { PostEntity } from '../../../posts/entities/db-entities/post.entity';
 import { usersConstants } from '../../../common/constants';
+import { QuizAnswerEntity } from '../../../quiz/answers/entities/quiz-answer.entity';
+import { QuizGameEntity } from '../../../quiz/games/entities/quiz-game.entity';
 
 const { MAX_LOGIN_LENGTH } = usersConstants;
 
@@ -66,4 +68,13 @@ export class UserEntity extends BlockableEntity {
 
   @OneToMany(() => LikeEntity, (likeEntity) => likeEntity.user)
   likes: LikeEntity[];
+
+  @OneToMany(
+    () => QuizAnswerEntity,
+    (quizAnswerEntity) => quizAnswerEntity.user,
+  )
+  answers: QuizAnswerEntity[];
+
+  @ManyToMany(() => QuizGameEntity, (quizGameEntity) => quizGameEntity.users)
+  games: QuizGameEntity[];
 }

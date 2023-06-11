@@ -86,3 +86,8 @@ export enum QuizGameStatus {
   ACTIVE = 'Active',
   FINISHED = 'Finished',
 }
+
+export enum AnswerStatus {
+  CORRECT = 'correct',
+  INCORRECT = 'incorrect',
+}

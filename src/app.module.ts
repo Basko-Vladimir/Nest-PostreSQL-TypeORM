@@ -83,7 +83,7 @@ import { DeleteCommentUseCase } from './comments/application/use-cases/delete-co
 import { UpdateCommentUseCase } from './comments/application/use-cases/update-comment.useCase';
 import { UpdateCommentLikeStatusUseCase } from './comments/application/use-cases/update-comment-like-status.useCase';
 import { GetAllBloggerCommentsUseCase } from './comments/application/use-cases/get-all-blogger-comments.useCase';
-import { QuizQuestionEntity } from './quiz/questions/entities/quizQuestionEntity';
+import { QuizQuestionEntity } from './quiz/questions/entities/quiz-question.entity';
 import { AdminQuestionsController } from './quiz/questions/api/admin-questions.controller';
 import { QueryAdminQuizQuestionsRepository } from './quiz/questions/infrastructure/query-admin-quiz-quetions.repository';
 import { QuizQuestionsRepository } from './quiz/questions/infrastructure/quiz-questions.repository';
@@ -92,6 +92,7 @@ import { DeleteQuizQuestionUseCase } from './quiz/questions/application/use-case
 import { UpdateQuizQuestionUseCase } from './quiz/questions/application/use-cases/update-quiz-question.useCase';
 import { UpdateQuizQuestionPublishStatusUseCase } from './quiz/questions/application/use-cases/update-quiz-question-publish-status.useCase';
 import { QuizGameEntity } from './quiz/games/entities/quiz-game.entity';
+import { QuizAnswerEntity } from './quiz/answers/entities/quiz-answer.entity';
 
 const useCases = [
   RegisterUserUseCase,
@@ -167,6 +168,7 @@ const useCases = [
       LikeEntity,
       QuizQuestionEntity,
       QuizGameEntity,
+      QuizAnswerEntity,
     ]),
     CqrsModule,
   ],

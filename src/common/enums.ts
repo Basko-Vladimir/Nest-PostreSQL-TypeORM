@@ -88,6 +88,6 @@ export enum QuizGameStatus {
 }
 
 export enum AnswerStatus {
-  CORRECT = 'correct',
-  INCORRECT = 'incorrect',
+  CORRECT = 'Correct',
+  INCORRECT = 'Incorrect',
 }

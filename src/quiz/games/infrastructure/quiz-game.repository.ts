@@ -28,6 +28,14 @@ export class QuizGameRepository {
       .getOne();
   }
 
+  async findGameById(gameId: string): Promise<QuizGameEntity> {
+    return this.typeOrmQuizGameRepository
+      .createQueryBuilder('game')
+      .select('game')
+      .where('game.id = :gameId', { gameId })
+      .getOne();
+  }
+
   async createGame(firstPlayer: UserEntity): Promise<string> {
     const insertResult = await this.typeOrmQuizGameRepository
       .createQueryBuilder()

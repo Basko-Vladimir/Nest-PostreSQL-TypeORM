@@ -15,6 +15,7 @@ import { PostsRepository } from '../../posts/infrastructure/posts.repository';
 import { IdValidator } from '../validators/uuid.validator';
 import { CommentsRepository } from '../../comments/infrastructure/comments.repository';
 import { QuizQuestionsRepository } from '../../quiz/questions/infrastructure/quiz-questions.repository';
+import { QuizGameRepository } from '../../quiz/games/infrastructure/quiz-game.repository';
 
 @Injectable()
 export class CheckExistingEntityGuard implements CanActivate {
@@ -25,6 +26,7 @@ export class CheckExistingEntityGuard implements CanActivate {
     private postsRepository: PostsRepository,
     private commentsRepository: CommentsRepository,
     private quizQuestionsRepository: QuizQuestionsRepository,
+    private quizGameRepository: QuizGameRepository,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -71,6 +73,12 @@ export class CheckExistingEntityGuard implements CanActivate {
             currentId,
           );
           CheckExistingEntityGuard.checkEntity(question);
+          break;
+        }
+        case IdTypes.QUIZ_GAME_ID: {
+          const game = await this.quizGameRepository.findGameById(currentId);
+          CheckExistingEntityGuard.checkEntity(game);
+          request.context = { ...request.context, game };
           break;
         }
       }

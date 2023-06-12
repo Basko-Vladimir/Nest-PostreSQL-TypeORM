@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { QuizGameEntity } from '../entities/quiz-game.entity';
 import { mapQuizGameEntityToQuizGameOutputModel } from '../mappers/quiz-game.mapper';
+import { IQuizGameOutputModel } from '../api/dto/quiz-game-output-models.dto';
 
 @Injectable()
 export class QueryQuizGameRepository {
@@ -11,7 +12,7 @@ export class QueryQuizGameRepository {
     private typeOrmQuizGameRepository: Repository<QuizGameEntity>,
   ) {}
 
-  async findQuizGameById(gameId: string): Promise<any> {
+  async findQuizGameById(gameId: string): Promise<IQuizGameOutputModel> {
     const currentGame = await this.typeOrmQuizGameRepository
       .createQueryBuilder('game')
       .leftJoin('game.questions', 'question')

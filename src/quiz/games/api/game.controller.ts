@@ -29,6 +29,13 @@ export class GameController {
     private queryQuizGameRepository: QueryQuizGameRepository,
   ) {}
 
+  @Get('my-current')
+  async getCurrentGame(
+    @User('id') userId: string,
+  ): Promise<IQuizGameOutputModel> {
+    return this.queryQuizGameRepository.getCurrentGame(userId);
+  }
+
   @Get(':id')
   @ParamIdType([IdTypes.QUIZ_GAME_ID])
   @UseGuards(CheckExistingEntityGuard)

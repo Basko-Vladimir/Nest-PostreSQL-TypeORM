@@ -14,13 +14,17 @@ export class DoubleParticipateToGameGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request: Request = context.switchToHttp().getRequest();
     const user = request.context.user;
-    const startedGame = await this.quizGameRepository.findStartedQuizGame();
+    const existingActiveGame =
+      await this.quizGameRepository.checkExistingActiveGame(user.id);
 
-    if (
-      startedGame &&
-      (user.id === startedGame.firstPlayerId ||
-        user.id === startedGame.secondPlayerId)
-    ) {
+    if (existingActiveGame) {
+      throw new ForbiddenException();
+    }
+
+    const startedGame =
+      await this.quizGameRepository.findStartedGameWithPendingStatus();
+
+    if (startedGame && user.id === startedGame.firstPlayerId) {
       throw new ForbiddenException();
     }
 

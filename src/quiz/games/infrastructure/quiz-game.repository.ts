@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { QuizGameEntity } from '../entities/quiz-game.entity';
 import { UserEntity } from '../../../users/entities/db-entities/user.entity';
 import { QuizGameStatus } from '../../../common/enums';
@@ -18,7 +18,26 @@ export class QuizGameRepository {
     private typeOrmGameUserRepository: Repository<GameUserEntity>,
   ) {}
 
-  async findStartedQuizGame(): Promise<QuizGameEntity> {
+  async checkExistingActiveGame(userId: string): Promise<QuizGameEntity> {
+    return this.typeOrmQuizGameRepository
+      .createQueryBuilder('game')
+      .select('game')
+      .where(
+        new Brackets((qb) => {
+          qb.where('game.firstPlayerId = :firstUserId', {
+            firstUserId: userId,
+          }).orWhere('game.secondPlayerId = :secondUserId', {
+            secondUserId: userId,
+          });
+        }),
+      )
+      .andWhere('game.status = :activeStatus', {
+        activeStatus: QuizGameStatus.ACTIVE,
+      })
+      .getOne();
+  }
+
+  async findStartedGameWithPendingStatus(): Promise<QuizGameEntity> {
     return this.typeOrmQuizGameRepository
       .createQueryBuilder('game')
       .select('game')

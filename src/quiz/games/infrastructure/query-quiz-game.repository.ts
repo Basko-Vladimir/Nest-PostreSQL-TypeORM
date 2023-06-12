@@ -34,7 +34,7 @@ export class QueryQuizGameRepository {
       })
       .getOne();
 
-    return mapQuizGameEntityToQuizGameOutputModel(currentGame);
+    return currentGame && mapQuizGameEntityToQuizGameOutputModel(currentGame);
   }
 
   private createSelectQueryBuilder(): SelectQueryBuilder<QuizGameEntity> {

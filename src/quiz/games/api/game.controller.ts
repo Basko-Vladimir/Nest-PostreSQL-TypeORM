@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  NotFoundException,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -33,7 +34,13 @@ export class GameController {
   async getCurrentGame(
     @User('id') userId: string,
   ): Promise<IQuizGameOutputModel> {
-    return this.queryQuizGameRepository.getCurrentGame(userId);
+    const currentGame = await this.queryQuizGameRepository.getCurrentGame(
+      userId,
+    );
+
+    if (!currentGame) throw new NotFoundException();
+
+    return currentGame;
   }
 
   @Get(':id')

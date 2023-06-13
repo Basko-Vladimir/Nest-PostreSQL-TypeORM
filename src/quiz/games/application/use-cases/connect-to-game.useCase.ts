@@ -1,7 +1,7 @@
 import { UserEntity } from '../../../../users/entities/db-entities/user.entity';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { QuizGameRepository } from '../../infrastructure/quiz-game.repository';
-import { QuizQuestionsRepository } from '../../../questions/infrastructure/quiz-questions.repository';
+import { QuizAdminQuestionsRepository } from '../../../questions/infrastructure/quiz-admin-questions.repository';
 import { QuizGameEntity } from '../../entities/quiz-game.entity';
 
 export class ConnectToGameCommand {
@@ -14,7 +14,7 @@ export class ConnectToGameUseCase
 {
   constructor(
     private quizGameRepository: QuizGameRepository,
-    private quizQuestionsRepository: QuizQuestionsRepository,
+    private quizQuestionsRepository: QuizAdminQuestionsRepository,
   ) {}
 
   async execute(command: ConnectToGameCommand): Promise<string> {

@@ -21,7 +21,18 @@ export class QuizGameRepository {
   async checkExistingActiveGame(userId: string): Promise<QuizGameEntity> {
     return this.typeOrmQuizGameRepository
       .createQueryBuilder('game')
-      .select('game')
+      .leftJoin('game.questions', 'question')
+      .leftJoin('game.users', 'user')
+      .leftJoin('game.answers', 'answer')
+      .select([
+        'game',
+        'question.id',
+        'question.body',
+        'question.correctAnswers',
+        'user.id',
+        'user.login',
+        'answer',
+      ])
       .where(
         new Brackets((qb) => {
           qb.where('game.firstPlayerId = :firstUserId', {
@@ -50,7 +61,18 @@ export class QuizGameRepository {
   async findGameById(gameId: string): Promise<QuizGameEntity> {
     return this.typeOrmQuizGameRepository
       .createQueryBuilder('game')
-      .select('game')
+      .leftJoin('game.questions', 'question')
+      .leftJoin('game.users', 'user')
+      .leftJoin('game.answers', 'answer')
+      .select([
+        'game',
+        'question.id',
+        'question.body',
+        'question.correctAnswers',
+        'user.id',
+        'user.login',
+        'answer',
+      ])
       .where('game.id = :gameId', { gameId })
       .getOne();
   }
@@ -105,6 +127,40 @@ export class QuizGameRepository {
       .insert()
       .into(GameUserEntity)
       .values({ userId, gameId })
+      .execute();
+  }
+
+  async finishGame(
+    gameId: string,
+    isFirstUser: boolean,
+    score: number,
+  ): Promise<void> {
+    const updatedField = isFirstUser ? 'firstPlayerScore' : 'secondPlayerScore';
+
+    await this.typeOrmQuizGameRepository
+      .createQueryBuilder('game')
+      .update(QuizGameEntity)
+      .set({
+        status: QuizGameStatus.FINISHED,
+        finishGameDate: new Date(),
+        [updatedField]: score,
+      })
+      .where('game.id = :gameId', { gameId })
+      .execute();
+  }
+
+  async updateScore(
+    gameId: string,
+    isFirstUser: boolean,
+    score: number,
+  ): Promise<void> {
+    const updatedField = isFirstUser ? 'firstPlayerScore' : 'secondPlayerScore';
+
+    await this.typeOrmQuizGameRepository
+      .createQueryBuilder('game')
+      .update(QuizGameEntity)
+      .set({ [updatedField]: score })
+      .where('game.id = :gameId', { gameId })
       .execute();
   }
 }

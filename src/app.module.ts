@@ -86,7 +86,7 @@ import { GetAllBloggerCommentsUseCase } from './comments/application/use-cases/g
 import { QuizQuestionEntity } from './quiz/questions/entities/quiz-question.entity';
 import { AdminQuestionsController } from './quiz/questions/api/admin-questions.controller';
 import { QueryAdminQuizQuestionsRepository } from './quiz/questions/infrastructure/query-admin-quiz-quetions.repository';
-import { QuizQuestionsRepository } from './quiz/questions/infrastructure/quiz-questions.repository';
+import { QuizAdminQuestionsRepository } from './quiz/questions/infrastructure/quiz-admin-questions.repository';
 import { CreateQuizQuestionUseCase } from './quiz/questions/application/use-cases/create-quiz-question.useCase';
 import { DeleteQuizQuestionUseCase } from './quiz/questions/application/use-cases/delete-quiz-question.useCase';
 import { UpdateQuizQuestionUseCase } from './quiz/questions/application/use-cases/update-quiz-question.useCase';
@@ -99,6 +99,8 @@ import { QuizGameRepository } from './quiz/games/infrastructure/quiz-game.reposi
 import { QueryQuizGameRepository } from './quiz/games/infrastructure/query-quiz-game.repository';
 import { GameQuestionEntity } from './quiz/games/entities/game-question.entity';
 import { GameUserEntity } from './quiz/games/entities/game-user.entity';
+import { GiveAnswerUseCase } from './quiz/answers/application/use-cases/give-answer.useCase';
+import { QuizAnswerRepository } from './quiz/answers/infrastructure/quiz-answer.repository';
 
 const useCases = [
   RegisterUserUseCase,
@@ -145,6 +147,7 @@ const useCases = [
   UpdateQuizQuestionUseCase,
   UpdateQuizQuestionPublishStatusUseCase,
   ConnectToGameUseCase,
+  GiveAnswerUseCase,
 ];
 
 @Module({
@@ -219,10 +222,11 @@ const useCases = [
     QueryCommentsRepository,
     LikesRepository,
     QueryLikesRepository,
-    QuizQuestionsRepository,
+    QuizAdminQuestionsRepository,
     QueryAdminQuizQuestionsRepository,
     QuizGameRepository,
     QueryQuizGameRepository,
+    QuizAnswerRepository,
     ...useCases,
   ],
 })

@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   ForbiddenException,
   Get,
@@ -21,6 +22,10 @@ import { DoubleParticipateToGameGuard } from '../../../common/guards/double-part
 import { CheckExistingEntityGuard } from '../../../common/guards/check-existing-entity.guard';
 import { ParamIdType } from '../../../common/decorators/param-id-type.decorator';
 import { IdTypes } from '../../../common/enums';
+import { IAnswerOutputModel } from '../../answers/api/dto/answer-output-models.dto';
+import { CheckParticipationInGameGuard } from '../../../common/guards/check-participation-in-game.guard';
+import { CreateAnswerDto } from '../../answers/api/dto/create-answer.dto';
+import { GiveAnswerCommand } from '../../answers/application/use-cases/give-answer.useCase';
 
 @Controller('pair-game-quiz/pairs')
 @UseGuards(BearerAuthGuard)
@@ -69,5 +74,18 @@ export class GameController {
     );
 
     return this.queryQuizGameRepository.findQuizGameById(actualGameId);
+  }
+
+  @Post('my-current/answers')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(CheckParticipationInGameGuard)
+  async giveAnswer(
+    @Body() createAnswerDto: CreateAnswerDto,
+    @User('id') userId: string,
+    @QuizGame() game: QuizGameEntity,
+  ): Promise<IAnswerOutputModel> {
+    return this.commandBus.execute(
+      new GiveAnswerCommand(userId, game, createAnswerDto.answer),
+    );
   }
 }

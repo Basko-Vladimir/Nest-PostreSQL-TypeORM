@@ -5,7 +5,7 @@ import { QuizQuestionEntity } from '../entities/quiz-question.entity';
 import { QUESTIONS_AMOUNT_IN_ONE_GAME } from '../../../common/constants';
 
 @Injectable()
-export class QuizQuestionsRepository {
+export class QuizAdminQuestionsRepository {
   constructor(
     @InjectRepository(QuizQuestionEntity)
     private typeOrmQuizQuestionRepository: Repository<QuizQuestionEntity>,

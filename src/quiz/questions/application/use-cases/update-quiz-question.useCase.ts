@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { QuizQuestionsRepository } from '../../infrastructure/quiz-questions.repository';
+import { QuizAdminQuestionsRepository } from '../../infrastructure/quiz-admin-questions.repository';
 import { UpdateQuizQuestionDto } from '../../api/dto/update-quiz-question.dto';
 
 export class UpdateQuizQuestionCommand {
@@ -13,7 +13,7 @@ export class UpdateQuizQuestionCommand {
 export class UpdateQuizQuestionUseCase
   implements ICommandHandler<UpdateQuizQuestionCommand>
 {
-  constructor(private quizQuestionsRepository: QuizQuestionsRepository) {}
+  constructor(private quizQuestionsRepository: QuizAdminQuestionsRepository) {}
 
   execute(command: UpdateQuizQuestionCommand): Promise<void> {
     const {

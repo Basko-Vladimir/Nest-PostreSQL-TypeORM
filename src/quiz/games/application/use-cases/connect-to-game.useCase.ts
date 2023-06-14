@@ -3,6 +3,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { QuizGameRepository } from '../../infrastructure/quiz-game.repository';
 import { QuizAdminQuestionsRepository } from '../../../questions/infrastructure/quiz-admin-questions.repository';
 import { QuizGameEntity } from '../../entities/quiz-game.entity';
+import { generateCustomBadRequestException } from '../../../../common/utils';
 
 export class ConnectToGameCommand {
   constructor(public user: UserEntity, public startedGame: QuizGameEntity) {}
@@ -23,6 +24,14 @@ export class ConnectToGameUseCase
     if (startedGame) {
       const questions =
         await this.quizQuestionsRepository.findRandomQuestions();
+
+      if (!questions.length) {
+        throw generateCustomBadRequestException(
+          'Questions are not found!',
+          'questions',
+        );
+      }
+
       const questionIds = questions.map((item) => item.id);
 
       await this.quizGameRepository.createGameUser(startedGame.id, user.id);

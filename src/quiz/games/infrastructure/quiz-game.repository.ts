@@ -139,6 +139,24 @@ export class QuizGameRepository {
       .execute();
   }
 
+  async deleteAllGames(): Promise<void> {
+    await this.typeOrmGameQuestionRepository
+      .createQueryBuilder('gameQuestion')
+      .delete()
+      .from(GameQuestionEntity)
+      .execute();
+    await this.typeOrmGameUserRepository
+      .createQueryBuilder('gameUser')
+      .delete()
+      .from(GameUserEntity)
+      .execute();
+    await this.typeOrmQuizGameRepository
+      .createQueryBuilder('game')
+      .delete()
+      .from(QuizGameEntity)
+      .execute();
+  }
+
   private createSelectQueryBuilder(): SelectQueryBuilder<QuizGameEntity> {
     return this.typeOrmQuizGameRepository
       .createQueryBuilder('game')

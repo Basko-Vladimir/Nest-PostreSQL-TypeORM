@@ -12,11 +12,13 @@ export const mapQuizGameEntityToQuizGameOutputModel = (
   return {
     id: game.id,
     firstPlayerProgress: {
-      answers: game.answers.map((answer) => ({
-        questionId: answer.questionId,
-        answerStatus: answer.status,
-        addedAt: answer.createdAt.toISOString(),
-      })),
+      answers: game.answers
+        .filter((answer) => answer.playerId === game.firstPlayerId)
+        .map((answer) => ({
+          questionId: answer.questionId,
+          answerStatus: answer.status,
+          addedAt: answer.createdAt.toISOString(),
+        })),
       player: {
         id: game.firstPlayerId,
         login: firstPlayer.login,
@@ -25,11 +27,13 @@ export const mapQuizGameEntityToQuizGameOutputModel = (
     },
     secondPlayerProgress: game.secondPlayerId
       ? {
-          answers: game.answers.map((answer) => ({
-            questionId: answer.questionId,
-            answerStatus: answer.status,
-            addedAt: answer.createdAt.toISOString(),
-          })),
+          answers: game.answers
+            .filter((answer) => answer.playerId === game.secondPlayerId)
+            .map((answer) => ({
+              questionId: answer.questionId,
+              answerStatus: answer.status,
+              addedAt: answer.createdAt.toISOString(),
+            })),
           player: {
             id: game.secondPlayerId,
             login: secondPlayer?.login,

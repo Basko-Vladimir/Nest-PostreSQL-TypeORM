@@ -4,7 +4,7 @@ import {
   IQuizQuestionOutputModel,
 } from '../api/dto/quiz-questions-output-models.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { QuizQuestionEntity } from '../entities/quizQuestionEntity';
+import { QuizQuestionEntity } from '../entities/quiz-question.entity';
 import { Repository } from 'typeorm';
 import { mapQuizQuestionEntityToQuizQuestionOutputModel } from '../mappers/quiz-questions.mapper';
 import { QuizQuestionsQueryParamsDto } from '../api/dto/quiz-questions-query-params.dto';

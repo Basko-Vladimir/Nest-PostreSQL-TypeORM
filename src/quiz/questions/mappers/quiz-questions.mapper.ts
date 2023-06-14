@@ -1,10 +1,10 @@
-import { QuizQuestionEntity } from '../entities/quizQuestionEntity';
+import { QuizQuestionEntity } from '../entities/quiz-question.entity';
 import { IQuizQuestionOutputModel } from '../api/dto/quiz-questions-output-models.dto';
 
 export const mapQuizQuestionEntityToQuizQuestionOutputModel = (
   question: QuizQuestionEntity,
 ): IQuizQuestionOutputModel => {
-  const correctAnswers: string[] = JSON.parse(question.answers);
+  const correctAnswers: string[] = JSON.parse(question.correctAnswers);
 
   return {
     id: question.id,

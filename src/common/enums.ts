@@ -61,6 +61,7 @@ export enum IdTypes {
   USER_ID = 'userId',
   COMMENT_ID = 'commentId',
   QUIZ_QUESTION_ID = 'quizQuestionId',
+  QUIZ_GAME_ID = 'quizGameId',
 }
 
 export enum BanStatus {
@@ -79,4 +80,15 @@ export enum Roles {
   ADMIN = 'admin',
   BLOGGER = 'blogger',
   PUBLIC_USER = 'user',
+}
+
+export enum QuizGameStatus {
+  PENDING_SECOND_PLAYER = 'PendingSecondPlayer',
+  ACTIVE = 'Active',
+  FINISHED = 'Finished',
+}
+
+export enum AnswerStatus {
+  CORRECT = 'Correct',
+  INCORRECT = 'Incorrect',
 }

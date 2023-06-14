@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Brackets, Repository } from 'typeorm';
+import { Brackets, Repository, SelectQueryBuilder } from 'typeorm';
 import { QuizGameEntity } from '../entities/quiz-game.entity';
 import { UserEntity } from '../../../users/entities/db-entities/user.entity';
 import { QuizGameStatus } from '../../../common/enums';
@@ -19,20 +19,7 @@ export class QuizGameRepository {
   ) {}
 
   async checkExistingActiveGame(userId: string): Promise<QuizGameEntity> {
-    return this.typeOrmQuizGameRepository
-      .createQueryBuilder('game')
-      .leftJoin('game.questions', 'question')
-      .leftJoin('game.users', 'user')
-      .leftJoin('game.answers', 'answer')
-      .select([
-        'game',
-        'question.id',
-        'question.body',
-        'question.correctAnswers',
-        'user.id',
-        'user.login',
-        'answer',
-      ])
+    return this.createSelectQueryBuilder()
       .where(
         new Brackets((qb) => {
           qb.where('game.firstPlayerId = :firstUserId', {
@@ -59,20 +46,7 @@ export class QuizGameRepository {
   }
 
   async findGameById(gameId: string): Promise<QuizGameEntity> {
-    return this.typeOrmQuizGameRepository
-      .createQueryBuilder('game')
-      .leftJoin('game.questions', 'question')
-      .leftJoin('game.users', 'user')
-      .leftJoin('game.answers', 'answer')
-      .select([
-        'game',
-        'question.id',
-        'question.body',
-        'question.correctAnswers',
-        'user.id',
-        'user.login',
-        'answer',
-      ])
+    return this.createSelectQueryBuilder()
       .where('game.id = :gameId', { gameId })
       .addOrderBy('answer.createdAt', 'DESC')
       .getOne();
@@ -163,5 +137,22 @@ export class QuizGameRepository {
       .set({ [updatedField]: score })
       .where('game.id = :gameId', { gameId })
       .execute();
+  }
+
+  private createSelectQueryBuilder(): SelectQueryBuilder<QuizGameEntity> {
+    return this.typeOrmQuizGameRepository
+      .createQueryBuilder('game')
+      .leftJoin('game.questions', 'question')
+      .leftJoin('game.users', 'user')
+      .leftJoin('game.answers', 'answer')
+      .select([
+        'game',
+        'question.id',
+        'question.body',
+        'question.correctAnswers',
+        'user.id',
+        'user.login',
+        'answer',
+      ]);
   }
 }

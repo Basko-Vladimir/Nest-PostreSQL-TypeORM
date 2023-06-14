@@ -74,6 +74,7 @@ export class QuizGameRepository {
         'answer',
       ])
       .where('game.id = :gameId', { gameId })
+      .addOrderBy('answer.createdAt', 'DESC')
       .getOne();
   }
 

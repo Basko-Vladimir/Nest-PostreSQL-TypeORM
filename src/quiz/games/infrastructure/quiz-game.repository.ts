@@ -6,7 +6,6 @@ import { UserEntity } from '../../../users/entities/db-entities/user.entity';
 import { QuizGameStatus } from '../../../common/enums';
 import { GameQuestionEntity } from '../entities/game-question.entity';
 import { GameUserEntity } from '../entities/game-user.entity';
-import { QuizAnswerEntity } from '../../answers/entities/quiz-answer.entity';
 
 @Injectable()
 export class QuizGameRepository {
@@ -163,7 +162,7 @@ export class QuizGameRepository {
   ): Promise<void> {
     const updatedField = isFirstUser ? 'firstPlayerScore' : 'secondPlayerScore';
     const typeOrmQuizGameRepository =
-      queryRunner.manager.getRepository(QuizAnswerEntity);
+      queryRunner.manager.getRepository(QuizGameEntity);
 
     await typeOrmQuizGameRepository
       .createQueryBuilder('game')

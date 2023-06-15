@@ -5,6 +5,7 @@ import { AnswerStatus } from '../../../../common/enums';
 import { QUESTIONS_AMOUNT_IN_ONE_GAME } from '../../../../common/constants';
 import { QuizGameRepository } from '../../../games/infrastructure/quiz-game.repository';
 import { mapQuizAnswerEntityToQuizAnswerOutputModel } from '../../mappers/quiz-answer.mapper';
+import { AppService } from '../../../../app.service';
 
 export class GiveAnswerCommand {
   constructor(
@@ -19,6 +20,7 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
   constructor(
     private quizAnswerRepository: QuizAnswerRepository,
     private quizGameRepository: QuizGameRepository,
+    private appService: AppService,
   ) {}
 
   async execute(command: GiveAnswerCommand): Promise<any> {
@@ -34,38 +36,56 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
     const status = correctAnswers.includes(body.toLowerCase())
       ? AnswerStatus.CORRECT
       : AnswerStatus.INCORRECT;
+    const queryRunner = await this.appService.startTransaction();
+    let savedAnswer;
 
-    if (status === AnswerStatus.CORRECT) {
-      await this.quizGameRepository.updateScore(
+    try {
+      savedAnswer = await this.quizAnswerRepository.createAnswer(
         game.id,
-        isCurrentUserFirst,
-        isCurrentUserFirst
-          ? game.firstPlayerScore + 1
-          : game.secondPlayerScore + 1,
+        userId,
+        currentQuestion.id,
+        body,
+        status,
+        queryRunner,
       );
-    }
 
-    const savedAnswer = await this.quizAnswerRepository.createAnswer(
-      game.id,
-      userId,
-      currentQuestion.id,
-      body,
-      status,
-    );
-    const actualStateGame = await this.quizGameRepository.findGameById(game.id);
-    const isFirstPlayerQuicker =
-      actualStateGame.answers[0].playerId === actualStateGame.secondPlayerId;
+      if (status === AnswerStatus.CORRECT) {
+        await this.quizGameRepository.updateScore(
+          game.id,
+          isCurrentUserFirst,
+          isCurrentUserFirst
+            ? game.firstPlayerScore + 1
+            : game.secondPlayerScore + 1,
+          queryRunner,
+        );
+      }
 
-    if (actualStateGame.answers.length === 2 * QUESTIONS_AMOUNT_IN_ONE_GAME) {
-      await this.quizGameRepository.finishGame(
-        actualStateGame.id,
-        isFirstPlayerQuicker,
-        isFirstPlayerQuicker
-          ? actualStateGame.firstPlayerScore + 1
-          : actualStateGame.secondPlayerScore + 1,
+      const actualStateGame = await this.quizGameRepository.findGameById(
+        game.id,
+        queryRunner,
       );
-    }
+      const isFirstPlayerQuicker =
+        actualStateGame.answers[0].playerId === actualStateGame.secondPlayerId;
 
-    return mapQuizAnswerEntityToQuizAnswerOutputModel(savedAnswer);
+      if (actualStateGame.answers.length === 2 * QUESTIONS_AMOUNT_IN_ONE_GAME) {
+        await this.quizGameRepository.finishGame(
+          actualStateGame.id,
+          isFirstPlayerQuicker,
+          isFirstPlayerQuicker
+            ? actualStateGame.firstPlayerScore + 1
+            : actualStateGame.secondPlayerScore + 1,
+          queryRunner,
+        );
+      }
+
+      await queryRunner.commitTransaction();
+
+      return mapQuizAnswerEntityToQuizAnswerOutputModel(savedAnswer);
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      console.error(e);
+    } finally {
+      await queryRunner.release();
+    }
   }
 }

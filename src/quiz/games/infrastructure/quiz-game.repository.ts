@@ -6,6 +6,7 @@ import { UserEntity } from '../../../users/entities/db-entities/user.entity';
 import { QuizGameStatus } from '../../../common/enums';
 import { GameQuestionEntity } from '../entities/game-question.entity';
 import { GameUserEntity } from '../entities/game-user.entity';
+import { QuizAnswerEntity } from '../../answers/entities/quiz-answer.entity';
 
 @Injectable()
 export class QuizGameRepository {
@@ -45,8 +46,11 @@ export class QuizGameRepository {
       .getOne();
   }
 
-  async findGameById(gameId: string): Promise<QuizGameEntity> {
-    return this.createSelectQueryBuilder()
+  async findGameById(
+    gameId: string,
+    queryRunner?: QueryRunner,
+  ): Promise<QuizGameEntity> {
+    return this.createSelectQueryBuilder(queryRunner)
       .where('game.id = :gameId', { gameId })
       .addOrderBy('answer.createdAt', 'DESC')
       .getOne();
@@ -133,10 +137,13 @@ export class QuizGameRepository {
     gameId: string,
     isFirstUser: boolean,
     score: number,
+    queryRunner: QueryRunner,
   ): Promise<void> {
     const updatedField = isFirstUser ? 'firstPlayerScore' : 'secondPlayerScore';
+    const typeOrmQuizGameRepository =
+      queryRunner.manager.getRepository(QuizGameEntity);
 
-    await this.typeOrmQuizGameRepository
+    await typeOrmQuizGameRepository
       .createQueryBuilder('game')
       .update(QuizGameEntity)
       .set({
@@ -152,10 +159,13 @@ export class QuizGameRepository {
     gameId: string,
     isFirstUser: boolean,
     score: number,
+    queryRunner: QueryRunner,
   ): Promise<void> {
     const updatedField = isFirstUser ? 'firstPlayerScore' : 'secondPlayerScore';
+    const typeOrmQuizGameRepository =
+      queryRunner.manager.getRepository(QuizAnswerEntity);
 
-    await this.typeOrmQuizGameRepository
+    await typeOrmQuizGameRepository
       .createQueryBuilder('game')
       .update(QuizGameEntity)
       .set({ [updatedField]: score })
@@ -181,8 +191,14 @@ export class QuizGameRepository {
       .execute();
   }
 
-  private createSelectQueryBuilder(): SelectQueryBuilder<QuizGameEntity> {
-    return this.typeOrmQuizGameRepository
+  private createSelectQueryBuilder(
+    queryRunner?: QueryRunner,
+  ): SelectQueryBuilder<QuizGameEntity> {
+    const currentRepository = queryRunner
+      ? queryRunner.manager.getRepository(QuizGameEntity)
+      : this.typeOrmQuizGameRepository;
+
+    return currentRepository
       .createQueryBuilder('game')
       .leftJoin('game.questions', 'question')
       .leftJoin('game.users', 'user')

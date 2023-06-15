@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QuizAnswerEntity } from '../entities/quiz-answer.entity';
-import { Repository } from 'typeorm';
+import { QueryRunner, Repository } from 'typeorm';
 import { AnswerStatus } from '../../../common/enums';
 
 @Injectable()
@@ -17,9 +17,14 @@ export class QuizAnswerRepository {
     questionId: string,
     body: string,
     status: AnswerStatus,
+    queryRunner: QueryRunner,
   ): Promise<QuizAnswerEntity> {
-    const insertResult = await this.typeOrmQuizAnswerRepository
+    const typeOrmQuizAnswerRepository =
+      queryRunner.manager.getRepository(QuizAnswerEntity);
+
+    const insertResult = await typeOrmQuizAnswerRepository
       .createQueryBuilder('answer')
+      .setLock('pessimistic_write')
       .insert()
       .into(QuizAnswerEntity)
       .values({ gameId, playerId, questionId, body, status })

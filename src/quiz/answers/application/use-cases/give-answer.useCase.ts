@@ -65,7 +65,8 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
         queryRunner,
       );
       const isFirstPlayerQuicker =
-        actualStateGame.answers[0].playerId === actualStateGame.secondPlayerId;
+        actualStateGame.answers[actualStateGame.answers.length - 1].playerId ===
+        actualStateGame.secondPlayerId;
 
       if (actualStateGame.answers.length === 2 * QUESTIONS_AMOUNT_IN_ONE_GAME) {
         await this.quizGameRepository.finishGame(

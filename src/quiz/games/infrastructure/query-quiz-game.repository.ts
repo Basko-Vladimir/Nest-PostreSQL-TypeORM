@@ -17,7 +17,7 @@ export class QueryQuizGameRepository {
     const selectQueryBuilder = this.createSelectQueryBuilder();
     const currentGame = await selectQueryBuilder
       .where('game.id = :gameId', { gameId })
-      .addOrderBy('answer.createdAt', 'ASC')
+      // .addOrderBy('answer.createdAt', 'ASC')
       .addOrderBy('question.createdAt', 'ASC')
       .getOne();
 
@@ -45,7 +45,7 @@ export class QueryQuizGameRepository {
           });
         }),
       )
-      .addOrderBy('answer.createdAt', 'ASC')
+      // .addOrderBy('answer.createdAt', 'ASC')
       .addOrderBy('question.createdAt', 'ASC')
       .getOne();
 

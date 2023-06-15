@@ -49,10 +49,12 @@ export class QuizGameRepository {
     gameId: string,
     queryRunner?: QueryRunner,
   ): Promise<QuizGameEntity> {
-    return this.createSelectQueryBuilder(queryRunner)
-      .where('game.id = :gameId', { gameId })
-      .addOrderBy('answer.createdAt', 'DESC')
-      .getOne();
+    return (
+      this.createSelectQueryBuilder(queryRunner)
+        .where('game.id = :gameId', { gameId })
+        // .addOrderBy('answer.createdAt', 'DESC')
+        .getOne()
+    );
   }
 
   async createGame(

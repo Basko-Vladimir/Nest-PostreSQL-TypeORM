@@ -60,6 +60,7 @@ export class QuizGameRepository {
       queryRunner.manager.getRepository(QuizGameEntity);
     const insertResult = await typeOrmQuizGameRepository
       .createQueryBuilder()
+      .setLock('pessimistic_write')
       .insert()
       .into(QuizGameEntity)
       .values({

@@ -19,6 +19,7 @@ export class QuizAdminQuestionsRepository {
 
     return typeOrmQuizQuestionRepository
       .createQueryBuilder('question')
+      .setLock('pessimistic_write')
       .select('question')
       .where('question.isPublished = true')
       .orderBy('Random()')

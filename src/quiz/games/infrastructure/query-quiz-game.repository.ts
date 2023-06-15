@@ -18,6 +18,7 @@ export class QueryQuizGameRepository {
     const currentGame = await selectQueryBuilder
       .where('game.id = :gameId', { gameId })
       .addOrderBy('answer.createdAt', 'ASC')
+      .addOrderBy('question.createdAt', 'ASC')
       .getOne();
 
     return mapQuizGameEntityToQuizGameOutputModel(currentGame);
@@ -45,6 +46,7 @@ export class QueryQuizGameRepository {
         }),
       )
       .addOrderBy('answer.createdAt', 'ASC')
+      .addOrderBy('question.createdAt', 'ASC')
       .getOne();
 
     return currentGame && mapQuizGameEntityToQuizGameOutputModel(currentGame);
@@ -58,8 +60,8 @@ export class QueryQuizGameRepository {
       .leftJoin('game.answers', 'answer')
       .select([
         'game',
-        'question.id',
-        'question.body',
+        'question',
+        // 'question.body',
         'user.id',
         'user.login',
         'answer',

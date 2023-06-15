@@ -8,7 +8,7 @@ export const mapQuizGameEntityToQuizGameOutputModel = (
   const secondPlayer = game.users.find(
     (user) => user.id === game.secondPlayerId,
   );
-
+  console.log(game.questions);
   return {
     id: game.id,
     firstPlayerProgress: {
@@ -41,7 +41,9 @@ export const mapQuizGameEntityToQuizGameOutputModel = (
           score: game.secondPlayerScore,
         }
       : null,
-    questions: game.questions.length ? game.questions : null,
+    questions: game.questions.length
+      ? game.questions.map((item) => ({ id: item.id, body: item.body }))
+      : null,
     status: game.status,
     pairCreatedDate: game.createdAt.toISOString(),
     startGameDate: game.startGameDate ? game.startGameDate.toISOString() : null,

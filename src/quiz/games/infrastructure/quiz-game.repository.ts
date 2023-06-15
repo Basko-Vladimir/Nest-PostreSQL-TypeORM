@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Brackets, Repository, SelectQueryBuilder } from 'typeorm';
+import { Brackets, QueryRunner, Repository, SelectQueryBuilder } from 'typeorm';
 import { QuizGameEntity } from '../entities/quiz-game.entity';
 import { UserEntity } from '../../../users/entities/db-entities/user.entity';
 import { QuizGameStatus } from '../../../common/enums';
@@ -52,8 +52,13 @@ export class QuizGameRepository {
       .getOne();
   }
 
-  async createGame(firstPlayer: UserEntity): Promise<string> {
-    const insertResult = await this.typeOrmQuizGameRepository
+  async createGame(
+    firstPlayer: UserEntity,
+    queryRunner: QueryRunner,
+  ): Promise<string> {
+    const typeOrmQuizGameRepository =
+      queryRunner.manager.getRepository(QuizGameEntity);
+    const insertResult = await typeOrmQuizGameRepository
       .createQueryBuilder()
       .insert()
       .into(QuizGameEntity)
@@ -65,13 +70,20 @@ export class QuizGameRepository {
       .execute();
     const gameId = insertResult.identifiers[0].id;
 
-    await this.createGameUser(gameId, firstPlayer.id);
+    await this.createGameUser(gameId, firstPlayer.id, queryRunner);
 
     return gameId;
   }
 
-  async startGame(gameId: string, secondPlayer: UserEntity): Promise<void> {
-    await this.typeOrmQuizGameRepository
+  async startGame(
+    gameId: string,
+    secondPlayer: UserEntity,
+    queryRunner: QueryRunner,
+  ): Promise<void> {
+    const typeOrmQuizGameRepository =
+      queryRunner.manager.getRepository(QuizGameEntity);
+
+    await typeOrmQuizGameRepository
       .createQueryBuilder('game')
       .update(QuizGameEntity)
       .set({
@@ -87,8 +99,12 @@ export class QuizGameRepository {
   async createManyGameQuestions(
     gameId: string,
     questionIds: string[],
+    queryRunner: QueryRunner,
   ): Promise<void> {
-    await this.typeOrmGameQuestionRepository
+    const typeOrmGameQuestionRepository =
+      queryRunner.manager.getRepository(GameQuestionEntity);
+
+    await typeOrmGameQuestionRepository
       .createQueryBuilder()
       .insert()
       .into(GameQuestionEntity)
@@ -96,8 +112,15 @@ export class QuizGameRepository {
       .execute();
   }
 
-  async createGameUser(gameId: string, userId: string): Promise<void> {
-    await this.typeOrmGameUserRepository
+  async createGameUser(
+    gameId: string,
+    userId: string,
+    queryRunner: QueryRunner,
+  ): Promise<void> {
+    const typeOrmGameUserRepository =
+      queryRunner.manager.getRepository(GameUserEntity);
+
+    await typeOrmGameUserRepository
       .createQueryBuilder()
       .insert()
       .into(GameUserEntity)

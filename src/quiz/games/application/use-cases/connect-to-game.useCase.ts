@@ -4,6 +4,7 @@ import { QuizGameRepository } from '../../infrastructure/quiz-game.repository';
 import { QuizAdminQuestionsRepository } from '../../../questions/infrastructure/quiz-admin-questions.repository';
 import { QuizGameEntity } from '../../entities/quiz-game.entity';
 import { generateCustomBadRequestException } from '../../../../common/utils';
+import { AppService } from '../../../../app.service';
 
 export class ConnectToGameCommand {
   constructor(public user: UserEntity, public startedGame: QuizGameEntity) {}
@@ -16,34 +17,57 @@ export class ConnectToGameUseCase
   constructor(
     private quizGameRepository: QuizGameRepository,
     private quizQuestionsRepository: QuizAdminQuestionsRepository,
+    private appService: AppService,
   ) {}
 
   async execute(command: ConnectToGameCommand): Promise<string> {
     const { user, startedGame } = command;
+    const queryRunner = await this.appService.startTransaction();
+    let result;
 
-    if (startedGame) {
-      const questions =
-        await this.quizQuestionsRepository.findRandomQuestions();
+    try {
+      if (startedGame) {
+        const questions =
+          await this.quizQuestionsRepository.findRandomQuestions(queryRunner);
 
-      if (!questions.length) {
-        throw generateCustomBadRequestException(
-          'Questions are not found!',
-          'questions',
+        if (!questions.length) {
+          generateCustomBadRequestException(
+            'Questions are not found!',
+            'questions',
+          );
+        }
+
+        const questionIds = questions.map((item) => item.id);
+
+        await this.quizGameRepository.createGameUser(
+          startedGame.id,
+          user.id,
+          queryRunner,
         );
+        await this.quizGameRepository.createManyGameQuestions(
+          startedGame.id,
+          questionIds,
+          queryRunner,
+        );
+        await this.quizGameRepository.startGame(
+          startedGame.id,
+          user,
+          queryRunner,
+        );
+
+        result = startedGame.id;
+      } else {
+        result = this.quizGameRepository.createGame(user, queryRunner);
       }
 
-      const questionIds = questions.map((item) => item.id);
+      await queryRunner.commitTransaction();
 
-      await this.quizGameRepository.createGameUser(startedGame.id, user.id);
-      await this.quizGameRepository.createManyGameQuestions(
-        startedGame.id,
-        questionIds,
-      );
-      await this.quizGameRepository.startGame(startedGame.id, user);
-
-      return startedGame.id;
-    } else {
-      return this.quizGameRepository.createGame(user);
+      return result;
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      console.error(e);
+    } finally {
+      await queryRunner.release();
     }
   }
 }

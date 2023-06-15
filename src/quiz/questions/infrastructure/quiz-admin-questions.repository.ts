@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { QueryRunner, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QuizQuestionEntity } from '../entities/quiz-question.entity';
@@ -11,8 +11,13 @@ export class QuizAdminQuestionsRepository {
     private typeOrmQuizQuestionRepository: Repository<QuizQuestionEntity>,
   ) {}
 
-  async findRandomQuestions(): Promise<QuizQuestionEntity[]> {
-    return this.typeOrmQuizQuestionRepository
+  async findRandomQuestions(
+    queryRunner: QueryRunner,
+  ): Promise<QuizQuestionEntity[]> {
+    const typeOrmQuizQuestionRepository =
+      queryRunner.manager.getRepository(QuizQuestionEntity);
+
+    return typeOrmQuizQuestionRepository
       .createQueryBuilder('question')
       .select('question')
       .where('question.isPublished = true')

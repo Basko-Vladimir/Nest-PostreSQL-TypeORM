@@ -8,7 +8,7 @@ export const mapQuizGameEntityToQuizGameOutputModel = (
   const secondPlayer = game.users.find(
     (user) => user.id === game.secondPlayerId,
   );
-  console.log(game.questions);
+
   return {
     id: game.id,
     firstPlayerProgress: {

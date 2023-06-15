@@ -60,8 +60,8 @@ export class QueryQuizGameRepository {
       .leftJoin('game.answers', 'answer')
       .select([
         'game',
-        'question',
-        // 'question.body',
+        'question.id',
+        'question.body',
         'user.id',
         'user.login',
         'answer',

@@ -53,6 +53,7 @@ export class QuizGameRepository {
     return this.createSelectQueryBuilder(queryRunner)
       .where('game.id = :gameId', { gameId })
       .addOrderBy('answer.createdAt', 'ASC')
+      .addOrderBy('question.createdAt', 'ASC')
       .getOne();
   }
 

@@ -64,17 +64,28 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
         game.id,
         queryRunner,
       );
-      const isFirstPlayerQuicker =
-        actualStateGame.answers[actualStateGame.answers.length - 1].playerId ===
-        actualStateGame.secondPlayerId;
 
       if (actualStateGame.answers.length === 2 * QUESTIONS_AMOUNT_IN_ONE_GAME) {
+        const isFirstPlayerQuicker =
+          actualStateGame.answers[actualStateGame.answers.length - 1]
+            .playerId === actualStateGame.secondPlayerId;
+        const currentScore = isFirstPlayerQuicker
+          ? actualStateGame.firstPlayerScore
+          : actualStateGame.secondPlayerScore;
+        const hasOneCorrectAnswer = actualStateGame.answers.some((item) => {
+          const playerId = isFirstPlayerQuicker
+            ? actualStateGame.firstPlayerId
+            : actualStateGame.secondPlayerId;
+
+          return (
+            item.playerId === playerId && item.status === AnswerStatus.CORRECT
+          );
+        });
+
         await this.quizGameRepository.finishGame(
           actualStateGame.id,
           isFirstPlayerQuicker,
-          isFirstPlayerQuicker
-            ? actualStateGame.firstPlayerScore + 1
-            : actualStateGame.secondPlayerScore + 1,
+          currentScore + Number(hasOneCorrectAnswer),
           queryRunner,
         );
       }

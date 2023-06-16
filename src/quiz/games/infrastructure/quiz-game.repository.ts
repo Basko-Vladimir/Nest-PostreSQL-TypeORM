@@ -32,6 +32,7 @@ export class QuizGameRepository {
       .andWhere('game.status = :activeStatus', {
         activeStatus: QuizGameStatus.ACTIVE,
       })
+      .addOrderBy('answer.createdAt', 'ASC')
       .getOne();
   }
 

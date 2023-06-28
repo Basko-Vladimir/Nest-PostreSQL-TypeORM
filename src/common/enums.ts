@@ -45,7 +45,7 @@ export enum QuizQuestionsSortByField {
 }
 
 export enum QuizGameSortByField {
-  pairCreatedDate = 'pairCreatedDate',
+  pairCreatedDate = 'createdAt',
   startGameDate = 'startGameDate',
   finishGameDate = 'finishGameDate',
   status = 'status',

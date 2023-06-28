@@ -43,6 +43,7 @@ export class QueryQuizGameRepository {
     const skip = countSkipValue(pageNumber, pageSize);
     const dbSortDirection = getDbSortDirection(sortDirection);
     const filteredSelectQueryBuilder = this.createSelectQueryBuilder()
+      .addSelect(['question.createdAt'])
       .where(
         new Brackets((qb) => {
           qb.where('game.firstPlayerId = :firstPlayerId', {
@@ -64,9 +65,9 @@ export class QueryQuizGameRepository {
 
     const totalCount = await filteredSelectQueryBuilder.getCount();
     const myGames = await filteredSelectQueryBuilder
-      // .orderBy(`game.${sortBy}`, dbSortDirection)
-      // .addOrderBy('answer.createdAt', 'ASC')
-      // .addOrderBy('question.createdAt', 'ASC')
+      .orderBy(`game.${sortBy}`, dbSortDirection)
+      .addOrderBy('answer.createdAt', 'ASC')
+      .addOrderBy('question.createdAt', 'ASC')
       .take(pageSize)
       .skip(skip)
       .getMany();

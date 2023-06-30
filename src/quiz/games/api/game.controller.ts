@@ -7,6 +7,7 @@ import {
   HttpStatus,
   NotFoundException,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { BearerAuthGuard } from '../../../common/guards/bearer-auth.guard';
@@ -15,7 +16,10 @@ import { ConnectToGameCommand } from '../application/use-cases/connect-to-game.u
 import { User } from '../../../common/decorators/user.decorator';
 import { UserEntity } from '../../../users/entities/db-entities/user.entity';
 import { QueryQuizGameRepository } from '../infrastructure/query-quiz-game.repository';
-import { IQuizGameOutputModel } from './dto/quiz-game-output-models.dto';
+import {
+  AllMyGamesOutputModel,
+  IQuizGameOutputModel,
+} from './dto/quiz-game-output-models.dto';
 import { QuizGame } from '../../../common/decorators/game.decorator';
 import { QuizGameEntity } from '../entities/quiz-game.entity';
 import { DoubleParticipateToGameGuard } from '../../../common/guards/double-participate-to-game.guard';
@@ -26,6 +30,7 @@ import { IAnswerOutputModel } from '../../answers/api/dto/answer-output-models.d
 import { CheckParticipationInGameGuard } from '../../../common/guards/check-participation-in-game.guard';
 import { CreateAnswerDto } from '../../answers/api/dto/create-answer.dto';
 import { GiveAnswerCommand } from '../../answers/application/use-cases/give-answer.useCase';
+import { QuizGamesQueryParamsDto } from './dto/quiz-games-query-params.dto';
 
 @Controller('pair-game-quiz/pairs')
 @UseGuards(BearerAuthGuard)
@@ -34,6 +39,14 @@ export class GameController {
     private commandBus: CommandBus,
     private queryQuizGameRepository: QueryQuizGameRepository,
   ) {}
+
+  @Get('my')
+  async findAllMyGames(
+    @Query() queryParams: QuizGamesQueryParamsDto,
+    @User('id') userId: string,
+  ): Promise<AllMyGamesOutputModel> {
+    return this.queryQuizGameRepository.findAllMyGames(queryParams, userId);
+  }
 
   @Get('my-current')
   async getCurrentGame(

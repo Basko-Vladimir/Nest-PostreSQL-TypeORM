@@ -1,5 +1,6 @@
 import { IAnswerOutputModel } from '../../../answers/api/dto/answer-output-models.dto';
 import { QuizGameStatus } from '../../../../common/enums';
+import { AllEntitiesOutputModel } from '../../../../common/types';
 
 interface IPlayerProgress {
   answers: IAnswerOutputModel[];
@@ -20,3 +21,6 @@ export interface IQuizGameOutputModel {
   startGameDate: string;
   finishGameDate: string;
 }
+
+export type AllMyGamesOutputModel =
+  AllEntitiesOutputModel<IQuizGameOutputModel>;

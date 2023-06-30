@@ -79,6 +79,7 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
     @Req() request: Request,
   ): Promise<LoginOutputModel> {
+    console.log({ loginUserDto });
     const { accessToken, refreshToken, refreshTokenSettings } =
       await this.commandBus.execute(
         new LoginUserCommand(

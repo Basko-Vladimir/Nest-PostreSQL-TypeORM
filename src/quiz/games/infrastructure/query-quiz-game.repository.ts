@@ -66,6 +66,7 @@ export class QueryQuizGameRepository {
     const totalCount = await filteredSelectQueryBuilder.getCount();
     const myGames = await filteredSelectQueryBuilder
       .orderBy(`game.${sortBy}`, dbSortDirection)
+      .addOrderBy(`game.createdAt`, 'DESC')
       .addOrderBy('answer.createdAt', 'ASC')
       .addOrderBy('question.createdAt', 'ASC')
       // .skip(skip) //TODO: using take and skip with .addOrderBy together some results are cut ;(

@@ -43,7 +43,7 @@ export class QueryQuizGameRepository {
     const skip = countSkipValue(pageNumber, pageSize);
     const dbSortDirection = getDbSortDirection(sortDirection);
     const filteredSelectQueryBuilder = this.createSelectQueryBuilder()
-      .addSelect(['question.createdAt'])
+      .addSelect('question.createdAt')
       .where(
         new Brackets((qb) => {
           qb.where('game.firstPlayerId = :firstPlayerId', {
@@ -68,8 +68,8 @@ export class QueryQuizGameRepository {
       .orderBy(`game.${sortBy}`, dbSortDirection)
       .addOrderBy('answer.createdAt', 'ASC')
       .addOrderBy('question.createdAt', 'ASC')
-      .take(pageSize)
-      .skip(skip)
+      // .skip(skip) //TODO: using take and skip with .addOrderBy together some results are cut ;(
+      // .take(pageSize)
       .getMany();
 
     return {

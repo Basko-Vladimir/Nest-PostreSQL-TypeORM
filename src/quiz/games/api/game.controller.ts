@@ -19,6 +19,7 @@ import { QueryQuizGameRepository } from '../infrastructure/query-quiz-game.repos
 import {
   AllMyGamesOutputModel,
   IQuizGameOutputModel,
+  IStatisticOutputModel,
 } from './dto/quiz-game-output-models.dto';
 import { QuizGame } from '../../../common/decorators/game.decorator';
 import { QuizGameEntity } from '../entities/quiz-game.entity';
@@ -39,6 +40,11 @@ export class GameController {
     private commandBus: CommandBus,
     private queryQuizGameRepository: QueryQuizGameRepository,
   ) {}
+
+  @Get('my-statistic')
+  getMyStatistic(@User('id') userId: string): Promise<IStatisticOutputModel> {
+    return this.queryQuizGameRepository.getMyStatistic(userId);
+  }
 
   @Get('my')
   async findAllMyGames(

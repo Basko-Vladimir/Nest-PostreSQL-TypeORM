@@ -11,6 +11,15 @@ interface IPlayerProgress {
   score: number;
 }
 
+export interface IStatisticOutputModel {
+  sumScore: number;
+  avgScores: number;
+  gamesCount: number;
+  winsCount: number;
+  lossesCount: number;
+  drawsCount: number;
+}
+
 export interface IQuizGameOutputModel {
   id: string;
   firstPlayerProgress: IPlayerProgress;

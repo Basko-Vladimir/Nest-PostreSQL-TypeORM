@@ -6,6 +6,7 @@ import { mapQuizGameEntityToQuizGameOutputModel } from '../mappers/quiz-game.map
 import {
   AllMyGamesOutputModel,
   IQuizGameOutputModel,
+  IStatisticOutputModel,
 } from '../api/dto/quiz-game-output-models.dto';
 import {
   QuizGameSortByField,
@@ -29,6 +30,8 @@ export class QueryQuizGameRepository {
     @InjectRepository(QuizGameEntity)
     private typeOrmQuizGameRepository: Repository<QuizGameEntity>,
   ) {}
+
+  async getMyStatistic(userId: string): Promise<IStatisticOutputModel> {}
 
   async findAllMyGames(
     queryParams: QuizGamesQueryParamsDto,

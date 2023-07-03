@@ -108,20 +108,19 @@ export class QueryQuizGameRepository {
     const { gamesCountInfo, drawsCountInfo } = commonStatisticInfo;
     const {
       sumScoreAsFirstPlayer,
-      avgScoreAsFirstPlayer,
+      // avgScoreAsFirstPlayer,
       winsCountAsFirstPlayer,
     } = statisticInfoAsFirstPlayer;
     const {
       sumScoreAsSecondPlayer,
-      avgScoreAsSecondPlayer,
+      // avgScoreAsSecondPlayer,
       winsCountAsSecondPlayer,
     } = statisticInfoAsSecondPlayer;
     const gamesCount = Number(gamesCountInfo);
     const drawsCount = Number(drawsCountInfo);
     const sumScore =
       Number(sumScoreAsFirstPlayer) + Number(sumScoreAsSecondPlayer);
-    const avgScores =
-      Number(avgScoreAsFirstPlayer) + Number(avgScoreAsSecondPlayer);
+    const avgScores = Math.round((sumScore / gamesCount) * 100) / 100;
     const winsCount =
       Number(winsCountAsFirstPlayer) + Number(winsCountAsSecondPlayer);
     const lossesCount = gamesCount - winsCount - drawsCount;

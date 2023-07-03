@@ -55,19 +55,6 @@ export class QueryQuizGameRepository {
             .where('game.firstPlayerScore = game.secondPlayerScore'),
         'drawsCountInfo',
       )
-      .getRawOne();
-    const statisticInfoAsFirstPlayer = await this.typeOrmQuizGameRepository
-      .createQueryBuilder('game')
-      .select([
-        'SUM(game.firstPlayerScore) as "sumScoreAsFirstPlayer"',
-        'TRUNC(AVG(game.firstPlayerScore), 2) as "avgScoreAsFirstPlayer"',
-      ])
-      .where('game.firstPlayerId = :firstPlayerId', {
-        firstPlayerId: userId,
-      })
-      .andWhere('game.status = :finishedStatus', {
-        finishedStatus: QuizGameStatus.FINISHED,
-      })
       .addSelect(
         (qb) =>
           qb
@@ -79,19 +66,6 @@ export class QueryQuizGameRepository {
             }),
         'winsCountAsFirstPlayer',
       )
-      .getRawOne();
-    const statisticInfoAsSecondPlayer = await this.typeOrmQuizGameRepository
-      .createQueryBuilder('game')
-      .select([
-        'SUM(game.secondPlayerScore) as "sumScoreAsSecondPlayer"',
-        'ROUND(AVG(game.secondPlayerScore), 2) as "avgScoreAsSecondPlayer"',
-      ])
-      .where('game.secondPlayerId = :secondPlayerId', {
-        secondPlayerId: userId,
-      })
-      .andWhere('game.status = :finishedStatus', {
-        finishedStatus: QuizGameStatus.FINISHED,
-      })
       .addSelect(
         (qb) =>
           qb
@@ -103,19 +77,94 @@ export class QueryQuizGameRepository {
             }),
         'winsCountAsSecondPlayer',
       )
+      .addSelect(
+        (qb) =>
+          qb
+            .select('SUM(game.firstPlayerScore)')
+            .from(QuizGameEntity, 'game')
+            .where('game.firstPlayerId = :firstPlayerId', {
+              firstPlayerId: userId,
+            }),
+        'sumScoreAsFirstPlayer',
+      )
+      .addSelect(
+        (qb) =>
+          qb
+            .select('SUM(game.secondPlayerScore)')
+            .from(QuizGameEntity, 'game')
+            .where('game.secondPlayerId = :secondPlayerId', {
+              secondPlayerId: userId,
+            }),
+        'sumScoreAsSecondPlayer',
+      )
       .getRawOne();
+    // const statisticInfoAsFirstPlayer = await this.typeOrmQuizGameRepository
+    //   .createQueryBuilder('game')
+    //   .select([
+    //     'SUM(game.firstPlayerScore) as "sumScoreAsFirstPlayer"',
+    //     'TRUNC(AVG(game.firstPlayerScore), 2) as "avgScoreAsFirstPlayer"',
+    //   ])
+    //   .where('game.firstPlayerId = :firstPlayerId', {
+    //     firstPlayerId: userId,
+    //   })
+    //   .andWhere('game.status = :finishedStatus', {
+    //     finishedStatus: QuizGameStatus.FINISHED,
+    //   })
+    // .addSelect(
+    //   (qb) =>
+    //     qb
+    //       .select('COUNT(*)')
+    //       .from(QuizGameEntity, 'game')
+    //       .where('game.firstPlayerScore > game.secondPlayerScore')
+    //       .andWhere('game.firstPlayerId = :firstPlayerId', {
+    //         firstPlayerId: userId,
+    //       }),
+    //   'winsCountAsFirstPlayer',
+    // )
+    // .getRawOne();
+    // const statisticInfoAsSecondPlayer = await this.typeOrmQuizGameRepository
+    //   .createQueryBuilder('game')
+    //   .select([
+    //     'SUM(game.secondPlayerScore) as "sumScoreAsSecondPlayer"',
+    //     'ROUND(AVG(game.secondPlayerScore), 2) as "avgScoreAsSecondPlayer"',
+    //   ])
+    //   .where('game.secondPlayerId = :secondPlayerId', {
+    //     secondPlayerId: userId,
+    //   })
+    //   .andWhere('game.status = :finishedStatus', {
+    //     finishedStatus: QuizGameStatus.FINISHED,
+    //   })
+    // .addSelect(
+    //   (qb) =>
+    //     qb
+    //       .select('COUNT(*)')
+    //       .from(QuizGameEntity, 'game')
+    //       .where('game.firstPlayerScore < game.secondPlayerScore')
+    //       .andWhere('game.secondPlayerId = :secondPlayerId', {
+    //         secondPlayerId: userId,
+    //       }),
+    //   'winsCountAsSecondPlayer',
+    // )
+    // .getRawOne();
 
-    const { gamesCountInfo, drawsCountInfo } = commonStatisticInfo;
     const {
+      gamesCountInfo,
+      drawsCountInfo,
       sumScoreAsFirstPlayer,
-      // avgScoreAsFirstPlayer,
       winsCountAsFirstPlayer,
-    } = statisticInfoAsFirstPlayer;
-    const {
       sumScoreAsSecondPlayer,
-      // avgScoreAsSecondPlayer,
       winsCountAsSecondPlayer,
-    } = statisticInfoAsSecondPlayer;
+    } = commonStatisticInfo;
+    // const {
+    //   sumScoreAsFirstPlayer,
+    //   // avgScoreAsFirstPlayer,
+    //   winsCountAsFirstPlayer,
+    // } = statisticInfoAsFirstPlayer;
+    // const {
+    //   sumScoreAsSecondPlayer,
+    //   // avgScoreAsSecondPlayer,
+    //   winsCountAsSecondPlayer,
+    // } = statisticInfoAsSecondPlayer;
     const gamesCount = Number(gamesCountInfo);
     const drawsCount = Number(drawsCountInfo);
     const sumScore =

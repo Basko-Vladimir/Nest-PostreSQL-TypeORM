@@ -19,6 +19,7 @@ import { QueryQuizGameRepository } from '../infrastructure/query-quiz-game.repos
 import {
   AllMyGamesOutputModel,
   IQuizGameOutputModel,
+  IStatisticOutputModel,
 } from './dto/quiz-game-output-models.dto';
 import { QuizGame } from '../../../common/decorators/game.decorator';
 import { QuizGameEntity } from '../entities/quiz-game.entity';
@@ -32,7 +33,7 @@ import { CreateAnswerDto } from '../../answers/api/dto/create-answer.dto';
 import { GiveAnswerCommand } from '../../answers/application/use-cases/give-answer.useCase';
 import { QuizGamesQueryParamsDto } from './dto/quiz-games-query-params.dto';
 
-@Controller('pair-game-quiz/pairs')
+@Controller('pair-game-quiz')
 @UseGuards(BearerAuthGuard)
 export class GameController {
   constructor(
@@ -40,7 +41,12 @@ export class GameController {
     private queryQuizGameRepository: QueryQuizGameRepository,
   ) {}
 
-  @Get('my')
+  @Get('users/my-statistic')
+  getMyStatistic(@User('id') userId: string): Promise<IStatisticOutputModel> {
+    return this.queryQuizGameRepository.getMyStatistic(userId);
+  }
+
+  @Get('pairs/my')
   async findAllMyGames(
     @Query() queryParams: QuizGamesQueryParamsDto,
     @User('id') userId: string,
@@ -48,7 +54,7 @@ export class GameController {
     return this.queryQuizGameRepository.findAllMyGames(queryParams, userId);
   }
 
-  @Get('my-current')
+  @Get('pairs/my-current')
   async getCurrentGame(
     @User('id') userId: string,
   ): Promise<IQuizGameOutputModel> {
@@ -61,7 +67,7 @@ export class GameController {
     return currentGame;
   }
 
-  @Get(':id')
+  @Get('pairs/:id')
   @ParamIdType([IdTypes.QUIZ_GAME_ID])
   @UseGuards(CheckExistingEntityGuard)
   async findGameById(
@@ -75,7 +81,7 @@ export class GameController {
     return this.queryQuizGameRepository.findQuizGameById(game.id);
   }
 
-  @Post('connection')
+  @Post('pairs/connection')
   @HttpCode(HttpStatus.OK)
   @UseGuards(DoubleParticipateToGameGuard)
   async connectToGame(
@@ -89,7 +95,7 @@ export class GameController {
     return this.queryQuizGameRepository.findQuizGameById(actualGameId);
   }
 
-  @Post('my-current/answers')
+  @Post('pairs/my-current/answers')
   @HttpCode(HttpStatus.OK)
   @UseGuards(CheckParticipationInGameGuard)
   async giveAnswer(

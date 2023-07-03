@@ -6,6 +6,7 @@ import { mapQuizGameEntityToQuizGameOutputModel } from '../mappers/quiz-game.map
 import {
   AllMyGamesOutputModel,
   IQuizGameOutputModel,
+  IStatisticOutputModel,
 } from '../api/dto/quiz-game-output-models.dto';
 import {
   QuizGameSortByField,
@@ -29,6 +30,111 @@ export class QueryQuizGameRepository {
     @InjectRepository(QuizGameEntity)
     private typeOrmQuizGameRepository: Repository<QuizGameEntity>,
   ) {}
+
+  async getMyStatistic(userId: string): Promise<IStatisticOutputModel> {
+    const commonStatisticInfo = await this.typeOrmQuizGameRepository
+      .createQueryBuilder('game')
+      .select('COUNT(*) as "gamesCountInfo"')
+      .where(
+        new Brackets((qb) => {
+          qb.where('game.firstPlayerId = :firstPlayerId', {
+            firstPlayerId: userId,
+          }).orWhere('game.secondPlayerId = :secondPlayerId', {
+            secondPlayerId: userId,
+          });
+        }),
+      )
+      .andWhere('game.status = :finishedStatus', {
+        finishedStatus: QuizGameStatus.FINISHED,
+      })
+      .addSelect(
+        (qb) =>
+          qb
+            .select('COUNT(*)')
+            .from(QuizGameEntity, 'game')
+            .where('game.firstPlayerScore = game.secondPlayerScore'),
+        'drawsCountInfo',
+      )
+      .getRawOne();
+    const statisticInfoAsFirstPlayer = await this.typeOrmQuizGameRepository
+      .createQueryBuilder('game')
+      .select([
+        'SUM(game.firstPlayerScore) as "sumScoreAsFirstPlayer"',
+        'TRUNC(AVG(game.firstPlayerScore), 2) as "avgScoreAsFirstPlayer"',
+      ])
+      .where('game.firstPlayerId = :firstPlayerId', {
+        firstPlayerId: userId,
+      })
+      .andWhere('game.status = :finishedStatus', {
+        finishedStatus: QuizGameStatus.FINISHED,
+      })
+      .addSelect(
+        (qb) =>
+          qb
+            .select('COUNT(*)')
+            .from(QuizGameEntity, 'game')
+            .where('game.firstPlayerScore > game.secondPlayerScore')
+            .andWhere('game.firstPlayerId = :firstPlayerId', {
+              firstPlayerId: userId,
+            }),
+        'winsCountAsFirstPlayer',
+      )
+      .getRawOne();
+    const statisticInfoAsSecondPlayer = await this.typeOrmQuizGameRepository
+      .createQueryBuilder('game')
+      .select([
+        'SUM(game.secondPlayerScore) as "sumScoreAsSecondPlayer"',
+        'ROUND(AVG(game.secondPlayerScore), 2) as "avgScoreAsSecondPlayer"',
+      ])
+      .where('game.secondPlayerId = :secondPlayerId', {
+        secondPlayerId: userId,
+      })
+      .andWhere('game.status = :finishedStatus', {
+        finishedStatus: QuizGameStatus.FINISHED,
+      })
+      .addSelect(
+        (qb) =>
+          qb
+            .select('COUNT(*)')
+            .from(QuizGameEntity, 'game')
+            .where('game.firstPlayerScore < game.secondPlayerScore')
+            .andWhere('game.secondPlayerId = :secondPlayerId', {
+              secondPlayerId: userId,
+            }),
+        'winsCountAsSecondPlayer',
+      )
+      .getRawOne();
+
+    const { gamesCountInfo, drawsCountInfo } = commonStatisticInfo;
+    const {
+      sumScoreAsFirstPlayer,
+      avgScoreAsFirstPlayer,
+      winsCountAsFirstPlayer,
+    } = statisticInfoAsFirstPlayer;
+    const {
+      sumScoreAsSecondPlayer,
+      avgScoreAsSecondPlayer,
+      winsCountAsSecondPlayer,
+    } = statisticInfoAsSecondPlayer;
+    const gamesCount = Number(gamesCountInfo);
+    const drawsCount = Number(drawsCountInfo);
+    const sumScore =
+      Number(sumScoreAsFirstPlayer) + Number(sumScoreAsSecondPlayer);
+    const avgScores =
+      Number(avgScoreAsFirstPlayer) + Number(avgScoreAsSecondPlayer);
+    const winsCount =
+      Number(winsCountAsFirstPlayer) + Number(winsCountAsSecondPlayer);
+    const lossesCount = gamesCount - winsCount - drawsCount;
+
+    return {
+      sumScore,
+      avgScores,
+      gamesCount,
+      winsCount,
+      lossesCount,
+      drawsCount,
+    };
+  }
 
   async findAllMyGames(
     queryParams: QuizGamesQueryParamsDto,

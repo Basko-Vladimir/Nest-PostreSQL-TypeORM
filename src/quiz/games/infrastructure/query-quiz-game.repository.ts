@@ -23,6 +23,7 @@ import {
   getCommonInfoForQueryAllRequests,
   getDbSortDirection,
 } from '../../../common/utils';
+import { QuizUsersTopParamsDto } from '../api/dto/quiz-users-top-params.dto';
 
 @Injectable()
 export class QueryQuizGameRepository {
@@ -30,6 +31,12 @@ export class QueryQuizGameRepository {
     @InjectRepository(QuizGameEntity)
     private typeOrmQuizGameRepository: Repository<QuizGameEntity>,
   ) {}
+
+  async getUsersTop(queryParams: QuizUsersTopParamsDto): Promise<any> {
+    console.log(queryParams);
+
+    return;
+  }
 
   async getMyStatistic(userId: string): Promise<IStatisticOutputModel> {
     const statisticInfo = await this.typeOrmQuizGameRepository

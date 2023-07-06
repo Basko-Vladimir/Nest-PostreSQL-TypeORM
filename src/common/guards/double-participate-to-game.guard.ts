@@ -24,7 +24,9 @@ export class DoubleParticipateToGameGuard implements CanActivate {
     const startedGame =
       await this.quizGameRepository.findStartedGameWithPendingStatus();
 
-    if (startedGame && user.id === startedGame.firstPlayerId) {
+    if (
+      startedGame?.gameUsers.some((gameUser) => gameUser.userId === user.id)
+    ) {
       throw new ForbiddenException();
     }
 

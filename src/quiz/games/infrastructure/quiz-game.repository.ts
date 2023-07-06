@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, QueryRunner, Repository, SelectQueryBuilder } from 'typeorm';
 import { QuizGameEntity } from '../entities/quiz-game.entity';
 import { UserEntity } from '../../../users/entities/db-entities/user.entity';
-import { QuizGameStatus } from '../../../common/enums';
+import { PlayerNumber, QuizGameStatus } from '../../../common/enums';
 import { GameQuestionEntity } from '../entities/game-question.entity';
 import { GameUserEntity } from '../entities/game-user.entity';
 
@@ -20,15 +20,7 @@ export class QuizGameRepository {
 
   async checkExistingActiveGame(userId: string): Promise<QuizGameEntity> {
     return this.createSelectQueryBuilder()
-      .where(
-        new Brackets((qb) => {
-          qb.where('game.firstPlayerId = :firstUserId', {
-            firstUserId: userId,
-          }).orWhere('game.secondPlayerId = :secondUserId', {
-            secondUserId: userId,
-          });
-        }),
-      )
+      .where('gameUser.userId = :userId', { userId })
       .andWhere('game.status = :activeStatus', {
         activeStatus: QuizGameStatus.ACTIVE,
       })
@@ -40,7 +32,8 @@ export class QuizGameRepository {
   async findStartedGameWithPendingStatus(): Promise<QuizGameEntity> {
     return this.typeOrmQuizGameRepository
       .createQueryBuilder('game')
-      .select('game')
+      .leftJoin('game.gameUsers', 'gameUser')
+      .select(['game', 'gameUser'])
       .where('status = :status', {
         status: QuizGameStatus.PENDING_SECOND_PLAYER,
       })
@@ -70,16 +63,17 @@ export class QuizGameRepository {
       .insert()
       .into(QuizGameEntity)
       .values({
-        firstPlayerId: firstPlayer.id,
+        // firstPlayerId: firstPlayer.id,
         status: QuizGameStatus.PENDING_SECOND_PLAYER,
       })
       .returning('id')
       .execute();
-    const gameId = insertResult.identifiers[0].id;
 
-    await this.createGameUser(gameId, firstPlayer.id, queryRunner);
+    return insertResult.identifiers[0].id;
 
-    return gameId;
+    // await this.createGameUser(gameId, firstPlayer.id, queryRunner);
+
+    // return gameId;
   }
 
   async startGame(
@@ -94,8 +88,8 @@ export class QuizGameRepository {
       .createQueryBuilder('game')
       .update(QuizGameEntity)
       .set({
-        secondPlayerId: secondPlayer.id,
-        secondPlayerScore: 0,
+        // secondPlayerId: secondPlayer.id,
+        // secondPlayerScore: 0,
         status: QuizGameStatus.ACTIVE,
         startGameDate: new Date(),
       })
@@ -122,6 +116,7 @@ export class QuizGameRepository {
   async createGameUser(
     gameId: string,
     userId: string,
+    playerNumber: PlayerNumber,
     queryRunner: QueryRunner,
   ): Promise<void> {
     const typeOrmGameUserRepository =
@@ -131,7 +126,7 @@ export class QuizGameRepository {
       .createQueryBuilder()
       .insert()
       .into(GameUserEntity)
-      .values({ userId, gameId })
+      .values({ userId, gameId, playerNumber })
       .execute();
   }
 
@@ -203,8 +198,9 @@ export class QuizGameRepository {
     return currentRepository
       .createQueryBuilder('game')
       .leftJoin('game.questions', 'question')
-      .leftJoin('game.users', 'user')
       .leftJoin('game.answers', 'answer')
+      .leftJoin('game.gameUsers', 'gameUser')
+      .leftJoin('gameUser.user', 'user')
       .select([
         'game',
         'question.id',
@@ -213,6 +209,8 @@ export class QuizGameRepository {
         'user.id',
         'user.login',
         'answer',
+        'gameUser.score',
+        'gameUser.userId',
       ]);
   }
 }

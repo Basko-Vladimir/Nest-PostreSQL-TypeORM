@@ -225,8 +225,9 @@ export class QueryQuizGameRepository {
     return this.typeOrmQuizGameRepository
       .createQueryBuilder('game')
       .leftJoin('game.questions', 'question')
-      .leftJoin('game.users', 'user')
       .leftJoin('game.answers', 'answer')
+      .leftJoin('game.gameUsers', 'gameUser')
+      .leftJoin('gameUser.user', 'user')
       .select([
         'game',
         'question.id',
@@ -234,6 +235,7 @@ export class QueryQuizGameRepository {
         'user.id',
         'user.login',
         'answer',
+        'gameUser',
       ]);
   }
 }

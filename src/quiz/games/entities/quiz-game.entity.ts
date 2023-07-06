@@ -3,22 +3,10 @@ import { BaseEntity } from '../../../common/common-db-entities';
 import { QuizGameStatus } from '../../../common/enums';
 import { QuizQuestionEntity } from '../../questions/entities/quiz-question.entity';
 import { QuizAnswerEntity } from '../../answers/entities/quiz-answer.entity';
-import { UserEntity } from '../../../users/entities/db-entities/user.entity';
+import { GameUserEntity } from './game-user.entity';
 
 @Entity({ name: 'game' })
 export class QuizGameEntity extends BaseEntity {
-  @Column({ type: 'uuid' })
-  firstPlayerId: string;
-
-  @Column({ type: 'uuid', nullable: true, default: null })
-  secondPlayerId: string;
-
-  @Column({ type: 'integer', default: 0 })
-  firstPlayerScore: number;
-
-  @Column({ type: 'integer', default: 0 })
-  secondPlayerScore: number;
-
   @Column({
     type: 'enum',
     enum: QuizGameStatus,
@@ -45,7 +33,6 @@ export class QuizGameEntity extends BaseEntity {
   @JoinTable({ name: 'gameQuestion' })
   questions: QuizQuestionEntity[];
 
-  @ManyToMany(() => UserEntity, (userEntity) => userEntity.games)
-  @JoinTable({ name: 'gameUser' })
-  users: UserEntity[];
+  @OneToMany(() => GameUserEntity, (gameUserEntity) => gameUserEntity.game)
+  gameUsers: GameUserEntity[];
 }

@@ -3,7 +3,7 @@ import { Type } from 'class-transformer';
 
 export class QuizUsersTopParamsDto {
   @IsOptional()
-  readonly sort: string[];
+  readonly sort: string[] = ['avgScores desc', 'sumScore desc'];
 
   @IsOptional()
   @Type(() => Number)

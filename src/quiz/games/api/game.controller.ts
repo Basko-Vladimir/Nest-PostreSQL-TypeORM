@@ -42,41 +42,41 @@ export class GameController {
     private queryQuizGameRepository: QueryQuizGameRepository,
   ) {}
 
-  @Get('users/top')
-  getUsersTop(
-    @Query() queryParams: QuizUsersTopParamsDto,
-  ): Promise<UsersTopOutputModel> {
-    return this.queryQuizGameRepository.getUsersTop(queryParams);
-  }
-
-  @Get('users/my-statistic')
-  @UseGuards(BearerAuthGuard)
-  getMyStatistic(@User('id') userId: string): Promise<IStatisticOutputModel> {
-    return this.queryQuizGameRepository.getMyStatistic(userId);
-  }
-
-  @Get('pairs/my')
-  @UseGuards(BearerAuthGuard)
-  async findAllMyGames(
-    @Query() queryParams: QuizGamesQueryParamsDto,
-    @User('id') userId: string,
-  ): Promise<AllMyGamesOutputModel> {
-    return this.queryQuizGameRepository.findAllMyGames(queryParams, userId);
-  }
-
-  @Get('pairs/my-current')
-  @UseGuards(BearerAuthGuard)
-  async getCurrentGame(
-    @User('id') userId: string,
-  ): Promise<IQuizGameOutputModel> {
-    const currentGame = await this.queryQuizGameRepository.getCurrentGame(
-      userId,
-    );
-
-    if (!currentGame) throw new NotFoundException();
-
-    return currentGame;
-  }
+  // @Get('users/top')
+  // getUsersTop(
+  //   @Query() queryParams: QuizUsersTopParamsDto,
+  // ): Promise<UsersTopOutputModel> {
+  //   return this.queryQuizGameRepository.getUsersTop(queryParams);
+  // }
+  //
+  // @Get('users/my-statistic')
+  // @UseGuards(BearerAuthGuard)
+  // getMyStatistic(@User('id') userId: string): Promise<IStatisticOutputModel> {
+  //   return this.queryQuizGameRepository.getMyStatistic(userId);
+  // }
+  //
+  // @Get('pairs/my')
+  // @UseGuards(BearerAuthGuard)
+  // async findAllMyGames(
+  //   @Query() queryParams: QuizGamesQueryParamsDto,
+  //   @User('id') userId: string,
+  // ): Promise<AllMyGamesOutputModel> {
+  //   return this.queryQuizGameRepository.findAllMyGames(queryParams, userId);
+  // }
+  //
+  // @Get('pairs/my-current')
+  // @UseGuards(BearerAuthGuard)
+  // async getCurrentGame(
+  //   @User('id') userId: string,
+  // ): Promise<IQuizGameOutputModel> {
+  //   const currentGame = await this.queryQuizGameRepository.getCurrentGame(
+  //     userId,
+  //   );
+  //
+  //   if (!currentGame) throw new NotFoundException();
+  //
+  //   return currentGame;
+  // }
 
   @Get('pairs/:id')
   @ParamIdType([IdTypes.QUIZ_GAME_ID])
@@ -85,9 +85,9 @@ export class GameController {
     @User('id') userId: string,
     @QuizGame() game: QuizGameEntity,
   ): Promise<IQuizGameOutputModel> {
-    // if (userId !== game.firstPlayerId && userId !== game.secondPlayerId) {
-    //   throw new ForbiddenException();
-    // }
+    if (game.gameUsers.every((item) => item.userId !== userId)) {
+      throw new ForbiddenException();
+    }
 
     return this.queryQuizGameRepository.findQuizGameById(game.id);
   }

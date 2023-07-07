@@ -193,17 +193,17 @@ export class QueryQuizGameRepository {
     return mapQuizGameEntityToQuizGameOutputModel(currentGame);
   }
 
-  async getCurrentGame(userId: string): Promise<IQuizGameOutputModel> {
-    const selectQueryBuilder = this.createSelectQueryBuilder();
-    const currentGame = await selectQueryBuilder
+  async getCurrentGame(userId: string): Promise<any> {
+    const currentGame = await this.createSelectQueryBuilder()
       .where(
-        new Brackets((qb) => {
-          qb.where('game.firstPlayerId = :firstPlayerId', {
-            firstPlayerId: userId,
-          }).orWhere('game.secondPlayerId = :secondPlayerId', {
-            secondPlayerId: userId,
-          });
-        }),
+        `EXISTS (
+          SELECT 1
+          FROM "game" g
+            LEFT JOIN "gameUser" ON "g"."id" = "gameUser"."gameId"
+          WHERE "gameUser"."userId" = :userId
+            AND "gameUser"."gameId" = game.id
+        )`,
+        { userId },
       )
       .andWhere(
         new Brackets((qb) => {

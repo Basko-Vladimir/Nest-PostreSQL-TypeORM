@@ -63,20 +63,20 @@ export class GameController {
   // ): Promise<AllMyGamesOutputModel> {
   //   return this.queryQuizGameRepository.findAllMyGames(queryParams, userId);
   // }
-  //
-  // @Get('pairs/my-current')
-  // @UseGuards(BearerAuthGuard)
-  // async getCurrentGame(
-  //   @User('id') userId: string,
-  // ): Promise<IQuizGameOutputModel> {
-  //   const currentGame = await this.queryQuizGameRepository.getCurrentGame(
-  //     userId,
-  //   );
-  //
-  //   if (!currentGame) throw new NotFoundException();
-  //
-  //   return currentGame;
-  // }
+
+  @Get('pairs/my-current')
+  @UseGuards(BearerAuthGuard)
+  async getCurrentGame(
+    @User('id') userId: string,
+  ): Promise<IQuizGameOutputModel> {
+    const currentGame = await this.queryQuizGameRepository.getCurrentGame(
+      userId,
+    );
+
+    if (!currentGame) throw new NotFoundException();
+
+    return currentGame;
+  }
 
   @Get('pairs/:id')
   @ParamIdType([IdTypes.QUIZ_GAME_ID])

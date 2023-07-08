@@ -20,6 +20,7 @@ import {
   AllMyGamesOutputModel,
   IQuizGameOutputModel,
   IStatisticOutputModel,
+  UsersTopOutputModel,
 } from './dto/quiz-game-output-models.dto';
 import { QuizGame } from '../../../common/decorators/game.decorator';
 import { QuizGameEntity } from '../entities/quiz-game.entity';
@@ -32,29 +33,39 @@ import { CheckParticipationInGameGuard } from '../../../common/guards/check-part
 import { CreateAnswerDto } from '../../answers/api/dto/create-answer.dto';
 import { GiveAnswerCommand } from '../../answers/application/use-cases/give-answer.useCase';
 import { QuizGamesQueryParamsDto } from './dto/quiz-games-query-params.dto';
+import { QuizUsersTopParamsDto } from './dto/quiz-users-top-params.dto';
 
 @Controller('pair-game-quiz')
-@UseGuards(BearerAuthGuard)
 export class GameController {
   constructor(
     private commandBus: CommandBus,
     private queryQuizGameRepository: QueryQuizGameRepository,
   ) {}
 
-  @Get('users/my-statistic')
-  getMyStatistic(@User('id') userId: string): Promise<IStatisticOutputModel> {
-    return this.queryQuizGameRepository.getMyStatistic(userId);
-  }
-
-  @Get('pairs/my')
-  async findAllMyGames(
-    @Query() queryParams: QuizGamesQueryParamsDto,
-    @User('id') userId: string,
-  ): Promise<AllMyGamesOutputModel> {
-    return this.queryQuizGameRepository.findAllMyGames(queryParams, userId);
-  }
+  // @Get('users/top')
+  // getUsersTop(
+  //   @Query() queryParams: QuizUsersTopParamsDto,
+  // ): Promise<UsersTopOutputModel> {
+  //   return this.queryQuizGameRepository.getUsersTop(queryParams);
+  // }
+  //
+  // @Get('users/my-statistic')
+  // @UseGuards(BearerAuthGuard)
+  // getMyStatistic(@User('id') userId: string): Promise<IStatisticOutputModel> {
+  //   return this.queryQuizGameRepository.getMyStatistic(userId);
+  // }
+  //
+  // @Get('pairs/my')
+  // @UseGuards(BearerAuthGuard)
+  // async findAllMyGames(
+  //   @Query() queryParams: QuizGamesQueryParamsDto,
+  //   @User('id') userId: string,
+  // ): Promise<AllMyGamesOutputModel> {
+  //   return this.queryQuizGameRepository.findAllMyGames(queryParams, userId);
+  // }
 
   @Get('pairs/my-current')
+  @UseGuards(BearerAuthGuard)
   async getCurrentGame(
     @User('id') userId: string,
   ): Promise<IQuizGameOutputModel> {
@@ -69,12 +80,12 @@ export class GameController {
 
   @Get('pairs/:id')
   @ParamIdType([IdTypes.QUIZ_GAME_ID])
-  @UseGuards(CheckExistingEntityGuard)
+  @UseGuards(BearerAuthGuard, CheckExistingEntityGuard)
   async findGameById(
     @User('id') userId: string,
     @QuizGame() game: QuizGameEntity,
   ): Promise<IQuizGameOutputModel> {
-    if (userId !== game.firstPlayerId && userId !== game.secondPlayerId) {
+    if (game.gameUsers.every((item) => item.userId !== userId)) {
       throw new ForbiddenException();
     }
 
@@ -83,7 +94,7 @@ export class GameController {
 
   @Post('pairs/connection')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(DoubleParticipateToGameGuard)
+  @UseGuards(BearerAuthGuard, DoubleParticipateToGameGuard)
   async connectToGame(
     @User() user: UserEntity,
     @QuizGame() game: QuizGameEntity,
@@ -97,7 +108,7 @@ export class GameController {
 
   @Post('pairs/my-current/answers')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(CheckParticipationInGameGuard)
+  @UseGuards(BearerAuthGuard, CheckParticipationInGameGuard)
   async giveAnswer(
     @Body() createAnswerDto: CreateAnswerDto,
     @User('id') userId: string,

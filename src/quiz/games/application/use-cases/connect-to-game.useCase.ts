@@ -5,6 +5,7 @@ import { QuizAdminQuestionsRepository } from '../../../questions/infrastructure/
 import { QuizGameEntity } from '../../entities/quiz-game.entity';
 import { generateCustomBadRequestException } from '../../../../common/utils';
 import { AppService } from '../../../../app.service';
+import { PlayerNumber } from '../../../../common/enums';
 
 export class ConnectToGameCommand {
   constructor(public user: UserEntity, public startedGame: QuizGameEntity) {}
@@ -23,7 +24,7 @@ export class ConnectToGameUseCase
   async execute(command: ConnectToGameCommand): Promise<string> {
     const { user, startedGame } = command;
     const queryRunner = await this.appService.startTransaction();
-    let result;
+    let gameId;
 
     try {
       if (startedGame) {
@@ -42,6 +43,7 @@ export class ConnectToGameUseCase
         await this.quizGameRepository.createGameUser(
           startedGame.id,
           user.id,
+          PlayerNumber.TWO,
           queryRunner,
         );
         await this.quizGameRepository.createManyGameQuestions(
@@ -55,14 +57,20 @@ export class ConnectToGameUseCase
           queryRunner,
         );
 
-        result = startedGame.id;
+        gameId = startedGame.id;
       } else {
-        result = this.quizGameRepository.createGame(user, queryRunner);
+        gameId = await this.quizGameRepository.createGame(user, queryRunner);
+        await this.quizGameRepository.createGameUser(
+          gameId,
+          user.id,
+          PlayerNumber.ONE,
+          queryRunner,
+        );
       }
 
       await queryRunner.commitTransaction();
 
-      return result;
+      return gameId;
     } catch (e) {
       await queryRunner.rollbackTransaction();
       console.error(e);

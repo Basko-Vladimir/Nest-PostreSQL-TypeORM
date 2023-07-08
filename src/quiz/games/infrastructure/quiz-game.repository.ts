@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Brackets, QueryRunner, Repository, SelectQueryBuilder } from 'typeorm';
+import { QueryRunner, Repository, SelectQueryBuilder } from 'typeorm';
 import { QuizGameEntity } from '../entities/quiz-game.entity';
 import { UserEntity } from '../../../users/entities/db-entities/user.entity';
-import { QuizGameStatus } from '../../../common/enums';
+import { PlayerNumber, QuizGameStatus } from '../../../common/enums';
 import { GameQuestionEntity } from '../entities/game-question.entity';
 import { GameUserEntity } from '../entities/game-user.entity';
 
@@ -21,13 +21,14 @@ export class QuizGameRepository {
   async checkExistingActiveGame(userId: string): Promise<QuizGameEntity> {
     return this.createSelectQueryBuilder()
       .where(
-        new Brackets((qb) => {
-          qb.where('game.firstPlayerId = :firstUserId', {
-            firstUserId: userId,
-          }).orWhere('game.secondPlayerId = :secondUserId', {
-            secondUserId: userId,
-          });
-        }),
+        `EXISTS (
+          SELECT 1
+          FROM "game" g
+            LEFT JOIN "gameUser" ON "g"."id" = "gameUser"."gameId"
+          WHERE "gameUser"."userId" = :userId
+            AND "gameUser"."gameId" = game.id
+        )`,
+        { userId },
       )
       .andWhere('game.status = :activeStatus', {
         activeStatus: QuizGameStatus.ACTIVE,
@@ -40,7 +41,8 @@ export class QuizGameRepository {
   async findStartedGameWithPendingStatus(): Promise<QuizGameEntity> {
     return this.typeOrmQuizGameRepository
       .createQueryBuilder('game')
-      .select('game')
+      .leftJoin('game.gameUsers', 'gameUser')
+      .select(['game', 'gameUser'])
       .where('status = :status', {
         status: QuizGameStatus.PENDING_SECOND_PLAYER,
       })
@@ -70,16 +72,12 @@ export class QuizGameRepository {
       .insert()
       .into(QuizGameEntity)
       .values({
-        firstPlayerId: firstPlayer.id,
         status: QuizGameStatus.PENDING_SECOND_PLAYER,
       })
       .returning('id')
       .execute();
-    const gameId = insertResult.identifiers[0].id;
 
-    await this.createGameUser(gameId, firstPlayer.id, queryRunner);
-
-    return gameId;
+    return insertResult.identifiers[0].id;
   }
 
   async startGame(
@@ -94,8 +92,6 @@ export class QuizGameRepository {
       .createQueryBuilder('game')
       .update(QuizGameEntity)
       .set({
-        secondPlayerId: secondPlayer.id,
-        secondPlayerScore: 0,
         status: QuizGameStatus.ACTIVE,
         startGameDate: new Date(),
       })
@@ -122,6 +118,7 @@ export class QuizGameRepository {
   async createGameUser(
     gameId: string,
     userId: string,
+    playerNumber: PlayerNumber,
     queryRunner: QueryRunner,
   ): Promise<void> {
     const typeOrmGameUserRepository =
@@ -131,17 +128,11 @@ export class QuizGameRepository {
       .createQueryBuilder()
       .insert()
       .into(GameUserEntity)
-      .values({ userId, gameId })
+      .values({ userId, gameId, playerNumber })
       .execute();
   }
 
-  async finishGame(
-    gameId: string,
-    isFirstUser: boolean,
-    score: number,
-    queryRunner: QueryRunner,
-  ): Promise<void> {
-    const updatedField = isFirstUser ? 'firstPlayerScore' : 'secondPlayerScore';
+  async finishGame(gameId: string, queryRunner: QueryRunner): Promise<void> {
     const typeOrmQuizGameRepository =
       queryRunner.manager.getRepository(QuizGameEntity);
 
@@ -151,27 +142,24 @@ export class QuizGameRepository {
       .set({
         status: QuizGameStatus.FINISHED,
         finishGameDate: new Date(),
-        [updatedField]: score,
       })
       .where('game.id = :gameId', { gameId })
       .execute();
   }
 
   async updateScore(
-    gameId: string,
-    isFirstUser: boolean,
+    playerId: string,
     score: number,
     queryRunner: QueryRunner,
   ): Promise<void> {
-    const updatedField = isFirstUser ? 'firstPlayerScore' : 'secondPlayerScore';
-    const typeOrmQuizGameRepository =
-      queryRunner.manager.getRepository(QuizGameEntity);
+    const typeOrmGameUserRepository =
+      queryRunner.manager.getRepository(GameUserEntity);
 
-    await typeOrmQuizGameRepository
-      .createQueryBuilder('game')
-      .update(QuizGameEntity)
-      .set({ [updatedField]: score })
-      .where('game.id = :gameId', { gameId })
+    await typeOrmGameUserRepository
+      .createQueryBuilder('gameUser')
+      .update(GameUserEntity)
+      .set({ score })
+      .where('"gameUser".id = :playerId', { playerId })
       .execute();
   }
 
@@ -203,8 +191,9 @@ export class QuizGameRepository {
     return currentRepository
       .createQueryBuilder('game')
       .leftJoin('game.questions', 'question')
-      .leftJoin('game.users', 'user')
       .leftJoin('game.answers', 'answer')
+      .leftJoin('game.gameUsers', 'gameUser')
+      .leftJoin('gameUser.user', 'user')
       .select([
         'game',
         'question.id',
@@ -213,6 +202,7 @@ export class QuizGameRepository {
         'user.id',
         'user.login',
         'answer',
+        'gameUser',
       ]);
   }
 }

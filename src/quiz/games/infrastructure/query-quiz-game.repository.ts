@@ -23,6 +23,7 @@ import {
   getCommonInfoForQueryAllRequests,
   getDbSortDirection,
 } from '../../../common/utils';
+import { QuizUsersTopParamsDto } from '../api/dto/quiz-users-top-params.dto';
 
 @Injectable()
 export class QueryQuizGameRepository {
@@ -30,6 +31,12 @@ export class QueryQuizGameRepository {
     @InjectRepository(QuizGameEntity)
     private typeOrmQuizGameRepository: Repository<QuizGameEntity>,
   ) {}
+
+  async getUsersTop(queryParams: QuizUsersTopParamsDto): Promise<any> {
+    console.log(queryParams);
+
+    return;
+  }
 
   async getMyStatistic(userId: string): Promise<IStatisticOutputModel> {
     const statisticInfo = await this.typeOrmQuizGameRepository
@@ -186,17 +193,17 @@ export class QueryQuizGameRepository {
     return mapQuizGameEntityToQuizGameOutputModel(currentGame);
   }
 
-  async getCurrentGame(userId: string): Promise<IQuizGameOutputModel> {
-    const selectQueryBuilder = this.createSelectQueryBuilder();
-    const currentGame = await selectQueryBuilder
+  async getCurrentGame(userId: string): Promise<any> {
+    const currentGame = await this.createSelectQueryBuilder()
       .where(
-        new Brackets((qb) => {
-          qb.where('game.firstPlayerId = :firstPlayerId', {
-            firstPlayerId: userId,
-          }).orWhere('game.secondPlayerId = :secondPlayerId', {
-            secondPlayerId: userId,
-          });
-        }),
+        `EXISTS (
+          SELECT 1
+          FROM "game" g
+            LEFT JOIN "gameUser" ON "g"."id" = "gameUser"."gameId"
+          WHERE "gameUser"."userId" = :userId
+            AND "gameUser"."gameId" = game.id
+        )`,
+        { userId },
       )
       .andWhere(
         new Brackets((qb) => {
@@ -218,8 +225,9 @@ export class QueryQuizGameRepository {
     return this.typeOrmQuizGameRepository
       .createQueryBuilder('game')
       .leftJoin('game.questions', 'question')
-      .leftJoin('game.users', 'user')
       .leftJoin('game.answers', 'answer')
+      .leftJoin('game.gameUsers', 'gameUser')
+      .leftJoin('gameUser.user', 'user')
       .select([
         'game',
         'question.id',
@@ -227,6 +235,7 @@ export class QueryQuizGameRepository {
         'user.id',
         'user.login',
         'answer',
+        'gameUser',
       ]);
   }
 }

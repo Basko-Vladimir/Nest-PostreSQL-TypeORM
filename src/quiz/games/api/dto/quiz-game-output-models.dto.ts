@@ -33,3 +33,5 @@ export interface IQuizGameOutputModel {
 
 export type AllMyGamesOutputModel =
   AllEntitiesOutputModel<IQuizGameOutputModel>;
+
+export type UsersTopOutputModel = AllEntitiesOutputModel<IStatisticOutputModel>;

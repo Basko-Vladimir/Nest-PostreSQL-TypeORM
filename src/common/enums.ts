@@ -99,3 +99,8 @@ export enum AnswerStatus {
   CORRECT = 'Correct',
   INCORRECT = 'Incorrect',
 }
+
+export enum PlayerNumber {
+  ONE = 1,
+  TWO = 2,
+}

@@ -1,44 +1,47 @@
 import { QuizGameEntity } from '../entities/quiz-game.entity';
 import { IQuizGameOutputModel } from '../api/dto/quiz-game-output-models.dto';
+import { PlayerNumber } from '../../../common/enums';
 
 export const mapQuizGameEntityToQuizGameOutputModel = (
   game: QuizGameEntity,
 ): IQuizGameOutputModel => {
-  const firstPlayer = game.users.find((user) => user.id === game.firstPlayerId);
-  const secondPlayer = game.users.find(
-    (user) => user.id === game.secondPlayerId,
+  const firstPlayer = game.gameUsers.find(
+    (user) => user.playerNumber === PlayerNumber.ONE,
+  );
+  const secondPlayer = game.gameUsers.find(
+    (user) => user.playerNumber === PlayerNumber.TWO,
   );
 
   return {
     id: game.id,
     firstPlayerProgress: {
       answers: game.answers
-        .filter((answer) => answer.playerId === game.firstPlayerId)
+        .filter((answer) => answer.playerId === firstPlayer.userId)
         .map((answer) => ({
           questionId: answer.questionId,
           answerStatus: answer.status,
           addedAt: answer.createdAt.toISOString(),
         })),
       player: {
-        id: game.firstPlayerId,
-        login: firstPlayer.login,
+        id: firstPlayer.userId,
+        login: firstPlayer.user.login,
       },
-      score: game.firstPlayerScore,
+      score: firstPlayer.score,
     },
-    secondPlayerProgress: game.secondPlayerId
+    secondPlayerProgress: secondPlayer?.id
       ? {
           answers: game.answers
-            .filter((answer) => answer.playerId === game.secondPlayerId)
+            .filter((answer) => answer.playerId === secondPlayer.userId)
             .map((answer) => ({
               questionId: answer.questionId,
               answerStatus: answer.status,
               addedAt: answer.createdAt.toISOString(),
             })),
           player: {
-            id: game.secondPlayerId,
-            login: secondPlayer?.login,
+            id: secondPlayer.userId,
+            login: secondPlayer.user.login,
           },
-          score: game.secondPlayerScore,
+          score: secondPlayer.score,
         }
       : null,
     questions: game.questions.length

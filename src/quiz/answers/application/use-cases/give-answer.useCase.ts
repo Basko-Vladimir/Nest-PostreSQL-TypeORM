@@ -1,7 +1,11 @@
 import { QuizGameEntity } from '../../../games/entities/quiz-game.entity';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { QuizAnswerRepository } from '../../infrastructure/quiz-answer.repository';
-import { AnswerStatus } from '../../../../common/enums';
+import {
+  AnswerStatus,
+  PlayerNumber,
+  PlayerResult,
+} from '../../../../common/enums';
 import { QuizGameRepository } from '../../../games/infrastructure/quiz-game.repository';
 import { AppService } from '../../../../app.service';
 import { QUESTIONS_AMOUNT_IN_ONE_GAME } from '../../../../common/constants';
@@ -85,6 +89,37 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
 
         await this.quizGameRepository.finishGame(
           actualStateGame.id,
+          queryRunner,
+        );
+
+        const finishedGame = await this.quizGameRepository.findGameById(
+          game.id,
+          queryRunner,
+        );
+        const firstPlayer = finishedGame.gameUsers.find(
+          (item) => item.playerNumber === PlayerNumber.ONE,
+        );
+        const secondPlayer = finishedGame.gameUsers.find(
+          (item) => item.playerNumber === PlayerNumber.TWO,
+        );
+        let firstPlayerResult, secondPlayerResult;
+
+        if (firstPlayer.score === secondPlayer.score) {
+          firstPlayerResult = PlayerResult.DRAW;
+          secondPlayerResult = PlayerResult.DRAW;
+        } else if (firstPlayer.score > secondPlayer.score) {
+          firstPlayerResult = PlayerResult.WINNER;
+          secondPlayerResult = PlayerResult.LOSER;
+        } else if (firstPlayer.score < secondPlayer.score) {
+          firstPlayerResult = PlayerResult.LOSER;
+          secondPlayerResult = PlayerResult.WINNER;
+        }
+
+        await this.quizGameRepository.setPlayersStatuses(
+          firstPlayer.id,
+          firstPlayerResult,
+          secondPlayer.id,
+          secondPlayerResult,
           queryRunner,
         );
       }

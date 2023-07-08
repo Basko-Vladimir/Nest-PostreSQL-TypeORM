@@ -3,7 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { QueryRunner, Repository, SelectQueryBuilder } from 'typeorm';
 import { QuizGameEntity } from '../entities/quiz-game.entity';
 import { UserEntity } from '../../../users/entities/db-entities/user.entity';
-import { PlayerNumber, QuizGameStatus } from '../../../common/enums';
+import {
+  PlayerNumber,
+  PlayerResult,
+  QuizGameStatus,
+} from '../../../common/enums';
 import { GameQuestionEntity } from '../entities/game-question.entity';
 import { GameUserEntity } from '../entities/game-user.entity';
 
@@ -160,6 +164,31 @@ export class QuizGameRepository {
       .update(GameUserEntity)
       .set({ score })
       .where('"gameUser".id = :playerId', { playerId })
+      .execute();
+  }
+
+  async setPlayersStatuses(
+    firstPlayerId: string,
+    firstPlayerResult: PlayerResult,
+    secondPlayerId: string,
+    secondPlayerResult: PlayerResult,
+    queryRunner: QueryRunner,
+  ): Promise<void> {
+    const typeOrmGameUserRepository =
+      queryRunner.manager.getRepository(GameUserEntity);
+
+    await typeOrmGameUserRepository
+      .createQueryBuilder('gameUser')
+      .update(GameUserEntity)
+      .set({ playerResult: firstPlayerResult })
+      .where('"gameUser".id = :playerId', { playerId: firstPlayerId })
+      .execute();
+
+    await typeOrmGameUserRepository
+      .createQueryBuilder('gameUser')
+      .update(GameUserEntity)
+      .set({ playerResult: secondPlayerResult })
+      .where('"gameUser".id = :playerId', { playerId: secondPlayerId })
       .execute();
   }
 

@@ -9,6 +9,7 @@ import {
   IStatisticOutputModel,
 } from '../api/dto/quiz-game-output-models.dto';
 import {
+  PlayerResult,
   QuizGameSortByField,
   QuizGameStatus,
   SortDirection,
@@ -24,12 +25,15 @@ import {
   getDbSortDirection,
 } from '../../../common/utils';
 import { QuizUsersTopParamsDto } from '../api/dto/quiz-users-top-params.dto';
+import { GameUserEntity } from '../entities/game-user.entity';
 
 @Injectable()
 export class QueryQuizGameRepository {
   constructor(
     @InjectRepository(QuizGameEntity)
     private typeOrmQuizGameRepository: Repository<QuizGameEntity>,
+    @InjectRepository(GameUserEntity)
+    private typeOrmGameUserRepository: Repository<GameUserEntity>,
   ) {}
 
   async getUsersTop(queryParams: QuizUsersTopParamsDto): Promise<any> {
@@ -41,15 +45,16 @@ export class QueryQuizGameRepository {
   async getMyStatistic(userId: string): Promise<IStatisticOutputModel> {
     const statisticInfo = await this.typeOrmQuizGameRepository
       .createQueryBuilder('game')
-      .select('COUNT(*) as "gamesCountInfo"')
+      .select('COUNT(*) as "gamesCount"')
       .where(
-        new Brackets((qb) => {
-          qb.where('game.firstPlayerId = :firstPlayerId', {
-            firstPlayerId: userId,
-          }).orWhere('game.secondPlayerId = :secondPlayerId', {
-            secondPlayerId: userId,
-          });
-        }),
+        `EXISTS (
+      SELECT 1
+      FROM "game" g
+        LEFT JOIN "gameUser" ON "g"."id" = "gameUser"."gameId"
+      WHERE "gameUser"."userId" = :userId
+        AND "gameUser"."gameId" = game.id
+    )`,
+        { userId },
       )
       .andWhere('game.status = :finishedStatus', {
         finishedStatus: QuizGameStatus.FINISHED,
@@ -57,79 +62,53 @@ export class QueryQuizGameRepository {
       .addSelect(
         (qb) =>
           qb
-            .select('COUNT(*)')
-            .from(QuizGameEntity, 'game')
-            .where('game.firstPlayerScore = game.secondPlayerScore'),
-        'drawsCountInfo',
+            .select('SUM(score)')
+            .from(GameUserEntity, 'gameUser')
+            .where('gameUser.userId = :userId', { userId }),
+        'sumScore',
+      )
+      .addSelect(
+        (qb) =>
+          qb
+            .select('AVG(score)')
+            .from(GameUserEntity, 'gameUser')
+            .where('gameUser.userId = :userId', { userId }),
+        'avgScores',
       )
       .addSelect(
         (qb) =>
           qb
             .select('COUNT(*)')
-            .from(QuizGameEntity, 'game')
-            .where('game.firstPlayerScore > game.secondPlayerScore')
-            .andWhere('game.firstPlayerId = :firstPlayerId', {
-              firstPlayerId: userId,
+            .from(GameUserEntity, 'gameUser')
+            .where('gameUser.userId = :userId', { userId })
+            .andWhere('gameUser.playerResult = :result', {
+              result: PlayerResult.WINNER,
             }),
-        'winsCountAsFirstPlayer',
+        'winsCount',
       )
       .addSelect(
         (qb) =>
           qb
             .select('COUNT(*)')
-            .from(QuizGameEntity, 'game')
-            .where('game.firstPlayerScore < game.secondPlayerScore')
-            .andWhere('game.secondPlayerId = :secondPlayerId', {
-              secondPlayerId: userId,
+            .from(GameUserEntity, 'gameUser')
+            .where('gameUser.userId = :userId', { userId })
+            .andWhere('gameUser.playerResult = :result', {
+              result: PlayerResult.LOSER,
             }),
-        'winsCountAsSecondPlayer',
-      )
-      .addSelect(
-        (qb) =>
-          qb
-            .select('SUM(game.firstPlayerScore)')
-            .from(QuizGameEntity, 'game')
-            .where('game.firstPlayerId = :firstPlayerId', {
-              firstPlayerId: userId,
-            }),
-        'sumScoreAsFirstPlayer',
-      )
-      .addSelect(
-        (qb) =>
-          qb
-            .select('SUM(game.secondPlayerScore)')
-            .from(QuizGameEntity, 'game')
-            .where('game.secondPlayerId = :secondPlayerId', {
-              secondPlayerId: userId,
-            }),
-        'sumScoreAsSecondPlayer',
+        'lossesCount',
       )
       .getRawOne();
 
-    const {
-      gamesCountInfo,
-      drawsCountInfo,
-      sumScoreAsFirstPlayer,
-      winsCountAsFirstPlayer,
-      sumScoreAsSecondPlayer,
-      winsCountAsSecondPlayer,
-    } = statisticInfo;
-    const gamesCount = Number(gamesCountInfo);
-    const drawsCount = Number(drawsCountInfo);
-    const sumScore =
-      Number(sumScoreAsFirstPlayer) + Number(sumScoreAsSecondPlayer);
-    const avgScores = Math.round((sumScore / gamesCount) * 100) / 100;
-    const winsCount =
-      Number(winsCountAsFirstPlayer) + Number(winsCountAsSecondPlayer);
-    const lossesCount = gamesCount - winsCount - drawsCount;
+    const { sumScore, avgScores, gamesCount, winsCount, lossesCount } =
+      statisticInfo;
 
     return {
-      sumScore,
-      avgScores,
-      gamesCount,
-      winsCount,
-      lossesCount,
-      drawsCount,
+      sumScore: Number(sumScore),
+      avgScores: Math.round(Number(avgScores) * 100) / 100,
+      gamesCount: Number(gamesCount),
+      winsCount: Number(winsCount),
+      lossesCount: Number(lossesCount),
+      drawsCount: Number(gamesCount) - Number(winsCount) - Number(lossesCount),
     };
   }
 
@@ -148,13 +127,14 @@ export class QueryQuizGameRepository {
     const filteredSelectQueryBuilder = this.createSelectQueryBuilder()
       .addSelect('question.createdAt')
       .where(
-        new Brackets((qb) => {
-          qb.where('game.firstPlayerId = :firstPlayerId', {
-            firstPlayerId: userId,
-          }).orWhere('game.secondPlayerId = :secondPlayerId', {
-            secondPlayerId: userId,
-          });
-        }),
+        `EXISTS (
+          SELECT 1
+          FROM "game" g
+            LEFT JOIN "gameUser" ON "g"."id" = "gameUser"."gameId"
+          WHERE "gameUser"."userId" = :userId
+            AND "gameUser"."gameId" = game.id
+        )`,
+        { userId },
       )
       .andWhere(
         new Brackets((qb) => {

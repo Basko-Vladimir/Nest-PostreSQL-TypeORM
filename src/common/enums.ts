@@ -104,3 +104,9 @@ export enum PlayerNumber {
   ONE = 1,
   TWO = 2,
 }
+
+export enum PlayerResult {
+  WINNER = 'winner',
+  LOSER = 'loser',
+  DRAW = 'draw',
+}

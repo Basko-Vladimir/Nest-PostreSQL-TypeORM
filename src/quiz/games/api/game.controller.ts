@@ -48,21 +48,21 @@ export class GameController {
   // ): Promise<UsersTopOutputModel> {
   //   return this.queryQuizGameRepository.getUsersTop(queryParams);
   // }
-  //
-  // @Get('users/my-statistic')
-  // @UseGuards(BearerAuthGuard)
-  // getMyStatistic(@User('id') userId: string): Promise<IStatisticOutputModel> {
-  //   return this.queryQuizGameRepository.getMyStatistic(userId);
-  // }
-  //
-  // @Get('pairs/my')
-  // @UseGuards(BearerAuthGuard)
-  // async findAllMyGames(
-  //   @Query() queryParams: QuizGamesQueryParamsDto,
-  //   @User('id') userId: string,
-  // ): Promise<AllMyGamesOutputModel> {
-  //   return this.queryQuizGameRepository.findAllMyGames(queryParams, userId);
-  // }
+
+  @Get('users/my-statistic')
+  @UseGuards(BearerAuthGuard)
+  getMyStatistic(@User('id') userId: string): Promise<IStatisticOutputModel> {
+    return this.queryQuizGameRepository.getMyStatistic(userId);
+  }
+
+  @Get('pairs/my')
+  @UseGuards(BearerAuthGuard)
+  async findAllMyGames(
+    @Query() queryParams: QuizGamesQueryParamsDto,
+    @User('id') userId: string,
+  ): Promise<AllMyGamesOutputModel> {
+    return this.queryQuizGameRepository.findAllMyGames(queryParams, userId);
+  }
 
   @Get('pairs/my-current')
   @UseGuards(BearerAuthGuard)

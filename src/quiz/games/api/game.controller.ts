@@ -106,16 +106,16 @@ export class GameController {
     return this.queryQuizGameRepository.findQuizGameById(actualGameId);
   }
 
-  // @Post('pairs/my-current/answers')
-  // @HttpCode(HttpStatus.OK)
-  // @UseGuards(BearerAuthGuard, CheckParticipationInGameGuard)
-  // async giveAnswer(
-  //   @Body() createAnswerDto: CreateAnswerDto,
-  //   @User('id') userId: string,
-  //   @QuizGame() game: QuizGameEntity,
-  // ): Promise<IAnswerOutputModel> {
-  //   return this.commandBus.execute(
-  //     new GiveAnswerCommand(userId, game, createAnswerDto.answer),
-  //   );
-  // }
+  @Post('pairs/my-current/answers')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(BearerAuthGuard, CheckParticipationInGameGuard)
+  async giveAnswer(
+    @Body() createAnswerDto: CreateAnswerDto,
+    @User('id') userId: string,
+    @QuizGame() game: QuizGameEntity,
+  ): Promise<IAnswerOutputModel> {
+    return this.commandBus.execute(
+      new GiveAnswerCommand(userId, game, createAnswerDto.answer),
+    );
+  }
 }

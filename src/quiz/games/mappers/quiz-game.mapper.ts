@@ -16,7 +16,7 @@ export const mapQuizGameEntityToQuizGameOutputModel = (
     id: game.id,
     firstPlayerProgress: {
       answers: game.answers
-        .filter((answer) => answer.playerId === firstPlayer.id)
+        .filter((answer) => answer.playerId === firstPlayer.userId)
         .map((answer) => ({
           questionId: answer.questionId,
           answerStatus: answer.status,
@@ -31,7 +31,7 @@ export const mapQuizGameEntityToQuizGameOutputModel = (
     secondPlayerProgress: secondPlayer?.id
       ? {
           answers: game.answers
-            .filter((answer) => answer.playerId === secondPlayer.id)
+            .filter((answer) => answer.playerId === secondPlayer.userId)
             .map((answer) => ({
               questionId: answer.questionId,
               answerStatus: answer.status,

@@ -93,7 +93,7 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
         );
 
         const finishedGame = await this.quizGameRepository.findGameById(
-          actualStateGame.id,
+          game.id,
           queryRunner,
         );
         const firstPlayer = finishedGame.gameUsers.find(

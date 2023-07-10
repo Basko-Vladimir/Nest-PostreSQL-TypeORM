@@ -76,7 +76,7 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
         );
         const hasOneCorrectAnswer = actualStateGame.answers.some((item) => {
           return (
-            item.playerId === currentPlayer.userId &&
+            item.playerId === quickerPlayer.userId &&
             item.status === AnswerStatus.CORRECT
           );
         });

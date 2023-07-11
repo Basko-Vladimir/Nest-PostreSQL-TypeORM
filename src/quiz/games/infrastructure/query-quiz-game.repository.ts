@@ -59,17 +59,12 @@ export class QueryQuizGameRepository {
       .where('game.status = :finishedStatus', {
         finishedStatus: QuizGameStatus.FINISHED,
       });
+    let statisticItems;
 
     const totalCountInfo = await selectQueryBuilder
       .select('COUNT(DISTINCT "gameUser"."userId") as "usersCount"')
       .getRawOne();
-    const statisticItems = await this.typeOrmGameUserRepository
-      .createQueryBuilder('gameUser')
-      .innerJoin(QuizGameEntity, 'game', 'game.id = gameUser.gameId')
-      .innerJoin(UserEntity, 'user', 'user.id = gameUser.userId')
-      .where('game.status = :finishedStatus', {
-        finishedStatus: QuizGameStatus.FINISHED,
-      })
+    const statisticItemsQueryBuilder = selectQueryBuilder
       .select([
         'COUNT(gameUser.id) as "gamesCount"',
         'SUM(gameUser.score) as "sumScore"',
@@ -86,6 +81,12 @@ export class QueryQuizGameRepository {
             ELSE NULL
           END
         ) as "lossesCount"`,
+        `COUNT(
+          CASE
+            WHEN gameUser.playerResult = '${PlayerResult.DRAW}' THEN true
+            ELSE NULL
+          END
+        ) as "drawsCount"`,
         'gameUser.userId as "playerId"',
       ])
       .addSelect(
@@ -97,7 +98,34 @@ export class QueryQuizGameRepository {
         'login',
       )
       .groupBy('gameUser.userId')
-      .getRawMany();
+      .limit(pageSize)
+      .offset(skip);
+
+    if (typeof sort === 'string') {
+      const sortBy = sort.split(' ')[0];
+      const direction = sort.split(' ')[1];
+      const sortDirection = getDbSortDirection(direction);
+      statisticItems = await statisticItemsQueryBuilder
+        .addOrderBy(`"${sortBy}"`, sortDirection)
+        .getRawMany();
+    } else if (Array.isArray(sort)) {
+      let orderedStatisticItems;
+
+      sort.forEach((item) => {
+        const sortBy = item.split(' ')[0];
+        const direction = item.split(' ')[1];
+        const sortDirection = getDbSortDirection(direction);
+
+        orderedStatisticItems = statisticItemsQueryBuilder.addOrderBy(
+          `"${sortBy}"`,
+          sortDirection,
+        );
+      });
+
+      statisticItems = await orderedStatisticItems.getRawMany();
+    }
+
+    console.log(statisticItems);
 
     return {
       ...getCommonInfoForQueryAllRequests(
@@ -105,7 +133,7 @@ export class QueryQuizGameRepository {
         pageSize,
         pageNumber,
       ),
-      items: statisticItems.map(mapCommonRawStatisticToStatisticOutputModel),
+      items: statisticItems?.map(mapCommonRawStatisticToStatisticOutputModel),
     };
   }
 

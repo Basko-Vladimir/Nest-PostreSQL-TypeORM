@@ -9,6 +9,7 @@ export interface IRawStatisticData {
   gamesCount: string;
   winsCount: string;
   lossesCount: string;
+  drawsCount: string;
 }
 
 export interface ICommonRawStatisticData extends IRawStatisticData {
@@ -19,8 +20,14 @@ export interface ICommonRawStatisticData extends IRawStatisticData {
 export const mapCurrentRawStatisticToStatisticOutputModel = (
   rawStatistic: IRawStatisticData,
 ): IStatisticOutputModel => {
-  const { sumScore, avgScores, gamesCount, winsCount, lossesCount } =
-    rawStatistic;
+  const {
+    sumScore,
+    avgScores,
+    gamesCount,
+    winsCount,
+    lossesCount,
+    drawsCount,
+  } = rawStatistic;
 
   return {
     sumScore: Number(sumScore),
@@ -28,7 +35,7 @@ export const mapCurrentRawStatisticToStatisticOutputModel = (
     gamesCount: Number(gamesCount),
     winsCount: Number(winsCount),
     lossesCount: Number(lossesCount),
-    drawsCount: Number(gamesCount) - Number(winsCount) - Number(lossesCount),
+    drawsCount: Number(drawsCount),
   };
 };
 
@@ -41,6 +48,7 @@ export const mapCommonRawStatisticToStatisticOutputModel = (
     gamesCount,
     winsCount,
     lossesCount,
+    drawsCount,
     playerId,
     login,
   } = rawStatistic;
@@ -51,7 +59,7 @@ export const mapCommonRawStatisticToStatisticOutputModel = (
     gamesCount: Number(gamesCount),
     winsCount: Number(winsCount),
     lossesCount: Number(lossesCount),
-    drawsCount: Number(gamesCount) - Number(winsCount) - Number(lossesCount),
+    drawsCount: Number(drawsCount),
     player: {
       id: playerId,
       login,

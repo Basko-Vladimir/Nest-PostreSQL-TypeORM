@@ -42,12 +42,12 @@ export class GameController {
     private queryQuizGameRepository: QueryQuizGameRepository,
   ) {}
 
-  // @Get('users/top')
-  // getUsersTop(
-  //   @Query() queryParams: QuizUsersTopParamsDto,
-  // ): Promise<UsersTopOutputModel> {
-  //   return this.queryQuizGameRepository.getUsersTop(queryParams);
-  // }
+  @Get('users/top')
+  getUsersTop(
+    @Query() queryParams: QuizUsersTopParamsDto,
+  ): Promise<UsersTopOutputModel> {
+    return this.queryQuizGameRepository.getUsersTop(queryParams);
+  }
 
   @Get('users/my-statistic')
   @UseGuards(BearerAuthGuard)

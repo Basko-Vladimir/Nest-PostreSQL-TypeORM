@@ -13,6 +13,7 @@ import {
   QuizGameSortByField,
   QuizGameStatus,
   SortDirection,
+  StatisticSortByField,
 } from '../../../common/enums';
 import { QuizGamesQueryParamsDto } from '../api/dto/quiz-games-query-params.dto';
 import {
@@ -26,6 +27,12 @@ import {
 } from '../../../common/utils';
 import { QuizUsersTopParamsDto } from '../api/dto/quiz-users-top-params.dto';
 import { GameUserEntity } from '../entities/game-user.entity';
+import {
+  IRawStatisticData,
+  mapCommonRawStatisticToStatisticOutputModel,
+  mapCurrentRawStatisticToStatisticOutputModel,
+} from '../mappers/game-statistic.mapper';
+import { UserEntity } from '../../../users/entities/db-entities/user.entity';
 
 @Injectable()
 export class QueryQuizGameRepository {
@@ -37,79 +44,130 @@ export class QueryQuizGameRepository {
   ) {}
 
   async getUsersTop(queryParams: QuizUsersTopParamsDto): Promise<any> {
-    console.log(queryParams);
+    const {
+      pageNumber = 1,
+      pageSize = 10,
+      sort = [
+        `${StatisticSortByField.AVG_SCORES} ${SortDirection.desc}`,
+        `${StatisticSortByField.SUM_SCORE} ${SortDirection.desc}`,
+      ],
+    } = queryParams;
+    const skip = countSkipValue(pageNumber, pageSize);
+    const selectQueryBuilder = this.typeOrmGameUserRepository
+      .createQueryBuilder('gameUser')
+      .innerJoin(QuizGameEntity, 'game', 'game.id = gameUser.gameId')
+      .where('game.status = :finishedStatus', {
+        finishedStatus: QuizGameStatus.FINISHED,
+      });
 
-    return;
+    const totalCountInfo = await selectQueryBuilder
+      .select('COUNT(DISTINCT "gameUser"."userId") as "usersCount"')
+      .getRawOne();
+    const statisticItems = await this.typeOrmGameUserRepository
+      .createQueryBuilder('gameUser')
+      .innerJoin(QuizGameEntity, 'game', 'game.id = gameUser.gameId')
+      .innerJoin(UserEntity, 'user', 'user.id = gameUser.userId')
+      .where('game.status = :finishedStatus', {
+        finishedStatus: QuizGameStatus.FINISHED,
+      })
+      .select([
+        'COUNT(gameUser.id) as "gamesCount"',
+        'SUM(gameUser.score) as "sumScore"',
+        'AVG(gameUser.score) as "avgScores"',
+        `COUNT(
+          CASE
+            WHEN gameUser.playerResult = '${PlayerResult.WINNER}' THEN true
+            ELSE NULL
+          END
+        ) as "winsCount"`,
+        `COUNT(
+          CASE
+            WHEN gameUser.playerResult = '${PlayerResult.LOSER}' THEN true
+            ELSE NULL
+          END
+        ) as "lossesCount"`,
+        'gameUser.userId as "playerId"',
+      ])
+      .addSelect(
+        (qb) =>
+          qb
+            .select('login')
+            .from(UserEntity, 'u')
+            .where('u.id = gameUser.userId'),
+        'login',
+      )
+      .groupBy('gameUser.userId')
+      .getRawMany();
+
+    return {
+      ...getCommonInfoForQueryAllRequests(
+        totalCountInfo.usersCount,
+        pageSize,
+        pageNumber,
+      ),
+      items: statisticItems.map(mapCommonRawStatisticToStatisticOutputModel),
+    };
   }
 
   async getMyStatistic(userId: string): Promise<IStatisticOutputModel> {
-    const statisticInfo = await this.typeOrmQuizGameRepository
-      .createQueryBuilder('game')
-      .select('COUNT(*) as "gamesCount"')
-      .where(
-        `EXISTS (
-      SELECT 1
-      FROM "game" g
-        LEFT JOIN "gameUser" ON "g"."id" = "gameUser"."gameId"
-      WHERE "gameUser"."userId" = :userId
-        AND "gameUser"."gameId" = game.id
-    )`,
-        { userId },
-      )
-      .andWhere('game.status = :finishedStatus', {
-        finishedStatus: QuizGameStatus.FINISHED,
-      })
-      .addSelect(
-        (qb) =>
-          qb
-            .select('SUM(score)')
-            .from(GameUserEntity, 'gameUser')
-            .where('gameUser.userId = :userId', { userId }),
-        'sumScore',
-      )
-      .addSelect(
-        (qb) =>
-          qb
-            .select('AVG(score)')
-            .from(GameUserEntity, 'gameUser')
-            .where('gameUser.userId = :userId', { userId }),
-        'avgScores',
-      )
-      .addSelect(
-        (qb) =>
-          qb
-            .select('COUNT(*)')
-            .from(GameUserEntity, 'gameUser')
-            .where('gameUser.userId = :userId', { userId })
-            .andWhere('gameUser.playerResult = :result', {
-              result: PlayerResult.WINNER,
-            }),
-        'winsCount',
-      )
-      .addSelect(
-        (qb) =>
-          qb
-            .select('COUNT(*)')
-            .from(GameUserEntity, 'gameUser')
-            .where('gameUser.userId = :userId', { userId })
-            .andWhere('gameUser.playerResult = :result', {
-              result: PlayerResult.LOSER,
-            }),
-        'lossesCount',
-      )
-      .getRawOne();
+    const statisticInfo: IRawStatisticData =
+      await this.typeOrmQuizGameRepository
+        .createQueryBuilder('game')
+        .select('COUNT(*) as "gamesCount"')
+        .where(
+          `EXISTS (
+            SELECT 1
+            FROM "game" g
+              LEFT JOIN "gameUser" ON "g"."id" = "gameUser"."gameId"
+            WHERE "gameUser"."userId" = :userId
+              AND "gameUser"."gameId" = game.id
+          )`,
+          { userId },
+        )
+        .andWhere('game.status = :finishedStatus', {
+          finishedStatus: QuizGameStatus.FINISHED,
+        })
+        .addSelect(
+          (qb) =>
+            qb
+              .select('SUM(score)')
+              .from(GameUserEntity, 'gameUser')
+              .where('gameUser.userId = :userId', { userId }),
+          'sumScore',
+        )
+        .addSelect(
+          (qb) =>
+            qb
+              .select('AVG(score)')
+              .from(GameUserEntity, 'gameUser')
+              .where('gameUser.userId = :userId', { userId }),
+          'avgScores',
+        )
+        .addSelect(
+          (qb) =>
+            qb
+              .select('COUNT(*)')
+              .from(GameUserEntity, 'gameUser')
+              .where('gameUser.userId = :userId', { userId })
+              .andWhere('gameUser.playerResult = :result', {
+                result: PlayerResult.WINNER,
+              }),
+          'winsCount',
+        )
+        .addSelect(
+          (qb) =>
+            qb
+              .select('COUNT(*)')
+              .from(GameUserEntity, 'gameUser')
+              .where('gameUser.userId = :userId', { userId })
+              .andWhere('gameUser.playerResult = :result', {
+                result: PlayerResult.LOSER,
+              }),
+          'lossesCount',
+        )
+        .getRawOne();
 
-    const { sumScore, avgScores, gamesCount, winsCount, lossesCount } =
-      statisticInfo;
-
-    return {
-      sumScore: Number(sumScore),
-      avgScores: Math.round(Number(avgScores) * 100) / 100,
-      gamesCount: Number(gamesCount),
-      winsCount: Number(winsCount),
-      lossesCount: Number(lossesCount),
-      drawsCount: Number(gamesCount) - Number(winsCount) - Number(lossesCount),
-    };
+    return mapCurrentRawStatisticToStatisticOutputModel(statisticInfo);
   }
 
   async findAllMyGames(

@@ -20,6 +20,13 @@ export interface IStatisticOutputModel {
   drawsCount: number;
 }
 
+export interface ICommonStatisticOutputModel extends IStatisticOutputModel {
+  player: {
+    id: string;
+    login: string;
+  };
+}
+
 export interface IQuizGameOutputModel {
   id: string;
   firstPlayerProgress: IPlayerProgress;

@@ -51,6 +51,15 @@ export enum QuizGameSortByField {
   status = 'status',
 }
 
+export enum StatisticSortByField {
+  SUM_SCORE = 'sumScore',
+  AVG_SCORES = 'avgScores',
+  GAMES_COUNT = 'gamesCount',
+  WINS_COUNT = 'winsCount',
+  LOSSES_COUNT = 'lossesCount',
+  DRAWS_COUNT = 'drawsCount',
+}
+
 export enum LikeStatus {
   NONE = 'None',
   LIKE = 'Like',

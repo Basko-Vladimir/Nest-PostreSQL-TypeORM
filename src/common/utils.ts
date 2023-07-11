@@ -76,7 +76,7 @@ export const getCommonInfoForQueryAllRequests = (
   };
 };
 
-export const getDbSortDirection = (sortDirection: SortDirection) => {
+export const getDbSortDirection = (sortDirection: string) => {
   return sortDirection === SortDirection.asc ? 'ASC' : 'DESC';
 };
 

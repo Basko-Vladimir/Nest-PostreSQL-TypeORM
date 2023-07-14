@@ -87,12 +87,12 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
     }
 
     const currentPlayerAnswersNumber = currentGame.answers.filter(
-      (answer) => answer.playerId === currentPlayer.id,
+      (answer) => answer.playerId === currentPlayer.userId,
     ).length;
 
     if (currentPlayerAnswersNumber === QUESTIONS_AMOUNT_IN_ONE_GAME) {
       setTimeout(
-        async () => await this.forceFinishGameByTimeout(currentGame.id),
+        () => this.forceFinishGameByTimeout(currentGame.id, userId),
         FINISH_GAME_TIMER,
       );
     }
@@ -155,7 +155,10 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
     );
   }
 
-  private async forceFinishGameByTimeout(currentGameId: string): Promise<void> {
+  private async forceFinishGameByTimeout(
+    currentGameId: string,
+    currentUserId: string,
+  ): Promise<void> {
     const queryRunner = await this.appService.startTransaction();
 
     try {
@@ -164,10 +167,10 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
         queryRunner,
       );
       const opponent = updatedActualStateGame.gameUsers.find(
-        (user) => user.userId === opponent.id,
+        (user) => user.userId !== currentUserId,
       );
       const opponentAnswers = updatedActualStateGame.answers.filter(
-        (answer) => answer.playerId === opponent.id,
+        (answer) => answer.playerId === opponent.userId,
       );
       const opponentAnsweredQuestionIds = opponentAnswers.map(
         (answer) => answer.questionId,
@@ -180,7 +183,7 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
 
       await this.quizAnswerRepository.forceReplyIncorrect(
         currentGameId,
-        opponent.id,
+        opponent.userId,
         opponentUnansweredQuestionIds,
         queryRunner,
       );

@@ -262,7 +262,7 @@ export class QueryQuizGameRepository {
   async getCurrentGame(userId: string): Promise<any> {
     const currentGame = await this.createSelectQueryBuilder()
       .where(
-        `EXISTS (
+        `EXISTS ( 
           SELECT 1
           FROM "game" g
             LEFT JOIN "gameUser" ON "g"."id" = "gameUser"."gameId"

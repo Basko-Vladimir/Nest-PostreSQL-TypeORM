@@ -13,6 +13,8 @@ import {
   QUESTIONS_AMOUNT_IN_ONE_GAME,
 } from '../../../../common/constants';
 import { mapQuizAnswerEntityToQuizAnswerOutputModel } from '../../mappers/quiz-answer.mapper';
+import { QueryRunner } from 'typeorm';
+import { IAnswerOutputModel } from '../../api/dto/answer-output-models.dto';
 
 export class GiveAnswerCommand {
   constructor(
@@ -30,7 +32,7 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
     private appService: AppService,
   ) {}
 
-  async execute(command: GiveAnswerCommand): Promise<any> {
+  async execute(command: GiveAnswerCommand): Promise<IAnswerOutputModel> {
     const { userId, game, body } = command;
     const currentPlayer = game.gameUsers.find(
       (player) => player.userId === userId,
@@ -47,6 +49,7 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
       : AnswerStatus.INCORRECT;
     const queryRunner = await this.appService.startTransaction();
     let savedAnswer;
+    let currentGame;
 
     try {
       savedAnswer = await this.quizAnswerRepository.createAnswer(
@@ -66,118 +69,127 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
         );
       }
 
-      const actualStateGame = await this.quizGameRepository.findGameById(
+      currentGame = await this.quizGameRepository.findGameById(
         game.id,
         queryRunner,
       );
 
-      const finishGameAndCountScores = async (
-        actualStateGame: QuizGameEntity,
-      ) => {
-        const lastAnswer =
-          actualStateGame.answers[actualStateGame.answers.length - 1];
-        const quickerPlayer = actualStateGame.gameUsers.find(
-          (player) => player.userId !== lastAnswer.playerId,
-        );
-        const hasOneCorrectAnswer = actualStateGame.answers.some((item) => {
-          return (
-            item.playerId === quickerPlayer.userId &&
-            item.status === AnswerStatus.CORRECT
-          );
-        });
-
-        await this.quizGameRepository.updateScore(
-          quickerPlayer.id,
-          quickerPlayer.score + Number(hasOneCorrectAnswer),
-          queryRunner,
-        );
-
-        await this.quizGameRepository.finishGame(
-          actualStateGame.id,
-          queryRunner,
-        );
-
-        const finishedGame = await this.quizGameRepository.findGameById(
-          game.id,
-          queryRunner,
-        );
-        const firstPlayer = finishedGame.gameUsers.find(
-          (item) => item.playerNumber === PlayerNumber.ONE,
-        );
-        const secondPlayer = finishedGame.gameUsers.find(
-          (item) => item.playerNumber === PlayerNumber.TWO,
-        );
-        let firstPlayerResult, secondPlayerResult;
-
-        if (firstPlayer.score === secondPlayer.score) {
-          firstPlayerResult = PlayerResult.DRAW;
-          secondPlayerResult = PlayerResult.DRAW;
-        } else if (firstPlayer.score > secondPlayer.score) {
-          firstPlayerResult = PlayerResult.WINNER;
-          secondPlayerResult = PlayerResult.LOSER;
-        } else if (firstPlayer.score < secondPlayer.score) {
-          firstPlayerResult = PlayerResult.LOSER;
-          secondPlayerResult = PlayerResult.WINNER;
-        }
-
-        await this.quizGameRepository.setPlayersStatuses(
-          firstPlayer.id,
-          firstPlayerResult,
-          secondPlayer.id,
-          secondPlayerResult,
-          queryRunner,
-        );
-      };
-
-      if (actualStateGame.answers.length === 2 * QUESTIONS_AMOUNT_IN_ONE_GAME) {
-        await finishGameAndCountScores(actualStateGame);
-      }
-
-      const currentPlayerAnswersNumber = actualStateGame.answers.filter(
-        (answer) => answer.playerId === currentPlayer.id,
-      ).length;
-
-      if (currentPlayerAnswersNumber === QUESTIONS_AMOUNT_IN_ONE_GAME) {
-        setTimeout(async () => {
-          const updatedActualStateGame =
-            await this.quizGameRepository.findGameById(
-              actualStateGame.id,
-              queryRunner,
-            );
-          const opponent = updatedActualStateGame.gameUsers.find(
-            (user) => user.userId === opponent.id,
-          );
-          const opponentAnswers = updatedActualStateGame.answers.filter(
-            (answer) => answer.playerId === opponent.id,
-          );
-          const opponentAnsweredQuestionIds = opponentAnswers.map(
-            (answer) => answer.questionId,
-          );
-          const opponentUnansweredQuestionIds = updatedActualStateGame.questions
-            .filter((question) => {
-              return !opponentAnsweredQuestionIds.includes(question.id);
-            })
-            .map((question) => question.id);
-
-          await this.quizAnswerRepository.forceReplyIncorrect(
-            updatedActualStateGame.id,
-            opponent.id,
-            opponentUnansweredQuestionIds,
-            queryRunner,
-          );
-
-          const finalStateGame = await this.quizGameRepository.findGameById(
-            actualStateGame.id,
-            queryRunner,
-          );
-
-          await finishGameAndCountScores(finalStateGame);
-        }, FINISH_GAME_TIMER);
+      if (currentGame.answers.length === 2 * QUESTIONS_AMOUNT_IN_ONE_GAME) {
+        await this.finishGameAndCountScores(currentGame, queryRunner);
       }
 
       await queryRunner.commitTransaction();
 
+      const currentPlayerAnswersNumber = currentGame.answers.filter(
+        (answer) => answer.playerId === currentPlayer.id,
+      ).length;
+
+      if (currentPlayerAnswersNumber === QUESTIONS_AMOUNT_IN_ONE_GAME) {
+        setTimeout(this.forceFinishGameByTimeout, FINISH_GAME_TIMER);
+      }
+
       return mapQuizAnswerEntityToQuizAnswerOutputModel(savedAnswer);
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      console.error(e);
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  private async finishGameAndCountScores(
+    currentGame: QuizGameEntity,
+    queryRunner: QueryRunner,
+  ): Promise<void> {
+    const lastAnswer = currentGame.answers[currentGame.answers.length - 1];
+    const quickerPlayer = currentGame.gameUsers.find(
+      (player) => player.userId !== lastAnswer.playerId,
+    );
+    const hasOneCorrectAnswer = currentGame.answers.some((item) => {
+      return (
+        item.playerId === quickerPlayer.userId &&
+        item.status === AnswerStatus.CORRECT
+      );
+    });
+
+    await this.quizGameRepository.updateScore(
+      quickerPlayer.id,
+      quickerPlayer.score + Number(hasOneCorrectAnswer),
+      queryRunner,
+    );
+
+    await this.quizGameRepository.finishGame(currentGame.id, queryRunner);
+
+    const finishedGame = await this.quizGameRepository.findGameById(
+      currentGame.id,
+      queryRunner,
+    );
+    const firstPlayer = finishedGame.gameUsers.find(
+      (item) => item.playerNumber === PlayerNumber.ONE,
+    );
+    const secondPlayer = finishedGame.gameUsers.find(
+      (item) => item.playerNumber === PlayerNumber.TWO,
+    );
+    let firstPlayerResult, secondPlayerResult;
+
+    if (firstPlayer.score === secondPlayer.score) {
+      firstPlayerResult = PlayerResult.DRAW;
+      secondPlayerResult = PlayerResult.DRAW;
+    } else if (firstPlayer.score > secondPlayer.score) {
+      firstPlayerResult = PlayerResult.WINNER;
+      secondPlayerResult = PlayerResult.LOSER;
+    } else if (firstPlayer.score < secondPlayer.score) {
+      firstPlayerResult = PlayerResult.LOSER;
+      secondPlayerResult = PlayerResult.WINNER;
+    }
+
+    await this.quizGameRepository.setPlayersStatuses(
+      firstPlayer.id,
+      firstPlayerResult,
+      secondPlayer.id,
+      secondPlayerResult,
+      queryRunner,
+    );
+  }
+
+  private async forceFinishGameByTimeout(currentGameId: string): Promise<void> {
+    const queryRunner = await this.appService.startTransaction();
+
+    try {
+      const updatedActualStateGame = await this.quizGameRepository.findGameById(
+        currentGameId,
+        queryRunner,
+      );
+      const opponent = updatedActualStateGame.gameUsers.find(
+        (user) => user.userId === opponent.id,
+      );
+      const opponentAnswers = updatedActualStateGame.answers.filter(
+        (answer) => answer.playerId === opponent.id,
+      );
+      const opponentAnsweredQuestionIds = opponentAnswers.map(
+        (answer) => answer.questionId,
+      );
+      const opponentUnansweredQuestionIds = updatedActualStateGame.questions
+        .filter((question) => {
+          return !opponentAnsweredQuestionIds.includes(question.id);
+        })
+        .map((question) => question.id);
+
+      await this.quizAnswerRepository.forceReplyIncorrect(
+        currentGameId,
+        opponent.id,
+        opponentUnansweredQuestionIds,
+        queryRunner,
+      );
+
+      const finalStateGame = await this.quizGameRepository.findGameById(
+        currentGameId,
+        queryRunner,
+      );
+
+      await this.finishGameAndCountScores(finalStateGame, queryRunner);
+
+      await queryRunner.commitTransaction();
     } catch (e) {
       await queryRunner.rollbackTransaction();
       console.error(e);

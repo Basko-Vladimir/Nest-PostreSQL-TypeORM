@@ -93,7 +93,10 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
     ).length;
 
     if (currentPlayerAnswersNumber === QUESTIONS_AMOUNT_IN_ONE_GAME) {
-      setTimeout(await this.forceFinishGameByTimeout, FINISH_GAME_TIMER);
+      setTimeout(
+        async () => await this.forceFinishGameByTimeout(currentGame.id),
+        FINISH_GAME_TIMER,
+      );
     }
   }
 

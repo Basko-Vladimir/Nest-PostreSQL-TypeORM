@@ -80,20 +80,20 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
 
       await queryRunner.commitTransaction();
 
-      const currentPlayerAnswersNumber = currentGame.answers.filter(
-        (answer) => answer.playerId === currentPlayer.id,
-      ).length;
-
-      if (currentPlayerAnswersNumber === QUESTIONS_AMOUNT_IN_ONE_GAME) {
-        setTimeout(this.forceFinishGameByTimeout, FINISH_GAME_TIMER);
-      }
-
       return mapQuizAnswerEntityToQuizAnswerOutputModel(savedAnswer);
     } catch (e) {
       await queryRunner.rollbackTransaction();
       console.error(e);
     } finally {
       await queryRunner.release();
+    }
+
+    const currentPlayerAnswersNumber = currentGame.answers.filter(
+      (answer) => answer.playerId === currentPlayer.id,
+    ).length;
+
+    if (currentPlayerAnswersNumber === QUESTIONS_AMOUNT_IN_ONE_GAME) {
+      setTimeout(await this.forceFinishGameByTimeout, FINISH_GAME_TIMER);
     }
   }
 

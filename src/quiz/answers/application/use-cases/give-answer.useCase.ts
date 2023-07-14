@@ -79,8 +79,6 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
       }
 
       await queryRunner.commitTransaction();
-
-      return mapQuizAnswerEntityToQuizAnswerOutputModel(savedAnswer);
     } catch (e) {
       await queryRunner.rollbackTransaction();
       console.error(e);
@@ -98,6 +96,8 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
         FINISH_GAME_TIMER,
       );
     }
+
+    return mapQuizAnswerEntityToQuizAnswerOutputModel(savedAnswer);
   }
 
   private async finishGameAndCountScores(

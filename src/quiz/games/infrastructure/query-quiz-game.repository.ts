@@ -125,8 +125,6 @@ export class QueryQuizGameRepository {
       statisticItems = await orderedStatisticItems.getRawMany();
     }
 
-    console.log(statisticItems);
-
     return {
       ...getCommonInfoForQueryAllRequests(
         totalCountInfo.usersCount,
@@ -259,7 +257,7 @@ export class QueryQuizGameRepository {
     return mapQuizGameEntityToQuizGameOutputModel(currentGame);
   }
 
-  async getCurrentGame(userId: string): Promise<any> {
+  async getCurrentGame(userId: string): Promise<IQuizGameOutputModel> {
     const currentGame = await this.createSelectQueryBuilder()
       .where(
         `EXISTS ( 

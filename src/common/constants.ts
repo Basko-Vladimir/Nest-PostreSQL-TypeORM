@@ -7,7 +7,7 @@ export const ACCESS_TOKEN_LIFE_TIME = '1d';
 export const REFRESH_TOKEN_LIFE_TIME = '10d';
 
 export const QUESTIONS_AMOUNT_IN_ONE_GAME = 5;
-export const FINISH_GAME_TIMER = 5000;
+export const FINISH_GAME_TIMER = 10000;
 
 export const blogsConstants = {
   MAX_NAME_LENGTH: 15,

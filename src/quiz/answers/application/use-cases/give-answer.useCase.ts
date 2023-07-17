@@ -89,7 +89,7 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
         });
 
         await this.finishGameAndCountScores(
-          currentGame,
+          currentGame.id,
           queryRunner,
           quickerPlayer.score + Number(hasOneCorrectAnswer),
           quickerPlayer.id,
@@ -120,16 +120,16 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
   }
 
   private async finishGameAndCountScores(
-    currentGame: QuizGameEntity,
+    currentGameId: string,
     queryRunner: QueryRunner,
     score: number,
     winnerId: string,
   ): Promise<void> {
+    await this.quizGameRepository.finishGame(currentGameId, queryRunner);
     await this.quizGameRepository.updateScore(winnerId, score, queryRunner);
-    await this.quizGameRepository.finishGame(currentGame.id, queryRunner);
 
     const finishedGame = await this.quizGameRepository.findGameById(
-      currentGame.id,
+      currentGameId,
       queryRunner,
     );
     const firstPlayer = finishedGame.gameUsers.find(
@@ -175,7 +175,7 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
 
       if (updatedActualStateGame) {
         await this.finishGameAndCountScores(
-          updatedActualStateGame,
+          updatedActualStateGame.id,
           queryRunner,
           currentPlayer.score + 1,
           currentPlayer.id,

@@ -169,34 +169,37 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
         currentGameId,
         queryRunner,
       );
-      const opponent = updatedActualStateGame.gameUsers.find(
-        (user) => user.userId !== currentUserId,
-      );
-      const opponentAnswers = updatedActualStateGame.answers.filter(
-        (answer) => answer.playerId === opponent.userId,
-      );
-      const opponentAnsweredQuestionIds = opponentAnswers.map(
-        (answer) => answer.questionId,
-      );
-      const opponentUnansweredQuestionIds = updatedActualStateGame.questions
-        .filter((question) => {
-          return !opponentAnsweredQuestionIds.includes(question.id);
-        })
-        .map((question) => question.id);
 
-      await this.quizAnswerRepository.forceReplyIncorrect(
-        currentGameId,
-        opponent.userId,
-        opponentUnansweredQuestionIds,
-        queryRunner,
-      );
+      if (updatedActualStateGame) {
+        const opponent = updatedActualStateGame?.gameUsers.find(
+          (user) => user.userId !== currentUserId,
+        );
+        const opponentAnswers = updatedActualStateGame.answers.filter(
+          (answer) => answer.playerId === opponent.userId,
+        );
+        const opponentAnsweredQuestionIds = opponentAnswers.map(
+          (answer) => answer.questionId,
+        );
+        const opponentUnansweredQuestionIds = updatedActualStateGame.questions
+          .filter((question) => {
+            return !opponentAnsweredQuestionIds.includes(question.id);
+          })
+          .map((question) => question.id);
 
-      const finalStateGame = await this.quizGameRepository.findGameById(
-        currentGameId,
-        queryRunner,
-      );
+        await this.quizAnswerRepository.forceReplyIncorrect(
+          currentGameId,
+          opponent.userId,
+          opponentUnansweredQuestionIds,
+          queryRunner,
+        );
 
-      await this.finishGameAndCountScores(finalStateGame, queryRunner);
+        const finalStateGame = await this.quizGameRepository.findGameById(
+          currentGameId,
+          queryRunner,
+        );
+
+        await this.finishGameAndCountScores(finalStateGame, queryRunner);
+      }
 
       await queryRunner.commitTransaction();
     } catch (e) {

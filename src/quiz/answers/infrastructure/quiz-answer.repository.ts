@@ -24,7 +24,6 @@ export class QuizAnswerRepository {
 
     const insertResult = await typeOrmQuizAnswerRepository
       .createQueryBuilder('answer')
-      .setLock('pessimistic_write')
       .insert()
       .into(QuizAnswerEntity)
       .values({ gameId, playerId, questionId, body, status })
@@ -32,32 +31,5 @@ export class QuizAnswerRepository {
       .execute();
 
     return insertResult.generatedMaps[0] as QuizAnswerEntity;
-  }
-
-  async forceReplyIncorrect(
-    gameId: string,
-    playerId: string,
-    questionIds: string[],
-    queryRunner,
-  ): Promise<void> {
-    const typeOrmQuizAnswerRepository =
-      queryRunner.manager.getRepository(QuizAnswerEntity);
-
-    await typeOrmQuizAnswerRepository
-      .createQueryBuilder('answer')
-      .setLock('pessimistic_write')
-      .insert()
-      .into(QuizAnswerEntity)
-      .values(
-        questionIds.map((questionId) => ({
-          gameId,
-          playerId,
-          questionId,
-          body: '-',
-          status: AnswerStatus.INCORRECT,
-        })),
-      )
-      .returning('*')
-      .execute();
   }
 }

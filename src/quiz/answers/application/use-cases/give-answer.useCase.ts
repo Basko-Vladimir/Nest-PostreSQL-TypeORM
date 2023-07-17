@@ -168,19 +168,12 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
     const queryRunner = await this.appService.startTransaction();
 
     try {
-      const updatedActualStateGame = await this.quizGameRepository.findGameById(
+      await this.finishGameAndCountScores(
         currentGameId,
         queryRunner,
+        currentPlayer.score + 1,
+        currentPlayer.id,
       );
-
-      if (updatedActualStateGame) {
-        await this.finishGameAndCountScores(
-          updatedActualStateGame.id,
-          queryRunner,
-          currentPlayer.score + 1,
-          currentPlayer.id,
-        );
-      }
 
       await queryRunner.commitTransaction();
     } catch (e) {

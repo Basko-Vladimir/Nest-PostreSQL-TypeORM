@@ -170,36 +170,41 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
         queryRunner,
       );
 
+      // if (updatedActualStateGame) {
+      //   const opponent = updatedActualStateGame?.gameUsers.find(
+      //     (user) => user.userId !== currentUserId,
+      //   );
+      //   const opponentAnswers = updatedActualStateGame.answers.filter(
+      //     (answer) => answer.playerId === opponent.userId,
+      //   );
+      //   const opponentAnsweredQuestionIds = opponentAnswers.map(
+      //     (answer) => answer.questionId,
+      //   );
+      //   const opponentUnansweredQuestionIds = updatedActualStateGame.questions
+      //     .filter((question) => {
+      //       return !opponentAnsweredQuestionIds.includes(question.id);
+      //     })
+      //     .map((question) => question.id);
+      //
+      //   await this.quizAnswerRepository.forceReplyIncorrect(
+      //     currentGameId,
+      //     opponent.userId,
+      //     opponentUnansweredQuestionIds,
+      //     queryRunner,
+      //   );
+      //
+      //   const finalStateGame = await this.quizGameRepository.findGameById(
+      //     currentGameId,
+      //     queryRunner,
+      //   );
+
       if (updatedActualStateGame) {
-        const opponent = updatedActualStateGame?.gameUsers.find(
-          (user) => user.userId !== currentUserId,
-        );
-        const opponentAnswers = updatedActualStateGame.answers.filter(
-          (answer) => answer.playerId === opponent.userId,
-        );
-        const opponentAnsweredQuestionIds = opponentAnswers.map(
-          (answer) => answer.questionId,
-        );
-        const opponentUnansweredQuestionIds = updatedActualStateGame.questions
-          .filter((question) => {
-            return !opponentAnsweredQuestionIds.includes(question.id);
-          })
-          .map((question) => question.id);
-
-        await this.quizAnswerRepository.forceReplyIncorrect(
-          currentGameId,
-          opponent.userId,
-          opponentUnansweredQuestionIds,
+        await this.finishGameAndCountScores(
+          updatedActualStateGame,
           queryRunner,
         );
-
-        const finalStateGame = await this.quizGameRepository.findGameById(
-          currentGameId,
-          queryRunner,
-        );
-
-        await this.finishGameAndCountScores(finalStateGame, queryRunner);
       }
+      // }
 
       await queryRunner.commitTransaction();
     } catch (e) {

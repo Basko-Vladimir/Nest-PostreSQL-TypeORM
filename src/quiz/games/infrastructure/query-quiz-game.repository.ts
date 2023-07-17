@@ -269,15 +269,15 @@ export class QueryQuizGameRepository {
         )`,
         { userId },
       )
-      .andWhere(
-        new Brackets((qb) => {
-          qb.where('game.status = :activeStatus', {
-            activeStatus: QuizGameStatus.ACTIVE,
-          }).orWhere('game.status = :pendingStatus', {
-            pendingStatus: QuizGameStatus.PENDING_SECOND_PLAYER,
-          });
-        }),
-      )
+      // .andWhere(
+      //   new Brackets((qb) => {
+      //     qb.where('game.status = :activeStatus', {
+      //       activeStatus: QuizGameStatus.ACTIVE,
+      //     }).orWhere('game.status = :pendingStatus', {
+      //       pendingStatus: QuizGameStatus.PENDING_SECOND_PLAYER,
+      //     });
+      //   }),
+      // )
       .addOrderBy('answer.createdAt', 'ASC')
       .addOrderBy('question.createdAt', 'ASC')
       .getOne();

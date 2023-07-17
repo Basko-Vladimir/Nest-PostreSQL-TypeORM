@@ -109,7 +109,11 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
     ).length;
 
     if (currentPlayerAnswersNumber === QUESTIONS_AMOUNT_IN_ONE_GAME) {
-      this.forceFinishGameByTimeout(currentGame.id, currentPlayer);
+      const actualCurrentPlayerState = currentGame.gameUsers.find(
+        (item) => item.id === currentPlayer.id,
+      );
+
+      this.forceFinishGameByTimeout(currentGame.id, actualCurrentPlayerState);
     }
 
     return mapQuizAnswerEntityToQuizAnswerOutputModel(savedAnswer);

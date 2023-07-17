@@ -166,21 +166,22 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
     currentPlayer: GameUserEntity,
   ): Promise<void> {
     const queryRunner = await this.appService.startTransaction();
+    if (currentGameId && currentPlayer) {
+      try {
+        await this.finishGameAndCountScores(
+          currentGameId,
+          queryRunner,
+          currentPlayer.score + 1,
+          currentPlayer.id,
+        );
 
-    try {
-      await this.finishGameAndCountScores(
-        currentGameId,
-        queryRunner,
-        currentPlayer.score + 1,
-        currentPlayer.id,
-      );
-
-      await queryRunner.commitTransaction();
-    } catch (e) {
-      await queryRunner.rollbackTransaction();
-      console.error(e);
-    } finally {
-      await queryRunner.release();
+        await queryRunner.commitTransaction();
+      } catch (e) {
+        await queryRunner.rollbackTransaction();
+        console.error(e);
+      } finally {
+        await queryRunner.release();
+      }
     }
   }
 }

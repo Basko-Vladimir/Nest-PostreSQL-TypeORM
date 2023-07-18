@@ -1,6 +1,5 @@
 import { QuizGameEntity } from '../../../games/entities/quiz-game.entity';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Timeout } from '@nestjs/schedule';
 import { QuizAnswerRepository } from '../../infrastructure/quiz-answer.repository';
 import {
   AnswerStatus,
@@ -113,7 +112,14 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
         (item) => item.id === currentPlayer.id,
       );
 
-      this.forceFinishGameByTimeout(currentGame.id, actualCurrentPlayerState);
+      setTimeout(
+        () =>
+          this.forceFinishGameByTimeout(
+            currentGame.id,
+            actualCurrentPlayerState,
+          ),
+        FINISH_GAME_TIMER,
+      );
     }
 
     return mapQuizAnswerEntityToQuizAnswerOutputModel(savedAnswer);
@@ -160,7 +166,6 @@ export class GiveAnswerUseCase implements ICommandHandler<GiveAnswerCommand> {
     );
   }
 
-  @Timeout(FINISH_GAME_TIMER)
   private async forceFinishGameByTimeout(
     currentGameId: string,
     currentPlayer: GameUserEntity,

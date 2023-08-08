@@ -41,6 +41,7 @@ import { CommentsQueryParamsDto } from '../../comments/api/dto/comments-query-pa
 import { AllBloggerCommentsOutputModel } from '../../comments/api/dto/comments-output-models.dto';
 import { GetAllBloggerCommentsQuery } from '../../comments/application/use-cases/get-all-blogger-comments.useCase';
 import { UserEntity } from '../../users/entities/db-entities/user.entity';
+import { IUploadedBlogImagesOutputModelDto } from './dto/uploaded-image-output-models.dto';
 
 @Controller('blogger/blogs')
 @UseGuards(BearerAuthGuard)
@@ -148,5 +149,12 @@ export class BloggerBlogsController {
     return this.commandBus.execute(
       new UpdatePostCommand(postId, { ...updatePostForBlogDto, blogId }),
     );
+  }
+
+  //Files uploading
+  @Post(':blogId/posts/images/wallpaper')
+  @ParamIdType([IdTypes.BLOG_ID])
+  async uploadBlogBackgroundWallpaper(): Promise<IUploadedBlogImagesOutputModelDto> {
+    return '' as any;
   }
 }

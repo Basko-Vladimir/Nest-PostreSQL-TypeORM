@@ -2,14 +2,19 @@ import {
   Body,
   Controller,
   Delete,
+  FileTypeValidator,
   Get,
   HttpCode,
   HttpStatus,
+  MaxFileSizeValidator,
   Param,
+  ParseFilePipe,
   Post,
   Put,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   AllBlogsOutputModel,
@@ -42,6 +47,8 @@ import { AllBloggerCommentsOutputModel } from '../../comments/api/dto/comments-o
 import { GetAllBloggerCommentsQuery } from '../../comments/application/use-cases/get-all-blogger-comments.useCase';
 import { UserEntity } from '../../users/entities/db-entities/user.entity';
 import { IUploadedBlogImagesOutputModelDto } from './dto/uploaded-image-output-models.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UploadFileValidator } from '../../common/validators/upload-file.validator';
 
 @Controller('blogger/blogs')
 @UseGuards(BearerAuthGuard)
@@ -152,9 +159,22 @@ export class BloggerBlogsController {
   }
 
   //Files uploading
-  @Post(':blogId/posts/images/wallpaper')
+  @Post(':blogId/images/wallpaper')
   @ParamIdType([IdTypes.BLOG_ID])
-  async uploadBlogBackgroundWallpaper(): Promise<IUploadedBlogImagesOutputModelDto> {
+  @UseGuards(CheckExistingEntityGuard, ActionsOnBlogGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadBlogBackgroundWallpaper(
+    @UploadedFile(
+      new UploadFileValidator({
+        type: /(png|jpeg|jpg)$/,
+        width: 1028,
+        height: 312,
+        maxSize: 100000,
+      }),
+    )
+    file: Express.Multer.File,
+  ): Promise<IUploadedBlogImagesOutputModelDto> {
+    console.log(file);
     return '' as any;
   }
 }

@@ -2,13 +2,10 @@ import {
   Body,
   Controller,
   Delete,
-  FileTypeValidator,
   Get,
   HttpCode,
   HttpStatus,
-  MaxFileSizeValidator,
   Param,
-  ParseFilePipe,
   Post,
   Put,
   Query,
@@ -46,9 +43,10 @@ import { CommentsQueryParamsDto } from '../../comments/api/dto/comments-query-pa
 import { AllBloggerCommentsOutputModel } from '../../comments/api/dto/comments-output-models.dto';
 import { GetAllBloggerCommentsQuery } from '../../comments/application/use-cases/get-all-blogger-comments.useCase';
 import { UserEntity } from '../../users/entities/db-entities/user.entity';
-import { IUploadedBlogImagesOutputModelDto } from './dto/uploaded-image-output-models.dto';
+import { IUploadedBlogImagesOutputModelDto } from './dto/uploaded-file-output-models.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadFileValidator } from '../../common/validators/upload-file.validator';
+import { UploadBlogWallpaperCommand } from '../application/use-cases/upload-blog-wallpaper.useCase';
 
 @Controller('blogger/blogs')
 @UseGuards(BearerAuthGuard)
@@ -173,8 +171,12 @@ export class BloggerBlogsController {
       }),
     )
     file: Express.Multer.File,
+    @User('id') userId: string,
   ): Promise<IUploadedBlogImagesOutputModelDto> {
-    console.log(file);
-    return '' as any;
+    const fileData = await this.commandBus.execute(
+      new UploadBlogWallpaperCommand(userId, file),
+    );
+
+    return fileData as any;
   }
 }

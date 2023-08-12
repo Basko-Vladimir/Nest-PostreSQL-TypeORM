@@ -6,10 +6,9 @@ import {
   FileUploadingRepository,
   IFileDataDto,
 } from '../../../files-uploading/infrastructure/file-uploding.repository';
-import { FileUploadingEntity } from '../../../files-uploading/entities/file-uploading.entity';
 
 export class UploadBlogWallpaperCommand {
-  constructor(public userId: string, public file: any) {}
+  constructor(public userId: string, public blogId: string, public file: any) {}
 }
 
 @CommandHandler(UploadBlogWallpaperCommand)
@@ -22,15 +21,14 @@ export class UploadBlogWallpaperUseCase
     private fileUploadingRepository: FileUploadingRepository,
   ) {}
 
-  async execute(
-    command: UploadBlogWallpaperCommand,
-  ): Promise<FileUploadingEntity> {
-    const { userId, file } = command;
+  async execute(command: UploadBlogWallpaperCommand): Promise<void> {
+    const { userId, file, blogId } = command;
 
     try {
       const { url, uploadedFileId } =
         await this.cloudStorageAdapter.saveFileToCloud(
           userId,
+          blogId,
           file,
           ImageType.WALLPAPER,
           EntityDirectory.BLOGS,
@@ -44,6 +42,7 @@ export class UploadBlogWallpaperUseCase
         width: metadata.options.width,
         url,
         userId,
+        blogId,
       };
       const existingFileUploading =
         await this.fileUploadingRepository.getFileUploadingById(uploadedFileId);
@@ -53,8 +52,6 @@ export class UploadBlogWallpaperUseCase
       } else {
         await this.fileUploadingRepository.createFileUploading(fileData);
       }
-
-      return this.fileUploadingRepository.getFileUploadingById(uploadedFileId);
     } catch (error) {
       console.error(error);
       throw error;

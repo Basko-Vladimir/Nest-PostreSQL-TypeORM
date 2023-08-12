@@ -23,11 +23,12 @@ export class CloudStorageAdapter {
 
   async saveFileToCloud(
     userId: string,
+    entityId: string,
     file: Express.Multer.File,
     imageType: ImageType,
     entityDirectory: EntityDirectory,
   ): Promise<{ url: string; uploadedFileId: string }> {
-    const key = `content/users/${userId}/${entityDirectory}/${imageType}/${file.originalname}`;
+    const key = `content/users/${userId}/${entityDirectory}/${entityId}/${imageType}/${file.originalname}`;
     const command = new PutObjectCommand({
       Bucket: 'devbucket1',
       Key: key,

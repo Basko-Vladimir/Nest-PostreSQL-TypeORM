@@ -43,10 +43,11 @@ import { CommentsQueryParamsDto } from '../../comments/api/dto/comments-query-pa
 import { AllBloggerCommentsOutputModel } from '../../comments/api/dto/comments-output-models.dto';
 import { GetAllBloggerCommentsQuery } from '../../comments/application/use-cases/get-all-blogger-comments.useCase';
 import { UserEntity } from '../../users/entities/db-entities/user.entity';
-import { IUploadedBlogImagesOutputModelDto } from './dto/uploaded-file-output-models.dto';
+import { IFileUploadingOutputModelDto } from './dto/uploaded-file-output-models.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadFileValidator } from '../../common/validators/upload-file.validator';
 import { UploadBlogWallpaperCommand } from '../application/use-cases/upload-blog-wallpaper.useCase';
+import { QueryFileUploadingRepository } from '../../files-uploading/infrastructure/query-file-uploding.repository';
 
 @Controller('blogger/blogs')
 @UseGuards(BearerAuthGuard)
@@ -55,6 +56,7 @@ export class BloggerBlogsController {
     private queryBlogsRepository: QueryBlogsRepository,
     private queryBloggerBlogsRepository: QueryBloggerBlogsRepository,
     private queryPostsRepository: QueryPostsRepository,
+    private queryFileUploadingRepository: QueryFileUploadingRepository,
     private commandBus: CommandBus,
     private queryBus: QueryBus,
   ) {}
@@ -172,11 +174,15 @@ export class BloggerBlogsController {
     )
     file: Express.Multer.File,
     @User('id') userId: string,
-  ): Promise<IUploadedBlogImagesOutputModelDto> {
-    const fileData = await this.commandBus.execute(
-      new UploadBlogWallpaperCommand(userId, file),
+    @Param('blogId') blogId: string,
+  ): Promise<IFileUploadingOutputModelDto> {
+    await this.commandBus.execute(
+      new UploadBlogWallpaperCommand(userId, blogId, file),
     );
 
-    return fileData as any;
+    return this.queryFileUploadingRepository.getBlogFileUploading(
+      userId,
+      blogId,
+    );
   }
 }

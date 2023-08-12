@@ -8,6 +8,7 @@ export interface IFileDataDto {
   id: string;
   url: string;
   userId: string;
+  blogId: string;
   type: ImageType;
   width: number;
   height: number;
@@ -27,29 +28,29 @@ export class FileUploadingRepository {
     return this.typeOrmFileUploadingRepository
       .createQueryBuilder('fileUploading')
       .select('fileUploading')
-      .where('fileUploading.id = :fileId', { fileId })
+      .where('"fileUploading".id = :fileId', { fileId })
       .getOne();
   }
 
   async createFileUploading(fileData: IFileDataDto): Promise<void> {
-    const { id, url, userId, width, height, size, type } = fileData;
+    const { id, url, userId, blogId, width, height, size, type } = fileData;
 
     await this.typeOrmFileUploadingRepository
       .createQueryBuilder()
       .insert()
       .into(FileUploadingEntity)
-      .values({ id, url, userId, width, height, size, type })
+      .values({ id, url, userId, blogId, width, height, size, type })
       .execute();
   }
 
   async updateFileUploading(fileData: IFileDataDto): Promise<void> {
-    const { id, url, userId, width, height, size, type } = fileData;
+    const { id, url, userId, blogId, width, height, size, type } = fileData;
 
     await this.typeOrmFileUploadingRepository
       .createQueryBuilder('fileUploading')
       .update()
-      .set({ url, userId, width, height, size, type })
-      .where('fileUploading.id = :id', { id })
+      .set({ id, userId, blogId, width, height, size, type })
+      .where('"fileUploading".url = :url', { url })
       .execute();
   }
 }

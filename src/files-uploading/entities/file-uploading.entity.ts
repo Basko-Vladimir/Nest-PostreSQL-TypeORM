@@ -9,6 +9,8 @@ import {
 } from 'typeorm';
 import { UserEntity } from '../../users/entities/db-entities/user.entity';
 import { ImageType } from '../../common/enums';
+import { BlogEntity } from '../../blogs/entities/db-entities/blog.entity';
+import { PostEntity } from '../../posts/entities/db-entities/post.entity';
 
 @Entity({ name: 'fileUploading' })
 export class FileUploadingEntity {
@@ -20,6 +22,12 @@ export class FileUploadingEntity {
 
   @Column({ type: 'uuid' })
   userId: string;
+
+  @Column({ type: 'uuid', nullable: true, default: null })
+  blogId: string;
+
+  @Column({ type: 'uuid', nullable: true, default: null })
+  postId: string;
 
   @Column({
     type: 'enum',
@@ -45,4 +53,12 @@ export class FileUploadingEntity {
   @ManyToOne(() => UserEntity, (userEntity) => userEntity.uploadedFiles)
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
+
+  @ManyToOne(() => BlogEntity, (blogEntity) => blogEntity.uploadedFiles)
+  @JoinColumn({ name: 'blogId' })
+  blog: UserEntity;
+
+  @ManyToOne(() => PostEntity, (postEntity) => postEntity.uploadedFiles)
+  @JoinColumn({ name: 'postId' })
+  post: UserEntity;
 }

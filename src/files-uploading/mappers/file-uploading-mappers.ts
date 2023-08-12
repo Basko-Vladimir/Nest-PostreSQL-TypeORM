@@ -11,7 +11,7 @@ export const mapFileUploadingEntityToFileUploadingOutputModel = (
   const mainFiles = fileUploadings.filter(
     (item) => item.type === ImageType.MAIN,
   );
-  console.log(fileUploadings);
+
   return {
     wallpaper: {
       url: wallpaper.url,

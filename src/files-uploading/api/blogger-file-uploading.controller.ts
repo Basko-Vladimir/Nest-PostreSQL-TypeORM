@@ -12,11 +12,11 @@ import { User } from '../../common/decorators/user.decorator';
 import { ActionsOnBlogGuard } from '../../common/guards/actions-on-blog.guard';
 import { CheckExistingEntityGuard } from '../../common/guards/check-existing-entity.guard';
 import { ParamIdType } from '../../common/decorators/param-id-type.decorator';
-import { IdTypes } from '../../common/enums';
+import { IdTypes, ImageType } from '../../common/enums';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadFileValidator } from '../../common/validators/upload-file.validator';
 import { IFileUploadingOutputModelDto } from './dto/file-uploading-output-models.dto';
-import { UploadBlogWallpaperCommand } from './application/use-cases/upload-blog-wallpaper.useCase';
+import { UploadBlogImageCommand } from './application/use-cases/upload-blog-image.useCase';
 import { QueryFileUploadingRepository } from '../infrastructure/query-file-uploding.repository';
 
 @Controller('blogger/blogs/:blogId')
@@ -45,7 +45,34 @@ export class BloggerFileUploadingController {
     @Param('blogId') blogId: string,
   ): Promise<IFileUploadingOutputModelDto> {
     await this.commandBus.execute(
-      new UploadBlogWallpaperCommand(userId, blogId, file),
+      new UploadBlogImageCommand(userId, blogId, file, ImageType.WALLPAPER),
+    );
+
+    return this.queryFileUploadingRepository.getBlogFileUploading(
+      userId,
+      blogId,
+    );
+  }
+
+  @Post('images/main')
+  @ParamIdType([IdTypes.BLOG_ID])
+  @UseGuards(CheckExistingEntityGuard, ActionsOnBlogGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadBlogBackgroundMain(
+    @UploadedFile(
+      new UploadFileValidator({
+        type: /(png|jpeg|jpg)$/,
+        width: 156,
+        height: 156,
+        maxSize: 100000,
+      }),
+    )
+    file: Express.Multer.File,
+    @User('id') userId: string,
+    @Param('blogId') blogId: string,
+  ): Promise<IFileUploadingOutputModelDto> {
+    await this.commandBus.execute(
+      new UploadBlogImageCommand(userId, blogId, file, ImageType.MAIN),
     );
 
     return this.queryFileUploadingRepository.getBlogFileUploading(

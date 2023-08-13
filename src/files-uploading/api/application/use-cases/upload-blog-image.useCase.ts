@@ -7,13 +7,18 @@ import {
   IFileDataDto,
 } from '../../../infrastructure/file-uploding.repository';
 
-export class UploadBlogWallpaperCommand {
-  constructor(public userId: string, public blogId: string, public file: any) {}
+export class UploadBlogImageCommand {
+  constructor(
+    public userId: string,
+    public blogId: string,
+    public file: any,
+    public imageType: ImageType,
+  ) {}
 }
 
-@CommandHandler(UploadBlogWallpaperCommand)
-export class UploadBlogWallpaperUseCase
-  implements ICommandHandler<UploadBlogWallpaperCommand>
+@CommandHandler(UploadBlogImageCommand)
+export class UploadBlogImageUseCase
+  implements ICommandHandler<UploadBlogImageCommand>
 {
   constructor(
     private blogsRepository: BlogsRepository,
@@ -21,8 +26,8 @@ export class UploadBlogWallpaperUseCase
     private fileUploadingRepository: FileUploadingRepository,
   ) {}
 
-  async execute(command: UploadBlogWallpaperCommand): Promise<void> {
-    const { userId, file, blogId } = command;
+  async execute(command: UploadBlogImageCommand): Promise<void> {
+    const { userId, file, blogId, imageType } = command;
 
     try {
       const { url, uploadedFileId } =
@@ -30,14 +35,14 @@ export class UploadBlogWallpaperUseCase
           userId,
           blogId,
           file,
-          ImageType.WALLPAPER,
+          imageType,
           EntityDirectory.BLOGS,
         );
       const metadata = await file.buffer.withMetadata();
       const fileData: IFileDataDto = {
         id: uploadedFileId,
         size: file.size,
-        type: ImageType.WALLPAPER,
+        type: imageType,
         height: metadata.options.height,
         width: metadata.options.width,
         url,

@@ -1,6 +1,6 @@
-import { IFileUploadingOutputModelDto } from '../../blogs/api/dto/uploaded-file-output-models.dto';
 import { FileUploadingEntity } from '../entities/file-uploading.entity';
 import { ImageType } from '../../common/enums';
+import { IFileUploadingOutputModelDto } from '../api/dto/file-uploading-output-models.dto';
 
 export const mapFileUploadingEntityToFileUploadingOutputModel = (
   fileUploadings: FileUploadingEntity[],

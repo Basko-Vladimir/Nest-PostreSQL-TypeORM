@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FileUploadingEntity } from '../entities/file-uploading.entity';
 import { mapFileUploadingEntityToFileUploadingOutputModel } from '../mappers/file-uploading-mappers';
-import { IFileUploadingOutputModelDto } from '../../blogs/api/dto/uploaded-file-output-models.dto';
+import { IFileUploadingOutputModelDto } from '../api/dto/file-uploading-output-models.dto';
 
 @Injectable()
 export class QueryFileUploadingRepository {
@@ -21,6 +21,7 @@ export class QueryFileUploadingRepository {
       .select('fileUploading')
       .where('"fileUploading"."userId" = :userId', { userId })
       .andWhere('"fileUploading"."blogId" = :blogId', { blogId })
+      .andWhere('"fileUploading"."postId" is Null')
       .getMany();
 
     return mapFileUploadingEntityToFileUploadingOutputModel(fileUploadings);

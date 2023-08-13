@@ -5,6 +5,8 @@ import {
   IPostFileUploadingOutputModelDto,
 } from '../api/dto/file-uploading-output-models.dto';
 
+const BASE_URL = 'https://devbucket1.storage.yandexcloud.net/';
+
 export const mapBlogFileUploadingEntityToBlogFileUploadingOutputModel = (
   fileUploadings: FileUploadingEntity[],
 ): IBlogFileUploadingOutputModelDto => {
@@ -16,17 +18,19 @@ export const mapBlogFileUploadingEntityToBlogFileUploadingOutputModel = (
   );
 
   return {
-    wallpaper: {
-      url: wallpaper?.url,
-      width: wallpaper?.width,
-      height: wallpaper?.height,
-      fileSize: wallpaper?.size,
-    },
+    wallpaper: wallpaper
+      ? {
+          url: `${BASE_URL}${wallpaper.url}`,
+          width: wallpaper.width,
+          height: wallpaper.height,
+          fileSize: wallpaper.size,
+        }
+      : null,
     main: mainFiles.map((item) => ({
-      url: item?.url,
-      width: item?.width,
-      height: item?.height,
-      fileSize: item?.size,
+      url: item && `${BASE_URL}${item.url}`,
+      width: item.width,
+      height: item.height,
+      fileSize: item.size,
     })),
   };
 };

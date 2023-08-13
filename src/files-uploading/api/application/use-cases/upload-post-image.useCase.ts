@@ -31,7 +31,7 @@ export class UploadPostImageUseCase
       const { url, uploadedFileId } =
         await this.cloudStorageAdapter.saveFileToCloud(
           userId,
-          blogId,
+          postId,
           file,
           ImageType.MAIN,
           EntityDirectory.POSTS,

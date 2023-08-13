@@ -1,11 +1,11 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { BlogsRepository } from '../../infrastructure/blogs.repository';
-import { CloudStorageAdapter } from '../../../common/adapters/cloud-storage.adapter';
-import { EntityDirectory, ImageType } from '../../../common/enums';
+import { BlogsRepository } from '../../../../blogs/infrastructure/blogs.repository';
+import { CloudStorageAdapter } from '../../../../common/adapters/cloud-storage.adapter';
+import { EntityDirectory, ImageType } from '../../../../common/enums';
 import {
   FileUploadingRepository,
   IFileDataDto,
-} from '../../../files-uploading/infrastructure/file-uploding.repository';
+} from '../../../infrastructure/file-uploding.repository';
 
 export class UploadBlogWallpaperCommand {
   constructor(public userId: string, public blogId: string, public file: any) {}

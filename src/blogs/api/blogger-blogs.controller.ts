@@ -9,9 +9,7 @@ import {
   Post,
   Put,
   Query,
-  UploadedFile,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import {
   AllBlogsOutputModel,
@@ -43,10 +41,6 @@ import { CommentsQueryParamsDto } from '../../comments/api/dto/comments-query-pa
 import { AllBloggerCommentsOutputModel } from '../../comments/api/dto/comments-output-models.dto';
 import { GetAllBloggerCommentsQuery } from '../../comments/application/use-cases/get-all-blogger-comments.useCase';
 import { UserEntity } from '../../users/entities/db-entities/user.entity';
-import { IFileUploadingOutputModelDto } from './dto/uploaded-file-output-models.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { UploadFileValidator } from '../../common/validators/upload-file.validator';
-import { UploadBlogWallpaperCommand } from '../application/use-cases/upload-blog-wallpaper.useCase';
 import { QueryFileUploadingRepository } from '../../files-uploading/infrastructure/query-file-uploding.repository';
 
 @Controller('blogger/blogs')
@@ -155,34 +149,6 @@ export class BloggerBlogsController {
   ): Promise<void> {
     return this.commandBus.execute(
       new UpdatePostCommand(postId, { ...updatePostForBlogDto, blogId }),
-    );
-  }
-
-  //Files uploading
-  @Post(':blogId/images/wallpaper')
-  @ParamIdType([IdTypes.BLOG_ID])
-  @UseGuards(CheckExistingEntityGuard, ActionsOnBlogGuard)
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadBlogBackgroundWallpaper(
-    @UploadedFile(
-      new UploadFileValidator({
-        type: /(png|jpeg|jpg)$/,
-        width: 1028,
-        height: 312,
-        maxSize: 100000,
-      }),
-    )
-    file: Express.Multer.File,
-    @User('id') userId: string,
-    @Param('blogId') blogId: string,
-  ): Promise<IFileUploadingOutputModelDto> {
-    await this.commandBus.execute(
-      new UploadBlogWallpaperCommand(userId, blogId, file),
-    );
-
-    return this.queryFileUploadingRepository.getBlogFileUploading(
-      userId,
-      blogId,
     );
   }
 }

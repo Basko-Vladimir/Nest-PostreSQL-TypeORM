@@ -102,11 +102,12 @@ import { GameQuestionEntity } from './quiz/games/entities/game-question.entity';
 import { GameUserEntity } from './quiz/games/entities/game-user.entity';
 import { GiveAnswerUseCase } from './quiz/answers/application/use-cases/give-answer.useCase';
 import { QuizAnswerRepository } from './quiz/answers/infrastructure/quiz-answer.repository';
-import { UploadBlogWallpaperUseCase } from './blogs/application/use-cases/upload-blog-wallpaper.useCase';
+import { UploadBlogWallpaperUseCase } from './files-uploading/api/application/use-cases/upload-blog-wallpaper.useCase';
 import { CloudStorageAdapter } from './common/adapters/cloud-storage.adapter';
 import { FileUploadingEntity } from './files-uploading/entities/file-uploading.entity';
 import { FileUploadingRepository } from './files-uploading/infrastructure/file-uploding.repository';
 import { QueryFileUploadingRepository } from './files-uploading/infrastructure/query-file-uploding.repository';
+import { BloggerFileUploadingController } from './files-uploading/api/blogger-file-uploading.controller';
 
 const useCases = [
   RegisterUserUseCase,
@@ -206,6 +207,7 @@ const useCases = [
     CommentsController,
     AdminQuestionsController,
     GameController,
+    BloggerFileUploadingController,
   ],
   providers: [
     AppService,

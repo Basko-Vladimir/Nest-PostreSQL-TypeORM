@@ -47,7 +47,7 @@ export class QueryBlogsRepository {
     const targetBlog = await this.typeOrmBlogRepository
       .createQueryBuilder('blog')
       .innerJoinAndSelect('blog.user', 'user')
-      .innerJoinAndSelect(
+      .leftJoinAndSelect(
         'blog.uploadedFiles',
         'fileUploading',
         'fileUploading.blogId = blog.id AND fileUploading.userId = user.id AND fileUploading.postId is Null',
@@ -77,7 +77,7 @@ export class QueryBlogsRepository {
     const selectQueryBuilder = this.typeOrmBlogRepository
       .createQueryBuilder('blog')
       .innerJoinAndSelect('blog.user', 'user')
-      .innerJoinAndSelect(
+      .leftJoinAndSelect(
         'blog.uploadedFiles',
         'fileUploading',
         'fileUploading.blogId = blog.id AND fileUploading.userId = user.id AND fileUploading.postId is Null',

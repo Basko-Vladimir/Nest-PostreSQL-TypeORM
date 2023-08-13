@@ -49,7 +49,7 @@ export class QueryPostsRepository {
       .createQueryBuilder('post')
       .innerJoin('post.blog', 'blog')
       .innerJoin('post.user', 'user') //TODO need to rework we need user of every Like, but not such who created post
-      .innerJoinAndSelect(
+      .leftJoinAndSelect(
         'post.uploadedFiles',
         'fileUploading',
         `fileUploading.blogId = blog.id
@@ -130,7 +130,7 @@ export class QueryPostsRepository {
       .createQueryBuilder('post')
       .innerJoin('post.blog', 'blog')
       .innerJoin('post.user', 'user')
-      .innerJoinAndSelect(
+      .leftJoinAndSelect(
         'post.uploadedFiles',
         'fileUploading',
         `fileUploading.blogId = blog.id

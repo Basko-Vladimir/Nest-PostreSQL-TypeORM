@@ -49,6 +49,13 @@ export class QueryPostsRepository {
       .createQueryBuilder('post')
       .innerJoin('post.blog', 'blog')
       .innerJoin('post.user', 'user') //TODO need to rework we need user of every Like, but not such who created post
+      .innerJoinAndSelect(
+        'post.uploadedFiles',
+        'fileUploading',
+        `fileUploading.blogId = blog.id
+          AND fileUploading.postId = post.id
+          AND fileUploading.userId = user.id`,
+      )
       .leftJoinAndMapOne(
         'post.myLike',
         LikeEntity,
@@ -83,6 +90,7 @@ export class QueryPostsRepository {
         'user.login', //TODO need to rework we need user of every Like, but not such who created post
         'myLike.status',
         'newestLike',
+        'fileUploading',
       ])
       .where('blog.isBanned = :isBanned', { isBanned: false });
     const dbSortDirection = getDbSortDirection(sortDirection);
@@ -122,6 +130,13 @@ export class QueryPostsRepository {
       .createQueryBuilder('post')
       .innerJoin('post.blog', 'blog')
       .innerJoin('post.user', 'user')
+      .innerJoinAndSelect(
+        'post.uploadedFiles',
+        'fileUploading',
+        `fileUploading.blogId = blog.id
+          AND fileUploading.postId = post.id
+          AND fileUploading.userId = user.id`,
+      )
       .leftJoinAndMapOne(
         'post.myLike',
         LikeEntity,
@@ -143,7 +158,7 @@ export class QueryPostsRepository {
             likeStatus: LikeStatus.DISLIKE,
           }),
       )
-      .select(['post', 'blog.name', 'myLike.status'])
+      .select(['post', 'blog.name', 'myLike.status', 'fileUploading'])
       .where('post.id = :postId', { postId })
       .andWhere('blog.isBanned = :isBanned', { isBanned: false })
       .getOne();

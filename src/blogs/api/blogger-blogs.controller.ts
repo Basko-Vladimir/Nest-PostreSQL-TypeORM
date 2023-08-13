@@ -41,6 +41,7 @@ import { CommentsQueryParamsDto } from '../../comments/api/dto/comments-query-pa
 import { AllBloggerCommentsOutputModel } from '../../comments/api/dto/comments-output-models.dto';
 import { GetAllBloggerCommentsQuery } from '../../comments/application/use-cases/get-all-blogger-comments.useCase';
 import { UserEntity } from '../../users/entities/db-entities/user.entity';
+import { QueryFileUploadingRepository } from '../../files-uploading/infrastructure/query-file-uploding.repository';
 
 @Controller('blogger/blogs')
 @UseGuards(BearerAuthGuard)
@@ -49,6 +50,7 @@ export class BloggerBlogsController {
     private queryBlogsRepository: QueryBlogsRepository,
     private queryBloggerBlogsRepository: QueryBloggerBlogsRepository,
     private queryPostsRepository: QueryPostsRepository,
+    private queryFileUploadingRepository: QueryFileUploadingRepository,
     private commandBus: CommandBus,
     private queryBus: QueryBus,
   ) {}

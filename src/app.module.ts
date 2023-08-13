@@ -102,6 +102,16 @@ import { GameQuestionEntity } from './quiz/games/entities/game-question.entity';
 import { GameUserEntity } from './quiz/games/entities/game-user.entity';
 import { GiveAnswerUseCase } from './quiz/answers/application/use-cases/give-answer.useCase';
 import { QuizAnswerRepository } from './quiz/answers/infrastructure/quiz-answer.repository';
+import { CloudStorageAdapter } from './common/adapters/cloud-storage.adapter';
+import { FileUploadingEntity } from './files-uploading/entities/file-uploading.entity';
+import { FileUploadingRepository } from './files-uploading/infrastructure/file-uploding.repository';
+import { QueryFileUploadingRepository } from './files-uploading/infrastructure/query-file-uploding.repository';
+import { BloggerFileUploadingController } from './files-uploading/api/blogger-file-uploading.controller';
+import { UploadBlogImageUseCase } from './files-uploading/api/application/use-cases/upload-blog-image.useCase';
+import {
+  UploadPostImageCommand,
+  UploadPostImageUseCase,
+} from './files-uploading/api/application/use-cases/upload-post-image.useCase';
 
 const useCases = [
   RegisterUserUseCase,
@@ -149,6 +159,9 @@ const useCases = [
   UpdateQuizQuestionPublishStatusUseCase,
   ConnectToGameUseCase,
   GiveAnswerUseCase,
+  UploadBlogImageUseCase,
+  UploadPostImageCommand,
+  UploadPostImageUseCase,
 ];
 
 @Module({
@@ -183,6 +196,7 @@ const useCases = [
       QuizAnswerEntity,
       GameQuestionEntity,
       GameUserEntity,
+      FileUploadingEntity,
     ]),
     CqrsModule,
   ],
@@ -199,6 +213,7 @@ const useCases = [
     CommentsController,
     AdminQuestionsController,
     GameController,
+    BloggerFileUploadingController,
   ],
   providers: [
     AppService,
@@ -229,6 +244,9 @@ const useCases = [
     QuizGameRepository,
     QueryQuizGameRepository,
     QuizAnswerRepository,
+    CloudStorageAdapter,
+    FileUploadingRepository,
+    QueryFileUploadingRepository,
     ...useCases,
   ],
 })

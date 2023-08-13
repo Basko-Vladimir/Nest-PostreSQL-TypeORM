@@ -10,6 +10,7 @@ import { PostEntity } from '../../../posts/entities/db-entities/post.entity';
 import { usersConstants } from '../../../common/constants';
 import { QuizAnswerEntity } from '../../../quiz/answers/entities/quiz-answer.entity';
 import { GameUserEntity } from '../../../quiz/games/entities/game-user.entity';
+import { FileUploadingEntity } from '../../../files-uploading/entities/file-uploading.entity';
 
 const { MAX_LOGIN_LENGTH } = usersConstants;
 
@@ -77,4 +78,10 @@ export class UserEntity extends BlockableEntity {
 
   @OneToMany(() => GameUserEntity, (gameUserEntity) => gameUserEntity.user)
   gameUsers: GameUserEntity[];
+
+  @OneToMany(
+    () => FileUploadingEntity,
+    (uploadedFileEntity) => uploadedFileEntity.user,
+  )
+  uploadedFiles: GameUserEntity[];
 }

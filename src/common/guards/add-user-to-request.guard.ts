@@ -16,8 +16,6 @@ export class AddUserToRequestGuard implements CanActivate {
     const authHeader = request.headers.authorization;
     request.context = {};
 
-    console.log(request.query);
-
     if (authHeader) {
       const [authType, authValue] = authHeader.split(' ');
 

@@ -5,6 +5,7 @@ import { BlogEntity } from '../../../blogs/entities/db-entities/blog.entity';
 import { CommentEntity } from '../../../comments/entities/db-entities/comment.entity';
 import { LikeEntity } from '../../../likes/entities/db-entities/like.entity';
 import { UserEntity } from '../../../users/entities/db-entities/user.entity';
+import { FileUploadingEntity } from '../../../files-uploading/entities/file-uploading.entity';
 
 const { MAX_TITLE_LENGTH, MAX_SHORT_DESCRIPTION_LENGTH, MAX_CONTENT_LENGTH } =
   postsConstants;
@@ -52,4 +53,10 @@ export class PostEntity extends BaseEntity {
   })
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
+
+  @OneToMany(
+    () => FileUploadingEntity,
+    (fileUploadingEntity) => fileUploadingEntity.post,
+  )
+  uploadedFiles: FileUploadingEntity[];
 }

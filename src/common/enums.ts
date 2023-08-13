@@ -119,3 +119,13 @@ export enum PlayerResult {
   LOSER = 'loser',
   DRAW = 'draw',
 }
+
+export enum ImageType {
+  WALLPAPER = 'wallpaper',
+  MAIN = 'main',
+}
+
+export enum EntityDirectory {
+  BLOGS = 'blogs',
+  POSTS = 'posts',
+}

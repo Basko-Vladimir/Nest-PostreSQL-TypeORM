@@ -4,6 +4,8 @@ import { BlogEntity } from '../../blogs/entities/db-entities/blog.entity';
 import { LikeStatus } from '../../common/enums';
 import { mapLikeEntityToLikeInfoOutputModel } from '../../likes/mappers/likes-mapper';
 import { UserEntity } from '../../users/entities/db-entities/user.entity';
+import { mapPostFileUploadingEntityToPostFileUploadingOutputModel } from '../../files-uploading/mappers/file-uploading-mappers';
+import { FileUploadingEntity } from '../../files-uploading/entities/file-uploading.entity';
 
 export interface RawFullPost {
   id: string;
@@ -21,6 +23,7 @@ export interface RawFullPost {
   likesCount: number;
   dislikesCount: number;
   newestLikes: LikeEntity[];
+  uploadedFiles: FileUploadingEntity[];
 }
 
 export const mapPostEntityToPostOutputModel = (
@@ -42,5 +45,8 @@ export const mapPostEntityToPostOutputModel = (
         mapLikeEntityToLikeInfoOutputModel(like, post.user?.login),
       ),
     },
+    images: mapPostFileUploadingEntityToPostFileUploadingOutputModel(
+      post.uploadedFiles,
+    ),
   };
 };

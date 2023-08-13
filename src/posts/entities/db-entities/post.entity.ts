@@ -6,7 +6,6 @@ import { CommentEntity } from '../../../comments/entities/db-entities/comment.en
 import { LikeEntity } from '../../../likes/entities/db-entities/like.entity';
 import { UserEntity } from '../../../users/entities/db-entities/user.entity';
 import { FileUploadingEntity } from '../../../files-uploading/entities/file-uploading.entity';
-import { GameUserEntity } from '../../../quiz/games/entities/game-user.entity';
 
 const { MAX_TITLE_LENGTH, MAX_SHORT_DESCRIPTION_LENGTH, MAX_CONTENT_LENGTH } =
   postsConstants;
@@ -57,7 +56,7 @@ export class PostEntity extends BaseEntity {
 
   @OneToMany(
     () => FileUploadingEntity,
-    (uploadedFileEntity) => uploadedFileEntity.post,
+    (fileUploadingEntity) => fileUploadingEntity.post,
   )
-  uploadedFiles: GameUserEntity[];
+  uploadedFiles: FileUploadingEntity[];
 }

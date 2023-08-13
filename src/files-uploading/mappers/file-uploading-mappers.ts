@@ -17,16 +17,16 @@ export const mapBlogFileUploadingEntityToBlogFileUploadingOutputModel = (
 
   return {
     wallpaper: {
-      url: wallpaper.url,
-      width: wallpaper.width,
-      height: wallpaper.height,
-      fileSize: wallpaper.size,
+      url: wallpaper?.url,
+      width: wallpaper?.width,
+      height: wallpaper?.height,
+      fileSize: wallpaper?.size,
     },
     main: mainFiles.map((item) => ({
-      url: item.url,
-      width: item.width,
-      height: item.height,
-      fileSize: item.size,
+      url: item?.url,
+      width: item?.width,
+      height: item?.height,
+      fileSize: item?.size,
     })),
   };
 };
@@ -35,9 +35,9 @@ export const mapPostFileUploadingEntityToPostFileUploadingOutputModel = (
   fileUploadings: FileUploadingEntity[],
 ): IPostFileUploadingOutputModelDto => ({
   main: fileUploadings.map((item) => ({
-    url: item.url,
-    width: item.width,
-    height: item.height,
-    fileSize: item.size,
+    url: item?.url,
+    width: item?.width,
+    height: item?.height,
+    fileSize: item?.size,
   })),
 });

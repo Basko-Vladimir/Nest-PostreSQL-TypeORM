@@ -23,7 +23,7 @@ export class FileUploadingEntity {
   @Column({ type: 'uuid' })
   userId: string;
 
-  @Column({ type: 'uuid', nullable: true, default: null })
+  @Column({ type: 'uuid' })
   blogId: string;
 
   @Column({ type: 'uuid', nullable: true, default: null })
@@ -56,9 +56,9 @@ export class FileUploadingEntity {
 
   @ManyToOne(() => BlogEntity, (blogEntity) => blogEntity.uploadedFiles)
   @JoinColumn({ name: 'blogId' })
-  blog: UserEntity;
+  blog: BlogEntity;
 
   @ManyToOne(() => PostEntity, (postEntity) => postEntity.uploadedFiles)
   @JoinColumn({ name: 'postId' })
-  post: UserEntity;
+  post: PostEntity;
 }

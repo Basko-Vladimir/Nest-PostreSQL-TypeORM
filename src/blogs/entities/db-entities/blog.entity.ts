@@ -5,7 +5,6 @@ import { BlockableEntity } from '../../../common/common-db-entities';
 import { PostEntity } from '../../../posts/entities/db-entities/post.entity';
 import { BannedUserForBlogEntity } from '../../../users/entities/db-entities/banned-user-for-blog.entity';
 import { FileUploadingEntity } from '../../../files-uploading/entities/file-uploading.entity';
-import { GameUserEntity } from '../../../quiz/games/entities/game-user.entity';
 
 const { MAX_NAME_LENGTH, MAX_WEBSITE_URL_LENGTH, MAX_DESCRIPTION_LENGTH } =
   blogsConstants;
@@ -56,7 +55,7 @@ export class BlogEntity extends BlockableEntity {
 
   @OneToMany(
     () => FileUploadingEntity,
-    (uploadedFileEntity) => uploadedFileEntity.blog,
+    (fileUploadingEntity) => fileUploadingEntity.blog,
   )
-  uploadedFiles: GameUserEntity[];
+  uploadedFiles: FileUploadingEntity[];
 }

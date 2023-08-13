@@ -46,7 +46,13 @@ export class QueryBlogsRepository {
   async findBlogById(blogId: string): Promise<IBlogOutputModel | null> {
     const targetBlog = await this.typeOrmBlogRepository
       .createQueryBuilder('blog')
-      .select()
+      .innerJoinAndSelect('blog.user', 'user')
+      .innerJoinAndSelect(
+        'blog.uploadedFiles',
+        'fileUploading',
+        'fileUploading.blogId = blog.id AND fileUploading.userId = user.id AND fileUploading.postId is Null',
+      )
+      .select(['blog', 'fileUploading'])
       .where('blog.id = :blogId', { blogId })
       .andWhere('blog.isBanned = :isBanned', { isBanned: false })
       .getOne();
@@ -71,7 +77,12 @@ export class QueryBlogsRepository {
     const selectQueryBuilder = this.typeOrmBlogRepository
       .createQueryBuilder('blog')
       .innerJoinAndSelect('blog.user', 'user')
-      .select(['blog', 'user.login']);
+      .innerJoinAndSelect(
+        'blog.uploadedFiles',
+        'fileUploading',
+        'fileUploading.blogId = blog.id AND fileUploading.userId = user.id AND fileUploading.postId is Null',
+      )
+      .select(['blog', 'user.login', 'fileUploading']);
 
     if (typeof isBanned === 'boolean') {
       selectQueryBuilder.where('blog.isBanned = :isBanned', { isBanned });

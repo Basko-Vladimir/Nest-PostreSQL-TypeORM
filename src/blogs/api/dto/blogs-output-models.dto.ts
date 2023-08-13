@@ -1,5 +1,6 @@
 import { AllEntitiesOutputModel } from '../../../common/types';
 import { IPostOutputModel } from '../../../posts/api/dto/posts-output-models.dto';
+import { IBlogFileUploadingOutputModelDto } from '../../../files-uploading/api/dto/file-uploading-output-models.dto';
 
 export interface IBlogOutputModel {
   id: string;
@@ -8,6 +9,7 @@ export interface IBlogOutputModel {
   description: string;
   isMembership: boolean;
   createdAt: string;
+  images: IBlogFileUploadingOutputModelDto;
 }
 
 export interface IBlogBanInfo {

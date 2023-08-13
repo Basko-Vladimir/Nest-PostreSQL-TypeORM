@@ -3,6 +3,7 @@ import {
   IBlogOutputModel,
 } from '../api/dto/blogs-output-models.dto';
 import { BlogEntity } from '../entities/db-entities/blog.entity';
+import { mapBlogFileUploadingEntityToBlogFileUploadingOutputModel } from '../../files-uploading/mappers/file-uploading-mappers';
 
 export const mapBlogEntityToBlogOutputModel = (
   blog: BlogEntity,
@@ -14,8 +15,11 @@ export const mapBlogEntityToBlogOutputModel = (
     name: blog.name,
     websiteUrl: blog.websiteUrl,
     description: blog.description,
-    isMembership: blog.isMembership,
     createdAt: blog.createdAt.toISOString(),
+    isMembership: blog.isMembership,
+    images: mapBlogFileUploadingEntityToBlogFileUploadingOutputModel(
+      blog.uploadedFiles,
+    ),
   };
 };
 
@@ -29,6 +33,9 @@ export const mapBlogEntityToBlogForAdminOutputModel = (
     description: blog.description,
     isMembership: blog.isMembership,
     createdAt: blog.createdAt.toISOString(),
+    images: mapBlogFileUploadingEntityToBlogFileUploadingOutputModel(
+      blog.uploadedFiles,
+    ),
     blogOwnerInfo: {
       userId: blog.ownerId,
       userLogin: blog.user.login,

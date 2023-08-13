@@ -102,6 +102,7 @@ export class QueryPostsRepository {
     const totalCount = await selectQueryBuilder.getCount();
     const posts = await selectQueryBuilder
       .orderBy(sortByValue, dbSortDirection)
+      .addOrderBy(`fileUploading.createdAt`, 'DESC')
       .take(pageSize)
       .skip(skip)
       .getMany();
@@ -161,6 +162,7 @@ export class QueryPostsRepository {
       .select(['post', 'blog.name', 'myLike.status', 'fileUploading'])
       .where('post.id = :postId', { postId })
       .andWhere('blog.isBanned = :isBanned', { isBanned: false })
+      .addOrderBy(`fileUploading.createdAt`, 'DESC')
       .getOne();
 
     return mapPostEntityToPostOutputModel({ ...targetPost, newestLikes });

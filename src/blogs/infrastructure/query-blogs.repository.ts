@@ -55,6 +55,7 @@ export class QueryBlogsRepository {
       .select(['blog', 'fileUploading'])
       .where('blog.id = :blogId', { blogId })
       .andWhere('blog.isBanned = :isBanned', { isBanned: false })
+      .addOrderBy(`fileUploading.createdAt`, 'DESC')
       .getOne();
 
     return mapBlogEntityToBlogOutputModel(targetBlog);
@@ -99,6 +100,7 @@ export class QueryBlogsRepository {
     const totalCount = await selectQueryBuilder.getCount();
     const blogs = await selectQueryBuilder
       .orderBy(`blog.${sortBy}`, dbSortDirection)
+      .addOrderBy(`fileUploading.createdAt`, 'DESC')
       .limit(pageSize)
       .offset(offset)
       .getMany();

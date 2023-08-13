@@ -36,13 +36,13 @@ export class UploadBlogImageUseCase
           imageType,
           EntityDirectory.BLOGS,
         );
-      const metadata = await file.buffer.withMetadata();
+      const metadata = await file.buffer.metadata();
       const fileData: IFileDataDto = {
         id: uploadedFileId,
-        size: file.size,
+        size: metadata.size,
         type: imageType,
-        height: metadata.options.height,
-        width: metadata.options.width,
+        height: metadata.height,
+        width: metadata.width,
         url,
         userId,
         blogId,

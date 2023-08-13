@@ -13,7 +13,7 @@ export interface IUploadFileOptions {
 export class UploadFileValidator implements PipeTransform {
   constructor(private options: IUploadFileOptions) {}
 
-  transform(value: Express.Multer.File) {
+  async transform(value: Express.Multer.File) {
     const { maxSize, width, height, type } = this.options;
     const defaultAllowableSize = 10000;
     const currentSizeLimit = maxSize || defaultAllowableSize;
@@ -32,11 +32,19 @@ export class UploadFileValidator implements PipeTransform {
       );
     }
 
-    const updatedFile = sharp(value.buffer).resize({ width, height });
+    const sharpFile = sharp(value.buffer);
+    const fileMetadata = await sharpFile.metadata();
+
+    if (fileMetadata.width !== width || fileMetadata.height !== height) {
+      generateCustomBadRequestException(
+        `Incorrect image sizes. Width should be ${width} and height should be ${height}`,
+        'file',
+      );
+    }
 
     return {
       ...value,
-      buffer: updatedFile,
+      buffer: sharpFile,
     };
   }
 }

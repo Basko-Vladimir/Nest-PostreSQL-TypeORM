@@ -56,4 +56,12 @@ export class FileUploadingRepository {
       .where('"fileUploading".url = :url', { url })
       .execute();
   }
+
+  async deleteAllFileUploadings(): Promise<void> {
+    await this.typeOrmFileUploadingRepository
+      .createQueryBuilder('fileUploading')
+      .delete()
+      .from(FileUploadingEntity)
+      .execute();
+  }
 }

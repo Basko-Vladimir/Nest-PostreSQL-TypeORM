@@ -9,6 +9,7 @@ export interface IFileDataDto {
   url: string;
   userId: string;
   blogId: string;
+  postId?: string;
   type: ImageType;
   width: number;
   height: number;
@@ -33,23 +34,25 @@ export class FileUploadingRepository {
   }
 
   async createFileUploading(fileData: IFileDataDto): Promise<void> {
-    const { id, url, userId, blogId, width, height, size, type } = fileData;
+    const { id, url, userId, blogId, width, height, size, type, postId } =
+      fileData;
 
     await this.typeOrmFileUploadingRepository
       .createQueryBuilder()
       .insert()
       .into(FileUploadingEntity)
-      .values({ id, url, userId, blogId, width, height, size, type })
+      .values({ id, url, userId, blogId, width, height, size, type, postId })
       .execute();
   }
 
   async updateFileUploading(fileData: IFileDataDto): Promise<void> {
-    const { id, url, userId, blogId, width, height, size, type } = fileData;
+    const { id, url, userId, blogId, width, height, size, type, postId } =
+      fileData;
 
     await this.typeOrmFileUploadingRepository
       .createQueryBuilder('fileUploading')
       .update()
-      .set({ id, userId, blogId, width, height, size, type })
+      .set({ id, userId, blogId, width, height, size, type, postId })
       .where('"fileUploading".url = :url', { url })
       .execute();
   }

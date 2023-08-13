@@ -2,8 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FileUploadingEntity } from '../entities/file-uploading.entity';
-import { mapFileUploadingEntityToFileUploadingOutputModel } from '../mappers/file-uploading-mappers';
-import { IFileUploadingOutputModelDto } from '../api/dto/file-uploading-output-models.dto';
+import {
+  mapBlogFileUploadingEntityToBlogFileUploadingOutputModel,
+  mapPostFileUploadingEntityToPostFileUploadingOutputModel,
+} from '../mappers/file-uploading-mappers';
+import {
+  IBlogFileUploadingOutputModelDto,
+  IPostFileUploadingOutputModelDto,
+} from '../api/dto/file-uploading-output-models.dto';
 
 @Injectable()
 export class QueryFileUploadingRepository {
@@ -12,10 +18,10 @@ export class QueryFileUploadingRepository {
     private typeOrmFileUploadingRepository: Repository<FileUploadingEntity>,
   ) {}
 
-  async getBlogFileUploading(
+  async getAllBlogFilesUploading(
     userId: string,
     blogId: string,
-  ): Promise<IFileUploadingOutputModelDto> {
+  ): Promise<IBlogFileUploadingOutputModelDto> {
     const fileUploadings = await this.typeOrmFileUploadingRepository
       .createQueryBuilder('fileUploading')
       .select('fileUploading')
@@ -24,6 +30,26 @@ export class QueryFileUploadingRepository {
       .andWhere('"fileUploading"."postId" is Null')
       .getMany();
 
-    return mapFileUploadingEntityToFileUploadingOutputModel(fileUploadings);
+    return mapBlogFileUploadingEntityToBlogFileUploadingOutputModel(
+      fileUploadings,
+    );
+  }
+
+  async getAllPostFilesUploading(
+    userId: string,
+    blogId: string,
+    postId: string,
+  ): Promise<IPostFileUploadingOutputModelDto> {
+    const fileUploadings = await this.typeOrmFileUploadingRepository
+      .createQueryBuilder('fileUploading')
+      .select('fileUploading')
+      .where('"fileUploading"."userId" = :userId', { userId })
+      .andWhere('"fileUploading"."blogId" = :blogId', { blogId })
+      .andWhere('"fileUploading"."postId" = :postId', { postId })
+      .getMany();
+
+    return mapPostFileUploadingEntityToPostFileUploadingOutputModel(
+      fileUploadings,
+    );
   }
 }

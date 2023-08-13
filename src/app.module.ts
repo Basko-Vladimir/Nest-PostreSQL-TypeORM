@@ -108,6 +108,10 @@ import { FileUploadingRepository } from './files-uploading/infrastructure/file-u
 import { QueryFileUploadingRepository } from './files-uploading/infrastructure/query-file-uploding.repository';
 import { BloggerFileUploadingController } from './files-uploading/api/blogger-file-uploading.controller';
 import { UploadBlogImageUseCase } from './files-uploading/api/application/use-cases/upload-blog-image.useCase';
+import {
+  UploadPostImageCommand,
+  UploadPostImageUseCase,
+} from './files-uploading/api/application/use-cases/upload-post-image.useCase';
 
 const useCases = [
   RegisterUserUseCase,
@@ -156,6 +160,8 @@ const useCases = [
   ConnectToGameUseCase,
   GiveAnswerUseCase,
   UploadBlogImageUseCase,
+  UploadPostImageCommand,
+  UploadPostImageUseCase,
 ];
 
 @Module({

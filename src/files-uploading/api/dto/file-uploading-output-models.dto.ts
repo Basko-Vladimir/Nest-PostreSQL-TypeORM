@@ -5,7 +5,11 @@ interface IUploadedImageOutputModelDto {
   fileSize: number;
 }
 
-export interface IFileUploadingOutputModelDto {
+export interface IBlogFileUploadingOutputModelDto {
   wallpaper: IUploadedImageOutputModelDto;
+  main: IUploadedImageOutputModelDto[];
+}
+
+export interface IPostFileUploadingOutputModelDto {
   main: IUploadedImageOutputModelDto[];
 }

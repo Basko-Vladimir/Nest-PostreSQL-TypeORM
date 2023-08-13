@@ -1,10 +1,13 @@
 import { FileUploadingEntity } from '../entities/file-uploading.entity';
 import { ImageType } from '../../common/enums';
-import { IFileUploadingOutputModelDto } from '../api/dto/file-uploading-output-models.dto';
+import {
+  IBlogFileUploadingOutputModelDto,
+  IPostFileUploadingOutputModelDto,
+} from '../api/dto/file-uploading-output-models.dto';
 
-export const mapFileUploadingEntityToFileUploadingOutputModel = (
+export const mapBlogFileUploadingEntityToBlogFileUploadingOutputModel = (
   fileUploadings: FileUploadingEntity[],
-): IFileUploadingOutputModelDto => {
+): IBlogFileUploadingOutputModelDto => {
   const wallpaper = fileUploadings.find(
     (item) => item.type === ImageType.WALLPAPER,
   );
@@ -27,3 +30,14 @@ export const mapFileUploadingEntityToFileUploadingOutputModel = (
     })),
   };
 };
+
+export const mapPostFileUploadingEntityToPostFileUploadingOutputModel = (
+  fileUploadings: FileUploadingEntity[],
+): IPostFileUploadingOutputModelDto => ({
+  main: fileUploadings.map((item) => ({
+    url: item.url,
+    width: item.width,
+    height: item.height,
+    fileSize: item.size,
+  })),
+});

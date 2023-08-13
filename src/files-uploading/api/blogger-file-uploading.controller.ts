@@ -15,9 +15,13 @@ import { ParamIdType } from '../../common/decorators/param-id-type.decorator';
 import { IdTypes, ImageType } from '../../common/enums';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadFileValidator } from '../../common/validators/upload-file.validator';
-import { IFileUploadingOutputModelDto } from './dto/file-uploading-output-models.dto';
+import {
+  IBlogFileUploadingOutputModelDto,
+  IPostFileUploadingOutputModelDto,
+} from './dto/file-uploading-output-models.dto';
 import { UploadBlogImageCommand } from './application/use-cases/upload-blog-image.useCase';
 import { QueryFileUploadingRepository } from '../infrastructure/query-file-uploding.repository';
+import { UploadPostImageCommand } from './application/use-cases/upload-post-image.useCase';
 
 @Controller('blogger/blogs/:blogId')
 @UseGuards(BearerAuthGuard)
@@ -43,12 +47,12 @@ export class BloggerFileUploadingController {
     file: Express.Multer.File,
     @User('id') userId: string,
     @Param('blogId') blogId: string,
-  ): Promise<IFileUploadingOutputModelDto> {
+  ): Promise<IBlogFileUploadingOutputModelDto> {
     await this.commandBus.execute(
       new UploadBlogImageCommand(userId, blogId, file, ImageType.WALLPAPER),
     );
 
-    return this.queryFileUploadingRepository.getBlogFileUploading(
+    return this.queryFileUploadingRepository.getAllBlogFilesUploading(
       userId,
       blogId,
     );
@@ -58,7 +62,7 @@ export class BloggerFileUploadingController {
   @ParamIdType([IdTypes.BLOG_ID])
   @UseGuards(CheckExistingEntityGuard, ActionsOnBlogGuard)
   @UseInterceptors(FileInterceptor('file'))
-  async uploadBlogBackgroundMain(
+  async uploadBlogMainImage(
     @UploadedFile(
       new UploadFileValidator({
         type: /(png|jpeg|jpg)$/,
@@ -70,14 +74,43 @@ export class BloggerFileUploadingController {
     file: Express.Multer.File,
     @User('id') userId: string,
     @Param('blogId') blogId: string,
-  ): Promise<IFileUploadingOutputModelDto> {
+  ): Promise<IBlogFileUploadingOutputModelDto> {
     await this.commandBus.execute(
       new UploadBlogImageCommand(userId, blogId, file, ImageType.MAIN),
     );
 
-    return this.queryFileUploadingRepository.getBlogFileUploading(
+    return this.queryFileUploadingRepository.getAllBlogFilesUploading(
       userId,
       blogId,
+    );
+  }
+
+  @Post('posts/:postId/images/main')
+  @ParamIdType([IdTypes.BLOG_ID, IdTypes.POST_ID])
+  @UseGuards(CheckExistingEntityGuard, ActionsOnBlogGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadPostMainImage(
+    @UploadedFile(
+      new UploadFileValidator({
+        type: /(png|jpeg|jpg)$/,
+        width: 940,
+        height: 432,
+        maxSize: 100000,
+      }),
+    )
+    file: Express.Multer.File,
+    @User('id') userId: string,
+    @Param('blogId') blogId: string,
+    @Param('postId') postId: string,
+  ): Promise<IPostFileUploadingOutputModelDto> {
+    await this.commandBus.execute(
+      new UploadPostImageCommand(userId, blogId, postId, file),
+    );
+
+    return this.queryFileUploadingRepository.getAllPostFilesUploading(
+      userId,
+      blogId,
+      postId,
     );
   }
 }

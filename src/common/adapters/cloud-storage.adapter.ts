@@ -31,7 +31,8 @@ export class CloudStorageAdapter {
     entityDirectory: EntityDirectory,
     fileName: string,
   ): Promise<string> {
-    const key = `content/users/${userId}/${entityDirectory}/${entityId}/${imageType}/${fileName}`;
+    const [defaultFileName, ext] = file.mimetype.split('/');
+    const key = `content/users/${userId}/${entityDirectory}/${entityId}/${imageType}/${fileName}_${defaultFileName}.${ext}`;
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: key,

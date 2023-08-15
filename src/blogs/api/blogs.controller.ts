@@ -36,7 +36,7 @@ export class BlogsController {
     @Query() query: BlogsQueryParamsDto,
   ): Promise<AllBlogsOutputModel> {
     const blogs = await this.queryBlogsRepository.findAllBlogs(query);
-    console.log(blogs);
+    console.log(blogs.items.map((item) => item.images));
     return blogs;
   }
 
@@ -47,7 +47,7 @@ export class BlogsController {
     const targetBlog = await this.queryBlogsRepository.findBlogById(blogId);
 
     if (!targetBlog) throw new NotFoundException();
-    console.log(targetBlog);
+    console.log(targetBlog.images);
 
     return targetBlog;
   }

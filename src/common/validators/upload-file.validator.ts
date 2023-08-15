@@ -34,6 +34,9 @@ export class UploadFileValidator implements PipeTransform {
 
     const sharpFile = sharp(value.buffer);
     const fileMetadata = await sharpFile.metadata();
+    const fileWithMetadata = await sharpFile.withMetadata();
+
+    console.log({ valueBuffer: value.buffer, fileMetadata, fileWithMetadata });
 
     if (fileMetadata.width !== width || fileMetadata.height !== height) {
       generateCustomBadRequestException(

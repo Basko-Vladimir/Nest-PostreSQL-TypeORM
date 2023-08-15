@@ -1,3 +1,4 @@
+import sharp from 'sharp';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CloudStorageAdapter } from '../../../common/adapters/cloud-storage.adapter';
 import {
@@ -61,7 +62,7 @@ export class UploadPostImageUseCase
           ImageType.MAIN,
           EntityDirectory.POSTS,
         );
-        const metadata = await fileItem.buffer.metadata();
+        const metadata = await sharp(fileItem.buffer).metadata();
         const fileData: IFileDataDto = {
           size: metadata.size,
           type: ImageType.MAIN,

@@ -19,9 +19,9 @@ import {
   IBlogFileUploadingOutputModelDto,
   IPostFileUploadingOutputModelDto,
 } from './dto/file-uploading-output-models.dto';
-import { UploadBlogImageCommand } from './application/use-cases/upload-blog-image.useCase';
 import { QueryFileUploadingRepository } from '../infrastructure/query-file-uploding.repository';
-import { UploadPostImageCommand } from './application/use-cases/upload-post-image.useCase';
+import { UploadBlogImageCommand } from '../application/use-cases/upload-blog-image.useCase';
+import { UploadPostImageCommand } from '../application/use-cases/upload-post-image.useCase';
 
 @Controller('blogger/blogs/:blogId')
 @UseGuards(BearerAuthGuard)

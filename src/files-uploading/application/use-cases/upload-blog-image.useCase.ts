@@ -1,50 +1,49 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CloudStorageAdapter } from '../../../../common/adapters/cloud-storage.adapter';
+import { EntityDirectory, ImageType } from '../../../common/enums';
+import { CloudStorageAdapter } from '../../../common/adapters/cloud-storage.adapter';
 import {
   FileUploadingRepository,
   IFileDataDto,
-} from '../../../infrastructure/file-uploding.repository';
-import { EntityDirectory, ImageType } from '../../../../common/enums';
+} from '../../infrastructure/file-uploding.repository';
 
-export class UploadPostImageCommand {
+export class UploadBlogImageCommand {
   constructor(
     public userId: string,
     public blogId: string,
-    public postId: string,
     public file: any,
+    public imageType: ImageType,
   ) {}
 }
 
-@CommandHandler(UploadPostImageCommand)
-export class UploadPostImageUseCase
-  implements ICommandHandler<UploadPostImageCommand>
+@CommandHandler(UploadBlogImageCommand)
+export class UploadBlogImageUseCase
+  implements ICommandHandler<UploadBlogImageCommand>
 {
   constructor(
     private cloudStorageAdapter: CloudStorageAdapter,
     private fileUploadingRepository: FileUploadingRepository,
   ) {}
 
-  async execute(command: UploadPostImageCommand): Promise<void> {
-    const { userId, blogId, postId, file } = command;
+  async execute(command: UploadBlogImageCommand): Promise<void> {
+    const { userId, file, blogId, imageType } = command;
 
     try {
       const url = await this.cloudStorageAdapter.saveFileToCloud(
         userId,
-        postId,
+        blogId,
         file,
-        ImageType.MAIN,
-        EntityDirectory.POSTS,
+        imageType,
+        EntityDirectory.BLOGS,
       );
       const metadata = await file.buffer.metadata();
       const fileData: IFileDataDto = {
         size: metadata.size,
-        type: ImageType.MAIN,
+        type: imageType,
         height: metadata.height,
         width: metadata.width,
         url,
         userId,
         blogId,
-        postId,
       };
       const existingFileUploading =
         await this.fileUploadingRepository.getFileUploadingByUrl(url);

@@ -36,8 +36,6 @@ export class UploadFileValidator implements PipeTransform {
     const fileMetadata = await sharpFile.metadata();
     const fileWithMetadata = await sharpFile.withMetadata();
 
-    console.log({ valueBuffer: value.buffer, fileMetadata, fileWithMetadata });
-
     if (fileMetadata.width !== width || fileMetadata.height !== height) {
       generateCustomBadRequestException(
         `Incorrect image sizes. Width should be ${width} and height should be ${height}`,

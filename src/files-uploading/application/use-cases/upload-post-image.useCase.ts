@@ -45,13 +45,19 @@ export class UploadPostImageUseCase
       defaultFile,
       {
         ...defaultFile,
-        buffer: middleSize,
+        buffer: sharp(middleSize),
       },
       {
         ...defaultFile,
-        buffer: smallSize,
+        buffer: sharp(smallSize),
       },
     ];
+
+    // console.log({
+    //   default: await files[0].buffer.metadata(),
+    //   middle: await files[1].buffer.metadata(),
+    //   small: await files[2].buffer.metadata(),
+    // });
 
     for (const fileItem of files) {
       try {
@@ -62,7 +68,7 @@ export class UploadPostImageUseCase
           ImageType.MAIN,
           EntityDirectory.POSTS,
         );
-        const metadata = await sharp(fileItem.buffer).metadata();
+        const metadata = await fileItem.buffer.metadata();
         const fileData: IFileDataDto = {
           size: metadata.size,
           type: ImageType.MAIN,

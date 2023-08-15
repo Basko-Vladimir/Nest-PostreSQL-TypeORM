@@ -28,17 +28,15 @@ export class UploadBlogImageUseCase
     const { userId, file, blogId, imageType } = command;
 
     try {
-      const { url, uploadedFileId } =
-        await this.cloudStorageAdapter.saveFileToCloud(
-          userId,
-          blogId,
-          file,
-          imageType,
-          EntityDirectory.BLOGS,
-        );
+      const url = await this.cloudStorageAdapter.saveFileToCloud(
+        userId,
+        blogId,
+        file,
+        imageType,
+        EntityDirectory.BLOGS,
+      );
       const metadata = await file.buffer.metadata();
       const fileData: IFileDataDto = {
-        id: uploadedFileId,
         size: metadata.size,
         type: imageType,
         height: metadata.height,
@@ -48,7 +46,7 @@ export class UploadBlogImageUseCase
         blogId,
       };
       const existingFileUploading =
-        await this.fileUploadingRepository.getFileUploadingById(uploadedFileId);
+        await this.fileUploadingRepository.getFileUploadingByUrl(url);
 
       if (existingFileUploading) {
         await this.fileUploadingRepository.updateFileUploading(fileData);

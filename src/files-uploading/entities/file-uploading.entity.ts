@@ -1,22 +1,12 @@
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { UserEntity } from '../../users/entities/db-entities/user.entity';
 import { ImageType } from '../../common/enums';
 import { BlogEntity } from '../../blogs/entities/db-entities/blog.entity';
 import { PostEntity } from '../../posts/entities/db-entities/post.entity';
+import { BaseEntity } from '../../common/common-db-entities';
 
 @Entity({ name: 'fileUploading' })
-export class FileUploadingEntity {
-  @PrimaryColumn({ type: 'varchar' })
-  id: string;
-
+export class FileUploadingEntity extends BaseEntity {
   @Column({ type: 'varchar' })
   url: string;
 
@@ -43,12 +33,6 @@ export class FileUploadingEntity {
 
   @Column({ type: 'integer' })
   size: number;
-
-  @CreateDateColumn({ type: 'timestamptz' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ type: 'timestamptz' })
-  updatedAt: Date;
 
   @ManyToOne(() => UserEntity, (userEntity) => userEntity.uploadedFiles)
   @JoinColumn({ name: 'userId' })

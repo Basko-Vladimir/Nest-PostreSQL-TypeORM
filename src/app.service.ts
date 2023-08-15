@@ -6,6 +6,7 @@ import { QuizGameRepository } from './quiz/games/infrastructure/quiz-game.reposi
 import { DataSource, QueryRunner } from 'typeorm';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { FileUploadingRepository } from './files-uploading/infrastructure/file-uploding.repository';
+import { CloudStorageAdapter } from './common/adapters/cloud-storage.adapter';
 
 @Injectable()
 export class AppService {
@@ -15,6 +16,7 @@ export class AppService {
     private quizQuestionsRepository: QuizAdminQuestionsRepository,
     private quizGameRepository: QuizGameRepository,
     private fileUploadingRepository: FileUploadingRepository,
+    private cloudStorageAdapter: CloudStorageAdapter,
     @InjectDataSource() private dataSource: DataSource,
   ) {}
 
@@ -24,6 +26,7 @@ export class AppService {
 
   async clearDatabase(): Promise<void> {
     await Promise.all([
+      await this.cloudStorageAdapter.clearBucket(),
       await this.fileUploadingRepository.deleteAllFileUploadings(),
       await this.quizGameRepository.deleteAllGames(),
       await this.usersRepository.deleteAllUsers(),

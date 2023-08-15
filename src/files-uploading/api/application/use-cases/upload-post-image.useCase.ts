@@ -35,12 +35,12 @@ export class UploadPostImageUseCase
         ImageType.MAIN,
         EntityDirectory.POSTS,
       );
-      const metadata = await file.buffer.withMetadata();
+      const metadata = await file.buffer.metadata();
       const fileData: IFileDataDto = {
-        size: file.size,
+        size: metadata.size,
         type: ImageType.MAIN,
-        height: metadata.options.height,
-        width: metadata.options.width,
+        height: metadata.height,
+        width: metadata.width,
         url,
         userId,
         blogId,

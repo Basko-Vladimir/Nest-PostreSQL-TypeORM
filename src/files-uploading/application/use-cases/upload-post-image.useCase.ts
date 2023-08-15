@@ -1,4 +1,5 @@
 import sharp from 'sharp';
+import { v4 as uuidv4 } from 'uuid';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { CloudStorageAdapter } from '../../../common/adapters/cloud-storage.adapter';
 import {
@@ -36,8 +37,8 @@ export class UploadPostImageUseCase
       .toBuffer();
     const smallSize = await defaultFile.buffer
       .resize({
-        width: 100,
-        height: 50,
+        width: 149,
+        height: 96,
         fit: 'fill',
       })
       .toBuffer();
@@ -61,15 +62,18 @@ export class UploadPostImageUseCase
 
     for (const fileItem of files) {
       try {
+        const uuid = uuidv4();
         const url = await this.cloudStorageAdapter.saveFileToCloud(
           userId,
           postId,
           fileItem,
           ImageType.MAIN,
           EntityDirectory.POSTS,
+          uuid,
         );
         const metadata = await fileItem.buffer.metadata();
         const fileData: IFileDataDto = {
+          id: uuid,
           size: metadata.size,
           type: ImageType.MAIN,
           height: metadata.height,

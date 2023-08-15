@@ -29,8 +29,9 @@ export class CloudStorageAdapter {
     file: Express.Multer.File,
     imageType: ImageType,
     entityDirectory: EntityDirectory,
+    fileName: string,
   ): Promise<string> {
-    const key = `content/users/${userId}/${entityDirectory}/${entityId}/${imageType}/${file.originalname}`;
+    const key = `content/users/${userId}/${entityDirectory}/${entityId}/${imageType}/${fileName}`;
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: key,

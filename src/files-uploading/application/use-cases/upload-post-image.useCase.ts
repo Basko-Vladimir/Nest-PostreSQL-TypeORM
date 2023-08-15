@@ -43,22 +43,16 @@ export class UploadPostImageUseCase
       })
       .toBuffer();
     const files = [
-      defaultFile,
-      {
-        ...defaultFile,
-        buffer: sharp(middleSize),
-      },
       {
         ...defaultFile,
         buffer: sharp(smallSize),
       },
+      {
+        ...defaultFile,
+        buffer: sharp(middleSize),
+      },
+      defaultFile,
     ];
-
-    // console.log({
-    //   default: await files[0].buffer.metadata(),
-    //   middle: await files[1].buffer.metadata(),
-    //   small: await files[2].buffer.metadata(),
-    // });
 
     for (const fileItem of files) {
       try {

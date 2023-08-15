@@ -39,7 +39,7 @@ export const mapPostFileUploadingEntityToPostFileUploadingOutputModel = (
   fileUploadings: FileUploadingEntity[],
 ): IPostFileUploadingOutputModelDto => ({
   main: fileUploadings.map((item) => ({
-    url: item?.url,
+    url: item && `${BASE_URL}${item.url}`,
     width: item?.width,
     height: item?.height,
     fileSize: item?.size,
